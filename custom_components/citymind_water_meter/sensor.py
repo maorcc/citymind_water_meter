@@ -1,25 +1,25 @@
 """Platform for sensor integration."""
+import json
 import logging
 
-import requests
-import json
-from bs4 import BeautifulSoup
-import voluptuous as vol
-
-from homeassistant.const import VOLUME_CUBIC_METERS, VOLUME_LITERS
-from homeassistant.helpers.entity import Entity
-from homeassistant.components.sensor import PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv
+import requests
+import voluptuous as vol
+from bs4 import BeautifulSoup
+from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
     CONF_USERNAME,
     CONF_PASSWORD,
 )
+from homeassistant.const import VOLUME_CUBIC_METERS, VOLUME_LITERS
+from homeassistant.helpers.entity import Entity
+
 from custom_components.citymind_water_meter.const import get_headers, get_request_data
 
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {vol.Required(CONF_USERNAME): cv.string, vol.Required(CONF_PASSWORD): cv.string,}
+    {vol.Required(CONF_USERNAME): cv.string, vol.Required(CONF_PASSWORD): cv.string, }
 )
 
 
@@ -54,6 +54,10 @@ class WaterMeterReadingSensor(Entity):
     def unit_of_measurement(self):
         """Return the unit of measurement."""
         return VOLUME_CUBIC_METERS
+
+    @property
+    def icon(self):
+        return 'mdi:counter'
 
     def update(self):
         """Fetch new state data for the sensor.
@@ -99,6 +103,10 @@ class WaterConsumptionSensor(Entity):
     def unit_of_measurement(self):
         """Return the unit of measurement."""
         return VOLUME_LITERS
+
+    @property
+    def icon(self):
+        return 'mdi:speedometer'
 
     def update(self):
         """Fetch new state data for the sensor.
