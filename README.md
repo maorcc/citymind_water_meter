@@ -1,5 +1,4 @@
 # City-Mind Water Meter
-:israel:
 City-Mind is a water technology service provider, serving many monicipalities **in Israel**, using the website https://cp.city-mind.com.
 
 
@@ -37,8 +36,9 @@ sensor:
 ```
 ### Credits
 This project was inspired by the [Read Your Meter](https://github.com/eyalcha/read_your_meter "Read Your Meter") 
-project, made by my neighbour @eyalcha.
+project, made by my neighbour [eyalcha](https://github.com/eyalcha/).
 
 I created this alternative project because I wanted it lighter, quicker, and easy to
-setup.  Mostly, I wanted to avoid the manual installation of a Selenium docker.
+setup.  Mostly, I wanted to avoid the manual installation of a Selenium docker on Hass.io.
 
+[![Israel](https://raw.githubusercontent.com/hjnilsson/country-flags/master/png250px/il.png "Water Meter by Arad Technologies")](https://arad.co.il/products/residential/ "Israel Flag")
