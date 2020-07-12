@@ -23,22 +23,57 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
+# noinspection PyUnusedLocal
 def setup_platform(hass, config, add_entities, discovery_info=None):
     """Set up the sensor platform."""
+    data_provider = DataProvider(config[CONF_USERNAME], config[CONF_PASSWORD])
     add_entities(
-        [WaterMeterReadingSensor(config[CONF_USERNAME], config[CONF_PASSWORD]),
-        WaterConsumptionSensor(config[CONF_USERNAME], config[CONF_PASSWORD])]
+        [WaterMeterReadingSensor(data_provider),
+         WaterConsumptionSensor(data_provider)]
     )
+
+
+class DataProvider:
+    """Get data from cp.city-mind.com"""
+
+    def __init__(self, username, password):
+        self._username = username
+        self._password = password
+        self._last_reading = None
+        self._consumption = None
+
+    def get_consumption(self):
+        return self._consumption
+
+    def get_reading(self):
+        return self._last_reading
+
+    def refresh_data(self):
+        data = get_request_data()
+        data["txtEmail"] = self._username
+        data["txtPassword"] = self._password
+
+        response = requests.post(
+            "https://cp.city-mind.com/", headers=get_headers(), data=data
+        )
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, "html.parser")
+            json_str = soup.select_one("#cphMain_div_properties").text
+            all_properties = json.loads(json_str)[0]
+            meter = all_properties["LastRead"]
+            if self._last_reading is not None:
+                self._consumption = int((meter - self._last_reading) * 1000)
+            self._last_reading = meter
+        else:
+            _LOGGER.warning('response status code %s', response.status_code)
 
 
 class WaterMeterReadingSensor(Entity):
     """Representation of a Sensor."""
 
-    def __init__(self, username, password):
+    def __init__(self, data_provider):
         """Initialize the sensor."""
-        self._state = None
-        self._username = username
-        self._password = password
+        self._data_provider = data_provider
 
     @property
     def name(self):
@@ -48,7 +83,7 @@ class WaterMeterReadingSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._state
+        return self._data_provider.get_reading()
 
     @property
     def unit_of_measurement(self):
@@ -60,34 +95,15 @@ class WaterMeterReadingSensor(Entity):
         return 'mdi:counter'
 
     def update(self):
-        """Fetch new state data for the sensor.
-
-        This is the only method that should fetch new data for Home Assistant.
-        """
-        data = get_request_data()
-        data["txtEmail"] = self._username
-        data["txtPassword"] = self._password
-
-        response = requests.post(
-            "https://cp.city-mind.com/", headers=get_headers(), data=data
-        )
-        soup = BeautifulSoup(response.text, "html.parser")
-        json_str = soup.select_one("#cphMain_div_properties").text
-        all_properties = json.loads(json_str)[0]
-        meter = all_properties["LastRead"]
-        _LOGGER.warning(meter)
-        self._state = meter
+        self._data_provider.refresh_data()
 
 
 class WaterConsumptionSensor(Entity):
     """Representation of a Sensor."""
 
-    def __init__(self, username, password):
+    def __init__(self, data_provider):
         """Initialize the sensor."""
-        self._state = 0
-        self._previous_reading = None
-        self._username = username
-        self._password = password
+        self._data_provider = data_provider
 
     @property
     def name(self):
@@ -97,7 +113,7 @@ class WaterConsumptionSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._state
+        return self._data_provider.get_consumption()
 
     @property
     def unit_of_measurement(self):
@@ -109,22 +125,5 @@ class WaterConsumptionSensor(Entity):
         return 'mdi:speedometer'
 
     def update(self):
-        """Fetch new state data for the sensor.
-
-        This is the only method that should fetch new data for Home Assistant.
-        """
-        data = get_request_data()
-        data["txtEmail"] = self._username
-        data["txtPassword"] = self._password
-
-        response = requests.post(
-            "https://cp.city-mind.com/", headers=get_headers(), data=data
-        )
-        soup = BeautifulSoup(response.text, "html.parser")
-        json_str = soup.select_one("#cphMain_div_properties").text
-        all_properties = json.loads(json_str)[0]
-        new_reading = all_properties["LastRead"]
-        _LOGGER.warning(new_reading)
-        if self._previous_reading is not None:
-            self._state = (new_reading - self._previous_reading) * 1000
-        self._previous_reading = new_reading
+        """No need to do anything here because the data is always up-to-date"""
+        pass
