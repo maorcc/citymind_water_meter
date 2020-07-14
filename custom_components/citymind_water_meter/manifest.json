@@ -1,9 +1,14 @@
 {
   "domain": "citymind_water_meter",
-  "name": "City-Mind water meter",
+  "name": "City-Mind Water Meter",
   "documentation": "https://github.com/maorcc/citymind_water_meter",
   "issue_tracker": "https://github.com/maorcc/citymind_water_meter/issues",
   "dependencies": [],
-  "codeowners": ["@maorcc"],
-  "requirements": ["requests", "beautifulsoup4"]
+  "codeowners": [
+    "@maorcc"
+  ],
+  "requirements": [
+    "requests",
+    "beautifulsoup4"
+  ]
 }

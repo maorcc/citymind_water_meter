@@ -1,0 +1,11 @@
+{
+  "name": "City-Mind Water Meter",
+  "domains": [
+    "sensor"
+  ],
+  "country": "IL",
+  "render_readme": true,
+  "iot_class": [
+    "Cloud Polling"
+  ]
+}
