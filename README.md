@@ -8,10 +8,7 @@ This integration provides Home Assistant with two **sensors** for water consumpt
 
 This project is not associated in any way with Arad Group or any of its companies that own and operate the City Mind water services.
 
-<!-- 
-[![Water Meter by Arad Technologies](https://arad.co.il/assets/Copy-of-OE-register.jpg "Water Meter by Arad Technologies")](https://arad.co.il/products/residential/ "Water Meter by Arad Technologies")
--->
-[![Water Meter by Arad Technologies](https://arad.co.il/assets/Copy-of-Gladiator1.png "Water Meter by Arad Technologies")](https://arad.co.il/products/residential/ "Water Meter by Arad Technologies")
+![Water Meter by Arad Technologies](https://user-images.githubusercontent.com/255973/87365347-ab607d00-c57e-11ea-9440-19e7805cf9ac.png "Water Meter by Arad Technologies")
 
 ### Requirements
 Need to have a username and password for the [cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com") website.  This is only available in Israel. Get the username and password from your water service provider.
@@ -37,6 +34,9 @@ sensor:
     username: !secret citymind_username     # Usually your email address
     password: !secret citymind_password     # Your password to cp.city-mind.com website
 ```
+### Example of a History Chart
+![Water Meter Reading Chart](https://user-images.githubusercontent.com/255973/87365060-eada9980-c57d-11ea-915a-0c1da95c2d4f.png "Water Meter Reading")
+
 ### Credits
 This project was inspired by the [Read Your Meter](https://github.com/eyalcha/read_your_meter "Read Your Meter") 
 project, made by my neighbor [eyalcha](https://github.com/eyalcha/).
