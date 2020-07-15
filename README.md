@@ -11,13 +11,28 @@ This project is not associated in any way with Arad Group or any of its companie
 ![Water Meter by Arad Technologies](https://user-images.githubusercontent.com/255973/87365347-ab607d00-c57e-11ea-9440-19e7805cf9ac.png "Water Meter by Arad Technologies")
 
 ### Requirements
-Need to have a username and password for the [cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com") website.  This is only available in Israel. Get the username and password from your water service provider.
+Need to have a username and password for the [cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com") website.  This is only available in Israel.
+Get the username and password from your water service provider.
+List of supported areas 
+[can be found here](https://arad.co.il/he/%d7%a4%d7%a8%d7%95%d7%99%d7%a7%d7%98%d7%99%d7%9d/).
 
-אפשרי רק ללקוח של אחד **מתאגידי המים** או **יישובים** שמקבלים שרותי קריאת מונים אונליין מארד טכנולוגיות, לדוגמא:
-  - "מעיינות העמקים"
-  - "מניב ראשון"
-  - "מעיינות הדרום"
-  - "יובלים בשומרון"
+Here is a partial list:
+
+
+אפשרי רק ללקוח של אחד **מתאגידי המים** שמקבלים שרותי קריאת מונים אונליין מארד טכנולוגיות, לדוגמא:
+  - מיתב: פתח תקווה, אלעד
+  - מי-נעם: נצרת עילית, עפולה, מגדל העמק
+  - פלג הגליל: צפת ועוד
+  - מעיינות הדרום: דימונה, ערד, ירוחם, ומצפה רמון
+  - מי-מודיעין
+  - מי ציונה: נס ציונה, מזכרת בתיה, קריית עקרון
+  - מי התנור: קריית שמונה, מטולה, קצרין
+  - מי רקת טבריה
+  - מי עכו
+  - מעיינות זיו: מעלות
+  - מעיינות העמקים: יוקנעם, זכרון יעקב
+  - מניב ראשון: ראשון לציון
+  - יובלים בשומרון
 
 
 ### Installation
