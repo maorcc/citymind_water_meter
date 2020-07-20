@@ -64,6 +64,17 @@ Notice that the system only shows usage in "steps" of 100 liters. That's the pro
 
 ![Water Meter Reading Chart](https://user-images.githubusercontent.com/255973/87365060-eada9980-c57d-11ea-915a-0c1da95c2d4f.png "Water Meter Reading")
 
+### Why the 100 liter limitation? (Only in Israel)
+Almost all water meters in Israel have the minimum resolution that is no less than 100 liters.
+
+The reason for that is religious.
+It allows normal use of water during a Saturday to not always triggers an electric pulse.
+You can find all kosher water meters reasoning [in this article](https://www.zomet.org.il/?CategoryID=198&ArticleID=697#_Toc334393456).
+
+Unfortunately, the 100 liter limitation in Israel reduces the water meter capabilities to identify water leaks.
+
+*Glatt Kosher water meters* can support fine metering resolution because they have automatic timers that shut the meter down completely during Saturdays.
+
 ### Credits
 This project was inspired by the [Read Your Meter](https://github.com/eyalcha/read_your_meter "Read Your Meter") 
 project, made by my neighbor [eyalcha](https://github.com/eyalcha/).
