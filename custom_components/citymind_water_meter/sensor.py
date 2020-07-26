@@ -5,7 +5,7 @@ import logging
 import homeassistant.helpers.config_validation as cv
 import requests
 import voluptuous as vol
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as bs
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import (
     CONF_USERNAME,
@@ -13,8 +13,6 @@ from homeassistant.const import (
 )
 from homeassistant.const import VOLUME_CUBIC_METERS, VOLUME_LITERS
 from homeassistant.helpers.entity import Entity
-
-from custom_components.citymind_water_meter.const import get_headers, get_request_data
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -39,6 +37,7 @@ class DataProvider:
     def __init__(self, username, password):
         self._username = username
         self._password = password
+        self._session = None
         self._last_reading = None
         self._consumption = None
 
@@ -48,24 +47,58 @@ class DataProvider:
     def get_reading(self):
         return self._last_reading
 
-    def refresh_data(self):
-        data = get_request_data()
-        data["txtEmail"] = self._username
-        data["txtPassword"] = self._password
-
-        response = requests.post(
-            "https://cp.city-mind.com/", headers=get_headers(), data=data
-        )
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, "html.parser")
-            json_str = soup.select_one("#cphMain_div_properties").text
-            all_properties = json.loads(json_str)[0]
-            meter = all_properties["LastRead"]
-            if self._last_reading is not None:
-                self._consumption = int((meter - self._last_reading) * 1000)
-            self._last_reading = meter
+    def login(self):
+        _LOGGER.info("Logging in to Water Meter service.")
+        self._session = requests.session()  # Discard any old session if existed
+        initial_resp = self._session.get('https://cp.city-mind.com/')
+        if initial_resp.status_code != requests.codes.ok:
+            _LOGGER.error(f'Error connecting to Water Meter service - %s - %s',
+                          initial_resp.status_code, initial_resp.reason)
+            self._session = None
+            return None  # login failed
+        soup = bs(initial_resp.text, "html.parser")
+        # We mimic ASP frontend behavior, sending back most hidden HTML input fields.
+        all_inputs = soup.find_all('input')
+        payload = {v['name']: (v.get('value')) or '' for v in all_inputs}
+        payload["txtEmail"] = self._username
+        payload["txtPassword"] = self._password
+        payload["cbRememberMe"] = 'on'
+        # need to send some other fields
+        payload["txtConsumerNumber"] = ''
+        payload["__EVENTARGUMENT"] = ''
+        payload["__LASTFOCUS"] = ''
+        payload["ddlWaterAuthority"] = ''
+        payload["ddlWaterAuthority"] = ''
+        del payload['btnRegister']  # not needed
+        del payload['cbAgree']  # not needed
+        resp = self._session.post('https://cp.city-mind.com/', data=payload)
+        if resp.status_code == requests.codes.ok and resp.url == 'https://cp.city-mind.com/Default.aspx':
+            _LOGGER.info("login success to Water Meter service")
+            return resp
         else:
-            _LOGGER.warning('response status code %s', response.status_code)
+            _LOGGER.error('Login to Water Meter failed. Username: %s . Check username and password', self._username)
+            self._session = None
+            return None  # login failed
+
+    def refresh_data(self):
+        if self._session is None:
+            response = self.login()
+        else:
+            _LOGGER.debug("Fetching data from Water Meter service")
+            response = self._session.get('https://cp.city-mind.com/Default.aspx')
+            if response.status_code != requests.codes.ok:
+                _LOGGER.error('Error response status %s - %s', response.status_code, response.reason)
+                _LOGGER.info('Trying to login again')
+                response = self.login()  # try a second time, before giving up for now
+        if response is None:  # if Login failed
+            return
+        soup = bs(response.text, "html.parser")
+        json_str = soup.select_one("#cphMain_div_properties").text  # The data is hidden as json text inside the html
+        all_properties = json.loads(json_str)[0]  # For consumers is always only one entry in this array.
+        meter = all_properties["LastRead"]  # the field in the json is called "LastRead"
+        if self._last_reading is not None:
+            self._consumption = int((meter - self._last_reading) * 1000)  # convert the increased amount to liters
+        self._last_reading = meter
 
 
 class WaterMeterReadingSensor(Entity):
