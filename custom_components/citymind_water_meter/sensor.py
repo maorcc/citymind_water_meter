@@ -41,6 +41,7 @@ class DataProvider:
         self._username = username
         self._password = password
         self._session = None
+        self._payload = None
         self._last_reading = None
         self._consumption = None
 
@@ -50,38 +51,40 @@ class DataProvider:
     def get_reading(self):
         return self._last_reading
 
-    def login(self):
-        _LOGGER.debug("Logging in to Water Meter service.")
-        self._session = requests.session()  # Discard any old session if existed
-        initial_resp = self._session.get(LOGIN_URL, timeout=10)
+    def create_session(self):
+        self._session = None
+        self._payload = None
+        _LOGGER.debug("Getting session from Water Meter service.")
+        session = requests.session()
+        initial_resp = session.get(LOGIN_URL, timeout=10)
         if initial_resp.status_code != requests.codes.ok:
-            _LOGGER.error(f'Error connecting to Water Meter service - %s - %s',
+            _LOGGER.error('Error connecting to Water Meter service - %s - %s',
                           initial_resp.status_code, initial_resp.reason)
-            self._session = None
-            return None  # login failed
+            return  # login failed, so leaving the self._session as None
         soup = bs(initial_resp.text, "html.parser")
         # We mimic ASP frontend behavior, sending back most hidden HTML input fields.
         all_inputs = soup.find_all('input')
+        # transform from structure from list like [{'name': myName, 'value': myVal}] to dictionary
         payload = {v['name']: (v.get('value')) or '' for v in all_inputs}
-        payload["txtEmail"] = self._username
-        payload["txtPassword"] = self._password
-        payload["cbRememberMe"] = 'on'
-        # need to send some other fields
-        payload["txtConsumerNumber"] = ''
-        payload["__EVENTARGUMENT"] = ''
-        payload["__LASTFOCUS"] = ''
-        payload["ddlWaterAuthority"] = ''
-        payload["ddlWaterAuthority"] = ''
+        # add some params
+        payload.update({
+            "txtEmail": self._username,
+            "txtPassword": self._password,
+            "cbRememberMe": 'on',
+            "txtConsumerNumber": '',
+            "__EVENTARGUMENT": '',
+            "__LASTFOCUS": '',
+            "ddlWaterAuthority": ''
+        })
         del payload['btnRegister']  # not needed
         del payload['cbAgree']  # not needed
-        resp = self._session.post(LOGIN_URL, data=payload, timeout=10)
-        meter = self.extract_meter_value(resp)  # return None if response is no good
-        if meter is not None:
-            _LOGGER.info("Login successful to the Water Meter service.")
-        return meter
+        _LOGGER.info("Reusable session data from the Water Meter service retrieved successfully.")
+        self._session = session
+        self._payload = payload
 
     def fetch_data(self):
-        resp = self._session.get(DATA_URL, timeout=10)
+        # all data is received in the html after login operation
+        resp = self._session.post(LOGIN_URL, data=self._payload, timeout=10)
         return self.extract_meter_value(resp)
 
     def extract_meter_value(self, data_response):
@@ -119,11 +122,14 @@ class DataProvider:
         _LOGGER.debug("Fetching data from Water Meter service")
         try:
             if self._session is None:
-                meter = self.login()
+                self.create_session()
+                meter = self.fetch_data()
             else:
                 meter = self.fetch_data()
                 if meter is None:
-                    meter = self.login()  # if session expired, try login again
+                    _LOGGER.warning('Existing session failed fetching data.  Trying to create a new session.')
+                    self.create_session()  # if session doesn't work, try creating a new session
+                    meter = self.fetch_data()
             if meter is None:
                 return
             _LOGGER.debug("Fetched last read from Water Meter service: %s", meter)
