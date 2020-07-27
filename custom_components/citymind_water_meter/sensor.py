@@ -52,6 +52,18 @@ class DataProvider:
         return self._last_reading
 
     def create_session(self):
+        """
+        Sessions in cp.city-mind.com are strange.  Here are few observations:
+        1. Sessions seem to exist for unlimited time.
+        2. A session needs to be retrieved from server before a login operation can be done.
+        3. On most computers, even in Incognito mode, whenever we ask for a session, we always get the same session data.
+           It is not clear how the server uniquely identifies that it is the same client, even if it did not connect
+           for a very long time.
+        4. Login operation authenticate the session for only few minutes. After that a new login operation (with the
+           same session data needs to be done.
+        So here we create a session only once. If there later we see errors, we will try to recreate a session, but
+        but so far such case have not been observed.
+        """
         self._session = None
         self._payload = None
         _LOGGER.debug("Getting session from Water Meter service.")
@@ -119,7 +131,6 @@ class DataProvider:
         return meter
 
     def refresh_data(self):
-        _LOGGER.debug("Fetching data from Water Meter service")
         try:
             if self._session is None:
                 self.create_session()
