@@ -53,7 +53,7 @@ class DataProvider:
     def login(self):
         _LOGGER.debug("Logging in to Water Meter service.")
         self._session = requests.session()  # Discard any old session if existed
-        initial_resp = self._session.get(LOGIN_URL)
+        initial_resp = self._session.get(LOGIN_URL, timeout=10)
         if initial_resp.status_code != requests.codes.ok:
             _LOGGER.error(f'Error connecting to Water Meter service - %s - %s',
                           initial_resp.status_code, initial_resp.reason)
@@ -74,14 +74,14 @@ class DataProvider:
         payload["ddlWaterAuthority"] = ''
         del payload['btnRegister']  # not needed
         del payload['cbAgree']  # not needed
-        resp = self._session.post(LOGIN_URL, data=payload)
+        resp = self._session.post(LOGIN_URL, data=payload, timeout=10)
         meter = self.extract_meter_value(resp)  # return None if response is no good
         if meter is not None:
             _LOGGER.info("Login successful to the Water Meter service.")
         return meter
 
     def fetch_data(self):
-        resp = self._session.get(DATA_URL)
+        resp = self._session.get(DATA_URL, timeout=10)
         return self.extract_meter_value(resp)
 
     def extract_meter_value(self, data_response):
@@ -117,18 +117,21 @@ class DataProvider:
 
     def refresh_data(self):
         _LOGGER.debug("Fetching data from Water Meter service")
-        if self._session is None:
-            meter = self.login()
-        else:
-            meter = self.fetch_data()
+        try:
+            if self._session is None:
+                meter = self.login()
+            else:
+                meter = self.fetch_data()
+                if meter is None:
+                    meter = self.login()  # if session expired, try login again
             if meter is None:
-                meter = self.login()  # if session expired, try login again
-        if meter is None:
-            return
-        _LOGGER.debug("Fetched last read from Water Meter service: %s", meter)
-        if self._last_reading is not None:
-            self._consumption = int((meter - self._last_reading) * 1000)  # convert the increased amount to liters
-        self._last_reading = meter
+                return
+            _LOGGER.debug("Fetched last read from Water Meter service: %s", meter)
+            if self._last_reading is not None:
+                self._consumption = int((meter - self._last_reading) * 1000)  # convert the increased amount to liters
+            self._last_reading = meter
+        except requests.exceptions.RequestException as e:
+            _LOGGER.error('RequestException from Water Meter service: %s', e)
 
 
 class WaterMeterReadingSensor(Entity):
