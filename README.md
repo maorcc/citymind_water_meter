@@ -11,10 +11,10 @@ This project is not associated in any way with Arad Group or any of its companie
 ![Water Meter by Arad Technologies](https://user-images.githubusercontent.com/255973/87365347-ab607d00-c57e-11ea-9440-19e7805cf9ac.png "Water Meter by Arad Technologies")
 
 ## Requirements
-You need to have a username and password for the [cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com") website.  
+If you do not already have a username and password, try registering here: [cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com")  
 
-If you pay for your water to one of the organizations shown on the map, then you 
- can probably get a username/password from your water service provider. 
+If you pay for your water to one of the organizations shown on the map, then it is likely 
+ that your registration on the link above will succeed. 
 
 ![map](https://user-images.githubusercontent.com/255973/87733202-c4b03600-c7d7-11ea-9c8c-7aff8c1f9e81.png "Supported water utilities")
 
