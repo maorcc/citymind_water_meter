@@ -205,7 +205,7 @@ class WaterConsumptionSensor(Entity):
 
     @property
     def icon(self):
-        return 'mdi:speedometer'
+        return 'mdi:water-pump'
 
     def update(self):
         """No need to do anything here because the data is always up-to-date"""
