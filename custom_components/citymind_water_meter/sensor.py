@@ -41,7 +41,6 @@ class DataProvider:
         self._username = username
         self._password = password
         self._session = None
-        self._payload = None
         self._last_reading = None
         self._consumption = None
 
@@ -55,20 +54,17 @@ class DataProvider:
         """
         Sessions in cp.city-mind.com are strange.  Here are few observations:
         1. Sessions seem to exist for unlimited time.
-        2. A session needs to be retrieved from server before a login operation can be done.
-        3. On most computers, even in Incognito mode, whenever we ask for a session, we always get the same session data.
+        2. The session information is hidden in hidden input tags, inside the html.
+        3. A session needs to be retrieved from server before a login operation can be done.
+        4. On most computers, even in Incognito mode, whenever we ask for a session, we always get the same session data.
            It is not clear how the server uniquely identifies that it is the same client, even if it did not connect
            for a very long time.
-        4. Login operation authenticate the session for only few minutes. After that a new login operation (with the
-           same session data needs to be done.
         So here we create a session only once. If there later we see errors, we will try to recreate a session, but
         but so far such case have not been observed.
         """
         self._session = None
-        self._payload = None
         _LOGGER.debug("Getting session from Water Meter service.")
-        session = requests.session()
-        initial_resp = session.get(LOGIN_URL, timeout=10)
+        initial_resp = requests.get(LOGIN_URL, timeout=10)
         if initial_resp.status_code != requests.codes.ok:
             _LOGGER.error('Error connecting to Water Meter service - %s - %s',
                           initial_resp.status_code, initial_resp.reason)
@@ -76,10 +72,11 @@ class DataProvider:
         soup = bs(initial_resp.text, "html.parser")
         # We mimic ASP frontend behavior, sending back most hidden HTML input fields.
         all_inputs = soup.find_all('input')
+        # The session information is hidden inside those input tags.  Yes, we are dealing with a strange server.
         # transform from structure from list like [{'name': myName, 'value': myVal}] to dictionary
-        payload = {v['name']: (v.get('value')) or '' for v in all_inputs}
+        session = {v['name']: (v.get('value')) or '' for v in all_inputs}
         # add some params
-        payload.update({
+        session.update({
             "txtEmail": self._username,
             "txtPassword": self._password,
             "cbRememberMe": 'on',
@@ -88,15 +85,14 @@ class DataProvider:
             "__LASTFOCUS": '',
             "ddlWaterAuthority": ''
         })
-        del payload['btnRegister']  # not needed
-        del payload['cbAgree']  # not needed
+        del session['btnRegister']  # not needed
+        del session['cbAgree']  # not needed
         _LOGGER.info("Reusable session data from the Water Meter service retrieved successfully.")
         self._session = session
-        self._payload = payload
 
     def fetch_data(self):
         # all data is received in the html after login operation
-        resp = self._session.post(LOGIN_URL, data=self._payload, timeout=10)
+        resp = requests.post(LOGIN_URL, data=self._session, timeout=10)
         return self.extract_meter_value(resp)
 
     def extract_meter_value(self, data_response):
@@ -106,7 +102,7 @@ class DataProvider:
             self._session = None  # Session is no good.  Need to login again.
             return None
         elif data_response.url != DATA_URL:
-            _LOGGER.error('Redirected to %s , probably because session expired.', data_response.url)
+            _LOGGER.error('Login request redirected to %s.', data_response.url)
             self._session = None
             return None
         soup = bs(data_response.text, "html.parser")
