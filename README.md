@@ -1,14 +1,16 @@
-# Home-Assistant City-Mind Water Meter
-This is a [Home Assistant](https://www.home-assistant.io/) integration for the **Israeli** [cp.city-mind.com](https://cp.city-mind.com) 
+# Home-Assistant City-Mind Water Meter (Israel only)
+This is a [Home Assistant](https://www.home-assistant.io/) integration for the Israeli [cp.city-mind.com](https://cp.city-mind.com) 
 online water meters service. 
 
 This integration provides Home Assistant with two **sensors** for water consumption in a minimum resolution of 100 liters:
   - Water meter reading in cubic meters.
   - Current consumption value in liters. (Multiplications of 100L.)
 
+<img src="https://user-images.githubusercontent.com/255973/88915377-d3352d80-d26c-11ea-8ffc-58d7adcca3b5.png" height="300" width="451" alt="24 hours water meter graph">
+
 This project is not associated in any way with Arad Group or any of its companies that own and operate the City Mind water services.
 
-![Water Meter by Arad Technologies](https://user-images.githubusercontent.com/255973/87365347-ab607d00-c57e-11ea-9440-19e7805cf9ac.png "Water Meter by Arad Technologies")
+<a href="https://user-images.githubusercontent.com/255973/87365347-ab607d00-c57e-11ea-9440-19e7805cf9ac.png" target="_blank"><img src="https://user-images.githubusercontent.com/255973/87365347-ab607d00-c57e-11ea-9440-19e7805cf9ac.png" height="300" width="450" alt="Water Meter by Arad Technologies"></a>
 
 ## Requirements
 You need to sign-up for the service at
