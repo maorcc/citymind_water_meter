@@ -1,6 +1,8 @@
 # Home-Assistant City-Mind Water Meter (Israel only)
 This is a [Home Assistant](https://www.home-assistant.io/) integration for the Israeli [cp.city-mind.com](https://cp.city-mind.com) 
-online water meters service. 
+online water meters service that serves many תאגידי מים. 
+
+#### Please ⭐️ this repo if you find it useful
 
 This integration provides Home Assistant with two **sensors** for water consumption in a minimum resolution of 100 liters:
   - Water meter reading in cubic meters.
