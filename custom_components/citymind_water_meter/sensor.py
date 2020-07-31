@@ -28,6 +28,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 def setup_platform(hass, config, add_entities, discovery_info=None):
     """Set up the sensor platform."""
     data_provider = DataProvider(config[CONF_USERNAME], config[CONF_PASSWORD])
+    data_provider.refresh_data()
+
     add_entities(
         [WaterMeterReadingSensor(data_provider),
          WaterConsumptionSensor(data_provider)]
@@ -74,19 +76,21 @@ class DataProvider:
         all_inputs = soup.find_all('input')
         # The session information is hidden inside those input tags.  Yes, we are dealing with a strange server.
         # transform from structure from list like [{'name': myName, 'value': myVal}] to dictionary
-        session = {v['name']: (v.get('value')) or '' for v in all_inputs}
+        FIELDS = ["__VIEWSTATE", "__VIEWSTATEGENERATOR", "__EVENTVALIDATION", "btnLogin"]
+
         # add some params
-        session.update({
+        session = {
             "txtEmail": self._username,
-            "txtPassword": self._password,
-            "cbRememberMe": 'on',
-            "txtConsumerNumber": '',
-            "__EVENTARGUMENT": '',
-            "__LASTFOCUS": '',
-            "ddlWaterAuthority": ''
-        })
-        del session['btnRegister']  # not needed
-        del session['cbAgree']  # not needed
+            "txtPassword": self._password
+        }
+
+        for item in all_inputs:
+            name = item.get("name")
+            value = item.get("value", "")
+
+            if name in FIELDS and value is not None:
+                session[name] = value
+
         _LOGGER.info("Reusable session data from the Water Meter service retrieved successfully.")
         self._session = session
 
@@ -142,6 +146,7 @@ class DataProvider:
             _LOGGER.debug("Fetched last read from Water Meter service: %s", meter)
             if self._last_reading is not None:
                 self._consumption = int((meter - self._last_reading) * 1000)  # convert the increased amount to liters
+
             self._last_reading = meter
         except requests.exceptions.RequestException as e:
             _LOGGER.error('RequestException from Water Meter service: %s', e)
@@ -205,4 +210,4 @@ class WaterConsumptionSensor(Entity):
 
     def update(self):
         """No need to do anything here because the data is always up-to-date"""
-        pass
+        self._data_provider.refresh_data()
