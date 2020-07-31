@@ -1,9 +1,12 @@
 """The cp.city-mind.com website for water meters integration.
 
-This component integrates with the Israeli https://cp.city-mind.com municipal water meters.
-It provides a sensor of water consumption in resoluton of 0.1 cube meters, which is 100 litters.
+This component integrates with the Israeli
+https://cp.city-mind.com municipal water meters.
+It provides a sensor of water consumption in resoluton of 0.1 cube meters,
+which is 100 litters.
 
-The authors of this integration are not associated in any way with Arad Technologies who own and operate
+The authors of this integration are not associated in any way
+with Arad Technologies who own and operate
 the City Mind water services.
 
 Configuration:

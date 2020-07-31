@@ -1,27 +1,37 @@
 """Platform for sensor integration."""
 import json
 import logging
+from typing import Optional
 
 import homeassistant.helpers.config_validation as cv
 import requests
 import voluptuous as vol
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import (
-    CONF_USERNAME,
-    CONF_PASSWORD,
-)
-from homeassistant.const import VOLUME_CUBIC_METERS, VOLUME_LITERS
+from homeassistant.const import (CONF_PASSWORD, CONF_USERNAME,
+                                 VOLUME_CUBIC_METERS, VOLUME_LITERS)
 from homeassistant.helpers.entity import Entity
+from pyexpat.errors import codes
+from requests import RequestException
 
-LOGIN_URL = 'https://cp.city-mind.com/'
-DATA_URL = 'https://cp.city-mind.com/Default.aspx'
+LOGIN_URL = "https://cp.city-mind.com/"
+DATA_URL = f"{LOGIN_URL}Default.aspx"
+
+INPUTS = [
+    "__VIEWSTATE",
+    "__VIEWSTATEGENERATOR",
+    "__EVENTVALIDATION",
+    "btnLogin",
+]
+
+FIELDS = {
+    vol.Required(CONF_USERNAME): cv.string,
+    vol.Required(CONF_PASSWORD): cv.string,
+}
+
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(FIELDS)
 
 _LOGGER = logging.getLogger(__name__)
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {vol.Required(CONF_USERNAME): cv.string, vol.Required(CONF_PASSWORD): cv.string, }
-)
 
 
 # noinspection PyUnusedLocal
@@ -30,10 +40,10 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     data_provider = DataProvider(config[CONF_USERNAME], config[CONF_PASSWORD])
     data_provider.refresh_data()
 
-    add_entities(
-        [WaterMeterReadingSensor(data_provider),
-         WaterConsumptionSensor(data_provider)]
-    )
+    reading_sensor = WaterMeterReadingSensor(data_provider)
+    consumption_sensor = WaterConsumptionSensor(data_provider)
+
+    add_entities([reading_sensor, consumption_sensor], True)
 
 
 class DataProvider:
@@ -43,119 +53,149 @@ class DataProvider:
         self._username = username
         self._password = password
         self._session = None
-        self._last_reading = None
-        self._consumption = None
+        self._last_reading: Optional[float] = None
+        self._consumption: Optional[float] = None
+        self._data = None
 
-    def get_consumption(self):
+    @property
+    def consumption(self) -> Optional[float]:
         return self._consumption
 
-    def get_reading(self):
+    @property
+    def reading(self) -> Optional[float]:
         return self._last_reading
 
-    def create_session(self):
+    def _create_request_data(self):
         """
-        Sessions in cp.city-mind.com are strange.  Here are few observations:
-        1. Sessions seem to exist for unlimited time.
-        2. The session information is hidden in hidden input tags, inside the html.
-        3. A session needs to be retrieved from server before a login operation can be done.
-        4. On most computers, even in Incognito mode, whenever we ask for a session, we always get the same session data.
-           It is not clear how the server uniquely identifies that it is the same client, even if it did not connect
-           for a very long time.
-        So here we create a session only once. If there later we see errors, we will try to recreate a session, but
-        but so far such case have not been observed.
+        Since ASP.NET session defined on the server side and we don't know
+        When it will get expired, we need to perform login on every request
         """
         self._session = None
+
         _LOGGER.debug("Getting session from Water Meter service.")
+
         initial_resp = requests.get(LOGIN_URL, timeout=10)
-        if initial_resp.status_code != requests.codes.ok:
-            _LOGGER.error('Error connecting to Water Meter service - %s - %s',
-                          initial_resp.status_code, initial_resp.reason)
-            return  # login failed, so leaving the self._session as None
-        soup = bs(initial_resp.text, "html.parser")
-        # We mimic ASP frontend behavior, sending back most hidden HTML input fields.
-        all_inputs = soup.find_all('input')
-        # The session information is hidden inside those input tags.  Yes, we are dealing with a strange server.
-        # transform from structure from list like [{'name': myName, 'value': myVal}] to dictionary
-        FIELDS = ["__VIEWSTATE", "__VIEWSTATEGENERATOR", "__EVENTVALIDATION", "btnLogin"]
 
-        # add some params
-        session = {
-            "txtEmail": self._username,
-            "txtPassword": self._password
-        }
+        if initial_resp.status_code != codes.ok:
+            # login failed, so leaving the self._session as None
+            _LOGGER.error(
+                "Failed to connect to Water Meter service, "
+                f"error: {initial_resp.reason} [{initial_resp.status_code}]"
+            )
 
+            return
+
+        soup = BeautifulSoup(initial_resp.text, "html.parser")
+        all_inputs = soup.find_all("input")
+
+        # Initiate clean session payload
+        session = {"txtEmail": self._username, "txtPassword": self._password}
+
+        # Add to session data fields from ASP.NET WebForm
+        # VIEW STATES and EVENT session
         for item in all_inputs:
             name = item.get("name")
             value = item.get("value", "")
 
-            if name in FIELDS and value is not None:
+            if name in INPUTS and value is not None:
                 session[name] = value
 
-        _LOGGER.info("Reusable session data from the Water Meter service retrieved successfully.")
+        _LOGGER.info("Session data created successfully")
+
         self._session = session
 
-    def fetch_data(self):
-        # all data is received in the html after login operation
-        resp = requests.post(LOGIN_URL, data=self._session, timeout=10)
-        return self.extract_meter_value(resp)
+    def _update_data(self, retry: bool = True):
+        if self._session is None:
+            self._create_request_data()
 
-    def extract_meter_value(self, data_response):
-        if data_response.status_code != requests.codes.ok:
-            _LOGGER.error('Error response status %s - %s: %s', data_response.status_code, data_response.reason,
-                          data_response.url)
-            self._session = None  # Session is no good.  Need to login again.
-            return None
-        elif data_response.url != DATA_URL:
-            _LOGGER.error('Login request redirected to %s.', data_response.url)
+        if self._session is not None:
+            # all data is received in the html after login operation
+            data = requests.post(LOGIN_URL, data=self._session, timeout=10)
+
+            if data is None:
+                self._session = None
+
+                if retry:
+                    # Retry to with new session one more time
+                    self._update_data(False)
+
+        else:
+            # No data available
+            self._data = None
+
+    def _get_latest_reading(self) -> Optional[float]:
+        latest_reading: Optional[float] = None
+
+        status_code = self._data.status_code
+        reason = self._data.reason
+        url = self._data.url
+        body = self._data.text
+
+        message = None
+
+        if status_code == codes.ok:
+
+            if url == DATA_URL:
+                soup = BeautifulSoup(body, "html.parser")
+                properties_tag = soup.select_one("#cphMain_div_properties")
+
+                if properties_tag is None:
+                    message = f"Invalid response - no data: {body}"
+
+                else:
+                    # The data is hidden as json text inside the html
+                    props_list = json.loads(properties_tag.text)
+
+                    if len(props_list) == 0:
+                        message = f"No properties found, data: {body}"
+
+                    else:
+                        all_properties = props_list[0]
+
+                        latest_reading = all_properties.get("LastRead")
+
+                        if latest_reading is None:
+                            message = (
+                                "Last read is not available for "
+                                f"the property, data: {body}"
+                            )
+
+            else:
+                message = f"Login request redirected to {url}"
+
+        else:
+            message = f"Request to {url} failed due {reason} [{status_code}]"
+
+        if latest_reading is None:
             self._session = None
-            return None
-        soup = bs(data_response.text, "html.parser")
-        properties_tag = soup.select_one("#cphMain_div_properties")
-        if properties_tag is None:
-            _LOGGER.error('Data not found in response from server:\n%s', data_response.text)
-            self._session = None
-            return None
-        json_str = properties_tag.text  # The data is hidden as json text inside the html
-        props_list = json.loads(json_str)
-        if len(props_list) != 1:  # For consumers always one entry in this array.
-            _LOGGER.error('Data from server contains an empty #cphMain_div_properties tag:\n%s', data_response.text)
-            self._session = None
-            return None
-        all_properties = props_list[0]  # For consumers is always only one entry in this array.
-        if 'LastRead' not in all_properties:
-            _LOGGER.error('Data from server contains #cphMain_div_properties tag with no LastRead:\n%s',
-                          data_response.text)
-            self._session = None
-            return None
-        meter = all_properties["LastRead"]  # the field in the json is called "LastRead"
-        return meter
+
+            if message is not None:
+                _LOGGER.error(message)
+
+        return latest_reading
 
     def refresh_data(self):
         try:
-            if self._session is None:
-                self.create_session()
-                meter = self.fetch_data()
-            else:
-                meter = self.fetch_data()
-                if meter is None:
-                    _LOGGER.warning('Existing session failed fetching data.  Trying to create a new session.')
-                    self.create_session()  # if session doesn't work, try creating a new session
-                    meter = self.fetch_data()
-            if meter is None:
-                return
-            _LOGGER.debug("Fetched last read from Water Meter service: %s", meter)
-            if self._last_reading is not None:
-                self._consumption = int((meter - self._last_reading) * 1000)  # convert the increased amount to liters
+            self._update_data()
 
-            self._last_reading = meter
-        except requests.exceptions.RequestException as e:
-            _LOGGER.error('RequestException from Water Meter service: %s', e)
+            latest_reading: Optional[float] = self._get_latest_reading()
+
+            if self._last_reading is not None:
+                # convert the increased amount to liters
+                consumption_m3 = latest_reading - self._last_reading
+
+                self._consumption = consumption_m3 * 1000
+
+            self._last_reading = latest_reading
+
+        except RequestException as e:
+            _LOGGER.error(f"Request failed, error: {str(e)}")
 
 
 class WaterMeterReadingSensor(Entity):
     """Representation of a Sensor."""
 
-    def __init__(self, data_provider):
+    def __init__(self, data_provider: DataProvider):
         """Initialize the sensor."""
         self._data_provider = data_provider
 
@@ -167,7 +207,7 @@ class WaterMeterReadingSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._data_provider.get_reading()
+        return self._data_provider.reading
 
     @property
     def unit_of_measurement(self):
@@ -176,7 +216,7 @@ class WaterMeterReadingSensor(Entity):
 
     @property
     def icon(self):
-        return 'mdi:counter'
+        return "mdi:counter"
 
     def update(self):
         self._data_provider.refresh_data()
@@ -197,7 +237,7 @@ class WaterConsumptionSensor(Entity):
     @property
     def state(self):
         """Return the state of the sensor."""
-        return self._data_provider.get_consumption()
+        return self._data_provider.consumption
 
     @property
     def unit_of_measurement(self):
@@ -206,7 +246,7 @@ class WaterConsumptionSensor(Entity):
 
     @property
     def icon(self):
-        return 'mdi:water-pump'
+        return "mdi:water-pump"
 
     def update(self):
         """No need to do anything here because the data is always up-to-date"""
