@@ -227,7 +227,9 @@ class ConfigFlowManager:
         await api.initialize()
 
         if await api.login():
-            self.title = f"{api.consumer} [{api.serial_number}]"
+            data = api.data
+
+            self.title = f"{data.consumer} [{data.serial_number}]"
         else:
             msg = "Failed to login CityMind due to invalid credentials"
 
