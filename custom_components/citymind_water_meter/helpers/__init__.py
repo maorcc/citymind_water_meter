@@ -4,7 +4,7 @@ import sys
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from ..managers.home_assistant import BlueIrisHomeAssistant
+from ..managers.home_assistant import CityMindHomeAssistant
 from ..managers.password_manager import PasswordManager
 from .const import (CONF_LOG_LEVEL, DOMAIN, DOMAIN_DATA, DOMAIN_LOGGER,
                     LOG_LEVEL_DEFAULT, PASSWORD_MANAGER, SERVICE_SET_LEVEL)
@@ -36,7 +36,7 @@ async def async_set_ha(hass: HomeAssistant, entry: ConfigEntry):
 
         password_manager = hass.data[PASSWORD_MANAGER]
 
-        instance = BlueIrisHomeAssistant(hass, password_manager)
+        instance = CityMindHomeAssistant(hass, password_manager)
 
         await instance.async_init(entry)
 

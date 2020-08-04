@@ -128,6 +128,8 @@ class EntityManager:
 
     def create_components(self):
         self.generate_water_last_reading_sensor()
+        self.generate_water_consumption_estimation_sensor()
+        self.generate_water_monthly_consumption_sensor()
 
     def update(self):
         self.hass.async_create_task(self._async_update())
@@ -234,17 +236,19 @@ class EntityManager:
 
         try:
             device_name = self.device_manager.get_system_device_name()
+            data = self.api.data
 
-            entity_name = f"{self.integration_title} Last Reading"
+            identity = f"{data.serial_number} Last Reading"
+            entity_name = f"Water Meter {identity}"
             unique_id = f"{DOMAIN}-{DOMAIN_SENSOR}-{entity_name}"
 
-            state = self.api.last_reading
+            state = data.last_read
 
             attributes = {ATTR_FRIENDLY_NAME: entity_name}
 
             entity = EntityData()
 
-            entity.id = "Last Reading"
+            entity.id = identity
             entity.unique_id = unique_id
             entity.name = entity_name
             entity.state = state
@@ -261,6 +265,94 @@ class EntityManager:
     def generate_water_last_reading_sensor(self):
         try:
             entity = self.get_water_last_reading_entity()
+            entity_name = entity.name
+
+            self.set_entity(DOMAIN_SENSOR, entity_name, entity)
+        except Exception as ex:
+            msg = "Failed to generate water consumption sensor"
+            self.log_exception(ex, msg)
+
+    def get_water_monthly_consumption_entity(self) -> EntityData:
+        entity = None
+
+        try:
+            device_name = self.device_manager.get_system_device_name()
+            data = self.api.data
+
+            identity = f"{data.serial_number} Monthly Consumption"
+            entity_name = f"Water Meter {identity}"
+            unique_id = f"{DOMAIN}-{DOMAIN_SENSOR}-{entity_name}"
+
+            state = data.monthly_consumption
+
+            attributes = {ATTR_FRIENDLY_NAME: entity_name}
+
+            entity = EntityData()
+
+            entity.id = identity
+            entity.unique_id = unique_id
+            entity.name = entity_name
+            entity.state = state
+            entity.attributes = attributes
+            entity.icon = DEFAULT_ICON
+            entity.device_name = device_name
+            entity.unit = VOLUME_CUBIC_METERS
+        except Exception as ex:
+            self.log_exception(ex, "Failed to get water consumption entity")
+
+        return entity
+
+    def generate_water_monthly_consumption_sensor(self):
+        try:
+            entity = self.get_water_monthly_consumption_entity()
+            entity_name = entity.name
+
+            self.set_entity(DOMAIN_SENSOR, entity_name, entity)
+        except Exception as ex:
+            msg = "Failed to generate water consumption sensor"
+            self.log_exception(ex, msg)
+
+    def get_water_consumption_estimation_entity(self) -> EntityData:
+        entity = None
+
+        try:
+            device_name = self.device_manager.get_system_device_name()
+            data = self.api.data
+
+            identity = f"{data.serial_number} Consumption Predication"
+            entity_name = f"Water Meter {identity}"
+            unique_id = f"{DOMAIN}-{DOMAIN_SENSOR}-{entity_name}"
+
+            predication = data.consumption_predication
+            current_monthly = data.monthly_consumption
+
+            percentage = (current_monthly / predication) * 100
+            state = f"{percentage:.2f}"
+
+            attributes = {
+                ATTR_FRIENDLY_NAME: entity_name,
+                "Predication": f"{predication} {VOLUME_CUBIC_METERS}",
+            }
+
+            entity = EntityData()
+
+            entity.id = identity
+            entity.unique_id = unique_id
+            entity.name = entity_name
+            entity.state = state
+            entity.attributes = attributes
+            entity.icon = DEFAULT_ICON
+            entity.device_name = device_name
+            entity.unit = "%"
+
+        except Exception as ex:
+            self.log_exception(ex, "Failed to get water consumption entity")
+
+        return entity
+
+    def generate_water_consumption_estimation_sensor(self):
+        try:
+            entity = self.get_water_consumption_estimation_entity()
             entity_name = entity.name
 
             self.set_entity(DOMAIN_SENSOR, entity_name, entity)

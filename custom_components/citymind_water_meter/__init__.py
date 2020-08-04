@@ -1,7 +1,7 @@
 """
 This component provides support for Blue Iris.
 For more details about this component, please refer to the documentation at
-https://home-assistant.io/components/blueiris/
+https://home-assistant.io/components/citymind_water_meter/
 """
 import logging
 import sys
@@ -10,7 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from .helpers import async_set_ha, clear_ha, get_ha, handle_log_level
-from .helpers.const import DOMAIN
+from .helpers.const import DEFAULT_NAME, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ async def async_setup(hass, config):
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up a BlueIris component."""
+    """Set up a CityMind Water Meter component."""
     initialized = False
 
     try:
@@ -36,8 +36,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     except Exception as ex:
         exc_type, exc_obj, tb = sys.exc_info()
         line = tb.tb_lineno
+        msg = f"Failed to load {DEFAULT_NAME}"
 
-        _LOGGER.error(f"Failed to load BlueIris, error: {ex}, line: {line}")
+        _LOGGER.error(f"{msg}, error: {ex}, line: {line}")
 
     return initialized
 

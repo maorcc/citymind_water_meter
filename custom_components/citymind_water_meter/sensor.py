@@ -9,7 +9,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass, config_entry, async_add_devices):
-    """Set up the BlueIris Binary Sensor."""
+    """Set up the CityMind Water Meter Sensor."""
     await async_setup_base_entry(
         hass, config_entry, async_add_devices, DOMAIN_SENSOR, CityMindSensor
     )
@@ -22,7 +22,7 @@ async def async_unload_entry(hass, config_entry):
 
 
 class CityMindSensor(CityMindEntity):
-    """Class for an BlueIris switch."""
+    """Class for an CityMind Water Meter sensor."""
 
     def __init__(self, hass, integration_name, entity: EntityData):
         super().__init__()

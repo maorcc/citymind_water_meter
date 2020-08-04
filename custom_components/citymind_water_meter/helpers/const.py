@@ -1,7 +1,5 @@
 """
-Support for Blue Iris.
-For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/switch.blueiris/
+Support for CityMind Water Meter.
 """
 from datetime import timedelta
 
@@ -42,7 +40,7 @@ DEFAULT_ICON = "mdi:alarm-light"
 
 ATTR_FRIENDLY_NAME = "friendly_name"
 
-SCAN_INTERVAL = timedelta(seconds=30)
+SCAN_INTERVAL = timedelta(minutes=30)
 
 DISCOVERY = f"{DOMAIN}_discovery"
 
@@ -90,14 +88,17 @@ LOG_LEVELS = [
 
 CONF_ARR = [CONF_USERNAME, CONF_PASSWORD]
 
-BASE_URL = "https://cp.city-mind.com/"
-DATA_URL = "Default.aspx"
+BASE_URL = "https://cp.city-mind.com"
+DATA_URL = "/Default.aspx"
 
-INPUTS = [
-    "__VIEWSTATE",
-    "__VIEWSTATEGENERATOR",
-    "__EVENTVALIDATION",
-    "btnLogin",
-]
+VIEW_STATE = "__VIEWSTATE"
+EVENT_ARGS = "__VIEWSTATEGENERATOR"
+EVENT_VALID = "__EVENTVALIDATION"
+BTN_LOGIN = "btnLogin"
+
+INPUTS = [VIEW_STATE, EVENT_ARGS, EVENT_VALID, BTN_LOGIN]
 
 HTML_DIV_PROPS = "#cphMain_div_properties"
+HTML_DIV_FACTORY = "#lblFactoryName"
+HTML_DIV_CONSUMER = "#lblConsumerName"
+HTML_DIV_SN = "#cphMain_lblMeterSN"

@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+from copy import deepcopy
 from datetime import datetime
 from typing import Optional
 
@@ -10,8 +11,12 @@ from bs4 import BeautifulSoup
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from ..helpers.const import BASE_URL, DATA_URL, HTML_DIV_PROPS, INPUTS
+from ..helpers.const import (BASE_URL, DATA_URL, DEFAULT_NAME,
+                             HTML_DIV_CONSUMER, HTML_DIV_FACTORY,
+                             HTML_DIV_PROPS, HTML_DIV_SN, INPUTS)
 from ..managers.configuration_manager import ConfigManager
+from ..models.citymind_data import CityMindData
+from ..models.response_data import ResponseData
 
 REQUIREMENTS = ["aiohttp"]
 
@@ -21,14 +26,13 @@ _LOGGER = logging.getLogger(__name__)
 class CityMindApi:
     """The Class for handling the data retrieval."""
 
-    is_logged_in: bool
     request_data: Optional[dict]
     session: ClientSession
-    data: Optional[dict]
+    data: CityMindData
+    previous_data: CityMindData
+
     hass: HomeAssistant
     config_manager: ConfigManager
-    last_reading: Optional[float]
-    consumption: Optional[float]
 
     def __init__(self, hass: HomeAssistant, config_manager: ConfigManager):
 
@@ -37,8 +41,6 @@ class CityMindApi:
             self.hass = hass
             self.config_manager = config_manager
             self.request_data = None
-            self.last_reading = None
-            self.consumption = None
 
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
@@ -55,8 +57,8 @@ class CityMindApi:
     def config_data(self):
         return self.config_manager.data
 
-    async def async_get(self, url: Optional[str] = None):
-        result = None
+    async def async_get(self, url: str = "") -> ResponseData:
+        result: ResponseData = ResponseData()
 
         try:
             url = f"{BASE_URL}/{url}"
@@ -64,14 +66,48 @@ class CityMindApi:
             async with self.session.get(url, ssl=False) as response:
                 _LOGGER.debug(f"Status of {url}: {response.status}")
 
+                result.status = response.status
+                result.reason = response.reason
+                result.url = response.url.path
+
                 response.raise_for_status()
 
-                result = await response.text()
-
-                _LOGGER.debug(f"Full result: {result}")
+                result.data = await response.text()
 
                 self._last_update = datetime.now()
 
+        except Exception as ex:
+            exc_type, exc_obj, tb = sys.exc_info()
+            line_number = tb.tb_lineno
+
+            _LOGGER.error(
+                f"Failed to connect {BASE_URL}/{url}, "
+                f"Error: {ex}, "
+                f"Line: {line_number}"
+            )
+
+        return result
+
+    async def async_post(self, url: str, data: dict) -> ResponseData:
+        result: ResponseData = ResponseData()
+
+        try:
+            url = f"{BASE_URL}/{url}"
+
+            session = self.session
+
+            async with session.post(url, data=data, ssl=False) as response:
+                _LOGGER.debug(f"Status of {url}: {response.status}")
+
+                result.status = response.status
+                result.reason = response.reason
+                result.url = response.url.path
+
+                response.raise_for_status()
+
+                self._last_update = datetime.now()
+
+                result.data = await response.text()
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
             line_number = tb.tb_lineno
@@ -83,38 +119,12 @@ class CityMindApi:
 
         return result
 
-    async def async_post(self, url: Optional[str], data: dict):
-        response = None
-
-        try:
-            url = f"{BASE_URL}/{url}"
-
-            async with self.session.post(
-                url, data=json.dumps(data), ssl=False
-            ) as response:
-                _LOGGER.debug(f"Status of {url}: {response.status}")
-
-                response.raise_for_status()
-
-                self._last_update = datetime.now()
-
-        except Exception as ex:
-            exc_type, exc_obj, tb = sys.exc_info()
-            line_number = tb.tb_lineno
-
-            _LOGGER.error(
-                f"Failed to connect {BASE_URL}/{url}, Error: {ex}, "
-                f"Line: {line_number}"
-            )
-
-        return response
-
     async def initialize(self):
-        _LOGGER.info("Initializing BlueIris")
+        _LOGGER.info(f"Initializing {DEFAULT_NAME}")
 
         try:
-            self.is_logged_in = False
-            self.data = None
+            self.data = CityMindData()
+            self.previous_data = CityMindData()
 
             if self.hass is None:
                 if self.session is not None:
@@ -136,23 +146,16 @@ class CityMindApi:
     async def async_update(self):
         _LOGGER.info(f"Updating data from CityMind {self.config_data.name})")
 
-        self.last_reading = None
-
         if await self.login():
-            latest_reading = self.data.get("LastRead")
+            previous_reading = self.previous_data.last_read
+            current_reading = self.data.last_read
 
-            if latest_reading is None:
-                _LOGGER.error(
-                    "Last read is not available for the property, "
-                    f" data: {self.data}"
-                )
-            else:
-                if self.last_reading is not None:
-                    consumption_m3 = latest_reading - self.last_reading
+            if current_reading is not None and previous_reading is not None:
+                consumption_m3 = current_reading - previous_reading
 
-                    self.consumption = consumption_m3 * 1000
+                self.data.consumption = consumption_m3 * 1000
 
-            self.last_reading = latest_reading
+            _LOGGER.info(f"CityMind data updated: {self.data}")
 
     async def load_request_data(self):
         _LOGGER.info("Retrieving session ID")
@@ -161,9 +164,9 @@ class CityMindApi:
 
         _LOGGER.debug("Getting session from Water Meter service.")
 
-        initial_resp = await self.async_get()
+        response = await self.async_get()
 
-        soup = BeautifulSoup(initial_resp.text, "html.parser")
+        soup = BeautifulSoup(response.data, "html.parser")
         all_inputs = soup.find_all("input")
 
         # Initiate clean session payload
@@ -185,62 +188,93 @@ class CityMindApi:
 
         self.request_data = session
 
-        self.is_logged_in = False
-
     async def login(self):
         _LOGGER.info("Performing login")
 
+        message = None
+
         logged_in = False
 
-        try:
-            self.data = None
+        data = CityMindData()
 
+        try:
             await self.load_request_data()
 
             if self.request_data is not None:
                 response = await self.async_post("", self.request_data)
                 url = response.url
 
-                message = None
-
-                if DATA_URL in response.url:
-
-                    body = await response.text()
+                if DATA_URL == url:
+                    body = response.data
 
                     soup = BeautifulSoup(body, "html.parser")
 
-                    properties_tag = soup.select_one(HTML_DIV_PROPS)
+                    properties = soup.select_one(HTML_DIV_PROPS)
+                    factory = soup.select_one(HTML_DIV_FACTORY)
+                    consumer = soup.select_one(HTML_DIV_CONSUMER)
+                    serial_number = soup.select_one(HTML_DIV_SN)
 
-                    if properties_tag is None:
-                        message = f"Invalid response - no data: {body}"
+                    data.provider = factory.text
+                    data.consumer = consumer.text
+                    data.serial_number = serial_number.text
+
+                    if properties is None:
+                        message = "Invalid response"
 
                     else:
                         # The data is hidden as json text inside the html
-                        props_list = json.loads(properties_tag.text)
+                        props_list = json.loads(properties.text)
 
                         if len(props_list) == 0:
-                            message = f"No properties found, data: {body}"
+                            message = "No properties found"
 
                         else:
-                            self.data = props_list[0]
+                            data.property = props_list[0]
+
+                            if "LastRead" in data.property:
+                                self._update_metrics(data)
+
+                                logged_in = True
+
+                            else:
+                                message = (
+                                    "Last read is not available for "
+                                    f"the property,  data: {data.property}"
+                                )
 
                 else:
                     message = f"Login request redirected to {url}"
-
-                if message is not None:
-                    logged_in = False
-
-                    _LOGGER.error(message)
-
-                else:
-                    logged_in = True
 
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
             line = tb.tb_lineno
 
-            _LOGGER.error(f"Failed to login, Error: {ex}, Line: {line}")
+            message = f"Failed to login, Error: {ex}, Line: {line}"
 
-        self.is_logged_in = logged_in
+        if message is not None:
+            _LOGGER.error(message)
 
-        return self.is_logged_in
+        previous_data = deepcopy(self.data)
+
+        self.data = data
+        self.previous_data = previous_data
+
+        return logged_in
+
+    def _update_metrics(self, data):
+        last_read = self._get_metrics(data, "LastRead")
+        monthly = self._get_metrics(data, "Common_Consumption")
+        predication = self._get_metrics(data, "Estemated_Consumption")
+
+        data.last_read = last_read
+        data.monthly_consumption = monthly
+        data.consumption_predication = predication
+
+    @staticmethod
+    def _get_metrics(data, key) -> Optional[float]:
+        metrics = data.property.get(key)
+
+        if metrics is not None:
+            metrics = float(metrics)
+
+        return metrics

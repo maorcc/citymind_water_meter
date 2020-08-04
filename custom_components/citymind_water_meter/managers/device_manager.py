@@ -2,6 +2,7 @@ import logging
 
 from homeassistant.helpers.device_registry import async_get_registry
 
+from ..api.api import CityMindApi
 from ..helpers.const import DEFAULT_NAME
 from .configuration_manager import ConfigManager
 
@@ -15,7 +16,7 @@ class DeviceManager:
 
         self._devices = {}
 
-        self._api = self._ha.api
+        self._api: CityMindApi = self._ha.api
 
     @property
     def config_manager(self) -> ConfigManager:
@@ -61,18 +62,15 @@ class DeviceManager:
         return device_name
 
     def generate_system_device(self):
-        server_status = self._api.status
-
-        version = server_status.get("version")
-
         device_name = self.get_system_device_name()
 
+        data = self._api.data
+
         device_info = {
-            "identifiers": {(DEFAULT_NAME, device_name)},
+            "identifiers": {(DEFAULT_NAME, data.serial_number)},
             "name": device_name,
-            "manufacturer": DEFAULT_NAME,
-            "model": "Server",
-            "sw_version": version,
+            "manufacturer": data.provider,
+            "model": DEFAULT_NAME,
         }
 
         self.set(device_name, device_info)

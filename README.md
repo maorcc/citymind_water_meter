@@ -1,4 +1,4 @@
-# Home-Assistant City-Mind Water Meter (Israel only)
+# Home-Assistant CityMind Water Meter (Israel only)
 This is a [Home Assistant](https://www.home-assistant.io/) integration for the Israeli [cp.city-mind.com](https://cp.city-mind.com) 
 online water meters service that serves many תאגידי מים. 
 

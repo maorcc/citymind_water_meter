@@ -1,6 +1,6 @@
 import logging
 import sys
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Union
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
@@ -22,7 +22,7 @@ async def async_setup_base_entry(
     component: Callable[[HomeAssistant, Any, EntityData], Any],
 ):
 
-    """Set up BlueIris based off an entry."""
+    """Set up based of an entry."""
     _LOGGER.debug(f"Starting async_setup_entry {domain}")
 
     try:
@@ -38,7 +38,7 @@ async def async_setup_base_entry(
 
 
 class CityMindEntity(Entity):
-    """Representation a binary sensor that is updated by BlueIris."""
+    """Representation a sensor that is updated."""
 
     hass: HomeAssistant = None
     integration_name: str = None
@@ -96,6 +96,11 @@ class CityMindEntity(Entity):
     @property
     def unit_of_measurement(self) -> Optional[str]:
         return self.entity.unit
+
+    @property
+    def state(self) -> Union[None, str, int, float]:
+        """Return the state of the entity."""
+        return self.entity.state
 
     async def async_added_to_hass(self):
         """Register callbacks."""

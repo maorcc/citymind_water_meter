@@ -30,7 +30,7 @@ from .storage_manager import StorageManager
 _LOGGER = logging.getLogger(__name__)
 
 
-class BlueIrisHomeAssistant:
+class CityMindHomeAssistant:
     def __init__(self, hass: HomeAssistant, password_manager: PasswordManager):
         self._hass = hass
 

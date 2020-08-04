@@ -226,7 +226,9 @@ class ConfigFlowManager:
         api = CityMindApi(self._hass, self._config_manager)
         await api.initialize()
 
-        if not api.is_logged_in:
+        if await api.login():
+            self.title = f"{api.consumer} [{api.serial_number}]"
+        else:
             msg = "Failed to login CityMind due to invalid credentials"
 
             _LOGGER.warning(msg)

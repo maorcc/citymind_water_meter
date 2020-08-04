@@ -5,8 +5,9 @@ from homeassistant import config_entries
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import callback
 
-from .helpers.const import (CONFIG_FLOW_DATA, CONFIG_FLOW_OPTIONS,
-                            DEFAULT_NAME, DOMAIN, ENTRY_PRIMARY_KEY)
+from .helpers.const import (CONF_PASSWORD, CONF_USERNAME, CONFIG_FLOW_DATA,
+                            CONFIG_FLOW_OPTIONS, DEFAULT_NAME, DOMAIN,
+                            ENTRY_PRIMARY_KEY)
 from .managers.config_flow_manager import ConfigFlowManager
 from .models import AlreadyExistsError, LoginError
 
@@ -50,6 +51,9 @@ class DomainFlowHandler(config_entries.ConfigFlow):
                 return self.async_create_entry(title=flow.title, data=data)
             except LoginError as lex:
                 _LOGGER.warning("Cannot complete login")
+
+                del new_user_input[CONF_USERNAME]
+                del new_user_input[CONF_PASSWORD]
 
                 errors = lex.errors
 
