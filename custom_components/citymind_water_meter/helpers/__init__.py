@@ -6,8 +6,15 @@ from homeassistant.core import HomeAssistant
 
 from ..managers.home_assistant import CityMindHomeAssistant
 from ..managers.password_manager import PasswordManager
-from .const import (CONF_LOG_LEVEL, DOMAIN, DOMAIN_DATA, DOMAIN_LOGGER,
-                    LOG_LEVEL_DEFAULT, PASSWORD_MANAGER, SERVICE_SET_LEVEL)
+from .const import (
+    CONF_LOG_LEVEL,
+    DOMAIN,
+    DOMAIN_DATA,
+    DOMAIN_LOGGER,
+    LOG_LEVEL_DEFAULT,
+    PASSWORD_MANAGER,
+    SERVICE_SET_LEVEL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 

@@ -16,5 +16,5 @@ jobs:
     - uses: actions/cache@v1
       with:
         path: ~/.cache/pre-commit
-        key: pre-commit|${{ env.PY }}|${{ hashFiles('.pre-commit-config.yaml') }}
+        key: pre-commit|${{ env.PY }}|${{ hashFiles('del.pre-commit-config.yaml') }}
     - uses: pre-commit/action@v1.0.1

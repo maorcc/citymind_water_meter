@@ -3,8 +3,12 @@ from typing import Optional
 
 from homeassistant.config_entries import ConfigEntry
 
-from ..helpers.const import (CONF_LOG_LEVEL, CONF_PASSWORD, CONF_USERNAME,
-                             LOG_LEVEL_DEFAULT)
+from ..helpers.const import (
+    CONF_LOG_LEVEL,
+    CONF_PASSWORD,
+    CONF_USERNAME,
+    LOG_LEVEL_DEFAULT,
+)
 from ..models.config_data import ConfigData
 from .password_manager import PasswordManager
 

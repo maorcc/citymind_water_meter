@@ -7,9 +7,16 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import EntityRegistry
 
 from ..api.api import CityMindApi
-from ..helpers.const import (ATTR_FRIENDLY_NAME, DEFAULT_ICON, DOMAIN,
-                             DOMAIN_SENSOR, ENTITY_STATUS_CREATED,
-                             ENTITY_STATUS_EMPTY, ENTITY_STATUS_READY, SIGNALS)
+from ..helpers.const import (
+    ATTR_FRIENDLY_NAME,
+    DEFAULT_ICON,
+    DOMAIN,
+    DOMAIN_SENSOR,
+    ENTITY_STATUS_CREATED,
+    ENTITY_STATUS_EMPTY,
+    ENTITY_STATUS_READY,
+    SIGNALS,
+)
 from ..models.config_data import ConfigData
 from ..models.entity_data import EntityData
 from .configuration_manager import ConfigManager

@@ -8,8 +8,16 @@ from homeassistant.config_entries import ConfigEntry
 from .. import get_ha
 from ..api.api import CityMindApi
 from ..helpers.const import (
-    CONF_ARR, CONF_LOG_LEVEL, CONF_PASSWORD, CONF_USERNAME, CONFIG_FLOW_DATA,
-    CONFIG_FLOW_INIT, CONFIG_FLOW_OPTIONS, DEFAULT_NAME, LOG_LEVELS)
+    CONF_ARR,
+    CONF_LOG_LEVEL,
+    CONF_PASSWORD,
+    CONF_USERNAME,
+    CONFIG_FLOW_DATA,
+    CONFIG_FLOW_INIT,
+    CONFIG_FLOW_OPTIONS,
+    DEFAULT_NAME,
+    LOG_LEVELS,
+)
 from ..managers.configuration_manager import ConfigManager
 from ..managers.password_manager import PasswordManager
 from ..models import LoginError
