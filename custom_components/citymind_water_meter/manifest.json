@@ -10,5 +10,6 @@
   "requirements": [
     "requests",
     "beautifulsoup4"
-  ]
+  ],
+   "config_flow": true
 }
