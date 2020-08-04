@@ -131,6 +131,12 @@ class EntityManager:
         self.generate_water_consumption_estimation_sensor()
         self.generate_water_monthly_consumption_sensor()
 
+        data = self.api.data
+        daily_consumption_sensor = self.generate_water_daily_consumption_sensor
+
+        daily_consumption_sensor("Yesterday", data.yesterday_consumption)
+        daily_consumption_sensor("Today", data.today_consumption)
+
     def update(self):
         self.hass.async_create_task(self._async_update())
 
@@ -353,6 +359,51 @@ class EntityManager:
     def generate_water_consumption_estimation_sensor(self):
         try:
             entity = self.get_water_consumption_estimation_entity()
+            entity_name = entity.name
+
+            self.set_entity(DOMAIN_SENSOR, entity_name, entity)
+        except Exception as ex:
+            msg = "Failed to generate water consumption sensor"
+            self.log_exception(ex, msg)
+
+    def get_water_daily_consumption_entity(
+        self, scope: str, value: Optional[float]
+    ) -> EntityData:
+        entity = None
+
+        try:
+            device_name = self.device_manager.get_system_device_name()
+            data = self.api.data
+
+            identity = f"{data.serial_number} {scope}'s Consumption"
+            entity_name = f"Water Meter {identity}"
+            unique_id = f"{DOMAIN}-{DOMAIN_SENSOR}-{entity_name}"
+
+            state = value
+
+            attributes = {ATTR_FRIENDLY_NAME: entity_name}
+
+            entity = EntityData()
+
+            entity.id = identity
+            entity.unique_id = unique_id
+            entity.name = entity_name
+            entity.state = state
+            entity.attributes = attributes
+            entity.icon = DEFAULT_ICON
+            entity.device_name = device_name
+            entity.unit = VOLUME_CUBIC_METERS
+
+        except Exception as ex:
+            self.log_exception(ex, "Failed to get water consumption entity")
+
+        return entity
+
+    def generate_water_daily_consumption_sensor(
+        self, scope: str, value: Optional[float]
+    ):
+        try:
+            entity = self.get_water_daily_consumption_entity(scope, value)
             entity_name = entity.name
 
             self.set_entity(DOMAIN_SENSOR, entity_name, entity)

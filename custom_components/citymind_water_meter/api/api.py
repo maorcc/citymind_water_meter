@@ -2,7 +2,7 @@ import json
 import logging
 import sys
 from copy import deepcopy
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 import aiohttp
@@ -11,9 +11,10 @@ from bs4 import BeautifulSoup
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from ..helpers.const import (BASE_URL, DATA_URL, DEFAULT_NAME,
-                             HTML_DIV_CONSUMER, HTML_DIV_FACTORY,
-                             HTML_DIV_PROPS, HTML_DIV_SN, INPUTS)
+from ..helpers.const import (
+    BASE_URL, DATA_URL, DEFAULT_NAME, HTML_DIV_CONSUMER, HTML_DIV_FACTORY,
+    HTML_DIV_PROPS, HTML_DIV_SN, INPUTS, STAT_FROM_QS, STAT_QS, STAT_TO_QS,
+    STAT_URL)
 from ..managers.configuration_manager import ConfigManager
 from ..models.citymind_data import CityMindData
 from ..models.response_data import ResponseData
@@ -59,6 +60,7 @@ class CityMindApi:
 
     async def async_get(self, url: str = "") -> ResponseData:
         result: ResponseData = ResponseData()
+        result.status = 404
 
         try:
             url = f"{BASE_URL}/{url}"
@@ -90,6 +92,7 @@ class CityMindApi:
 
     async def async_post(self, url: str, data: dict) -> ResponseData:
         result: ResponseData = ResponseData()
+        result.status = 404
 
         try:
             url = f"{BASE_URL}/{url}"
@@ -242,6 +245,8 @@ class CityMindApi:
                                     f"the property,  data: {data.property}"
                                 )
 
+                        await self._load_daily_consumptions(data)
+
                 else:
                     message = f"Login request redirected to {url}"
 
@@ -260,6 +265,44 @@ class CityMindApi:
         self.previous_data = previous_data
 
         return logged_in
+
+    async def _load_daily_consumptions(self, data: CityMindData):
+        today = datetime.now()
+        yesterday = datetime.now() - timedelta(1)
+        yesterday_str = yesterday.strftime("%d%m%Y")
+        today_str = today.strftime("%d%m%Y")
+
+        get_daily_stat = self._get_daily_consumption
+
+        data.yesterday_consumption = await get_daily_stat(yesterday_str)
+        data.today_consumption = await get_daily_stat(today_str)
+
+    async def _get_daily_consumption(self, date):
+        qs = f"{STAT_QS}&{STAT_FROM_QS}={date}&{STAT_TO_QS}={date}"
+        url = f"{STAT_URL}?{qs}"
+
+        response = await self.async_get(url)
+
+        daily_consumption: Optional[float] = None
+
+        _LOGGER.info(f"{response}")
+
+        if response.status == 200:
+            try:
+                json_data = json.loads(response.data)
+                result = json_data.get("Response_Message", {})
+                rows = result.get("Data_Rows", [])
+                first_row = rows[0]
+                row_data = first_row.get("Row", [])
+                data_item = row_data[1]
+                daily_consumption = float(data_item.get("Data", 0))
+            except Exception as ex:
+                exc_type, exc_obj, tb = sys.exc_info()
+                line = tb.tb_lineno
+
+                _LOGGER.error(f"Extract {date} failed, Error: {ex} [{line}]")
+
+        return daily_consumption
 
     def _update_metrics(self, data):
         last_read = self._get_metrics(data, "LastRead")

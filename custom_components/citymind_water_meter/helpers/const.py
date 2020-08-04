@@ -90,6 +90,10 @@ CONF_ARR = [CONF_USERNAME, CONF_PASSWORD]
 
 BASE_URL = "https://cp.city-mind.com"
 DATA_URL = "/Default.aspx"
+STAT_URL = "App_API/Web/CustomerConsumption.aspx"
+STAT_QS = "cmd=create_view&dt=0&vpt=1&pt=1&ct=0&p=1&ctp=0&im="
+STAT_FROM_QS = "fd"
+STAT_TO_QS = "td"
 
 VIEW_STATE = "__VIEWSTATE"
 EVENT_ARGS = "__VIEWSTATEGENERATOR"

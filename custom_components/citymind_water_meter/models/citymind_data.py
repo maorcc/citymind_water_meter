@@ -10,6 +10,8 @@ class CityMindData:
     consumption: Optional[float]
     monthly_consumption: Optional[float]
     consumption_estimation: Optional[float]
+    today_consumption: Optional[float]
+    yesterday_consumption: Optional[float]
 
     def __init__(self):
         self.property = None
@@ -20,6 +22,8 @@ class CityMindData:
         self.consumption = None
         self.monthly_consumption = None
         self.consumption_predication = None
+        self.today_consumption = None
+        self.yesterday_consumption = None
 
     def to_dict(self):
         obj = {
@@ -31,6 +35,8 @@ class CityMindData:
             "consumption": self.consumption,
             "monthly_consumption": self.monthly_consumption,
             "consumption_predication": self.consumption_predication,
+            "today_consumption": self.today_consumption,
+            "yesterday_consumption": self.yesterday_consumption,
         }
 
         return obj
