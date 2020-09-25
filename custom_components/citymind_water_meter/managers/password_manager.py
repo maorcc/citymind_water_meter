@@ -3,6 +3,7 @@ from os import path, remove
 from typing import Optional
 
 from cryptography.fernet import Fernet
+
 from homeassistant.core import HomeAssistant
 
 from ..helpers.const import DOMAIN_KEY_FILE

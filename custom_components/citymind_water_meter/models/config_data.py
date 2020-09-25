@@ -1,7 +1,13 @@
 from typing import Optional
 
-from ..helpers.const import (CONF_LOG_LEVEL, CONF_NAME, CONF_PASSWORD,
-                             CONF_USERNAME, DEFAULT_NAME, LOG_LEVEL_DEFAULT)
+from ..helpers.const import (
+    CONF_LOG_LEVEL,
+    CONF_NAME,
+    CONF_PASSWORD,
+    CONF_USERNAME,
+    DEFAULT_NAME,
+    LOG_LEVEL_DEFAULT,
+)
 
 
 class ConfigData:

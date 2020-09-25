@@ -1,20 +1,31 @@
+from copy import deepcopy
+from datetime import datetime, timedelta
 import json
 import logging
 import sys
-from copy import deepcopy
-from datetime import datetime, timedelta
 from typing import Optional
 
 import aiohttp
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
+
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from ..helpers.const import (
-    BASE_URL, DATA_URL, DEFAULT_NAME, HTML_DIV_CONSUMER, HTML_DIV_FACTORY,
-    HTML_DIV_PROPS, HTML_DIV_SN, INPUTS, STAT_FROM_QS, STAT_QS, STAT_TO_QS,
-    STAT_URL)
+    BASE_URL,
+    DATA_URL,
+    DEFAULT_NAME,
+    HTML_DIV_CONSUMER,
+    HTML_DIV_FACTORY,
+    HTML_DIV_PROPS,
+    HTML_DIV_SN,
+    INPUTS,
+    STAT_FROM_QS,
+    STAT_QS,
+    STAT_TO_QS,
+    STAT_URL,
+)
 from ..managers.configuration_manager import ConfigManager
 from ..models.citymind_data import CityMindData
 from ..models.response_data import ResponseData

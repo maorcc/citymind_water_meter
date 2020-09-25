@@ -3,23 +3,30 @@ Support for CityMind Water Meter.
 For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/citymind_water_meter/
 """
+from datetime import datetime
 import logging
 import sys
-from datetime import datetime
 from typing import Optional
 
 from cryptography.fernet import InvalidToken
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.helpers.entity_registry import EntityRegistry
-from homeassistant.helpers.entity_registry import \
-    async_get_registry as er_async_get_registry
+from homeassistant.helpers.entity_registry import (
+    EntityRegistry,
+    async_get_registry as er_async_get_registry,
+)
 from homeassistant.helpers.event import async_track_time_interval
 
 from ..api.api import CityMindApi
-from ..helpers.const import (DEFAULT_NAME, DOMAIN, SCAN_INTERVAL, SIGNALS,
-                             SUPPORTED_DOMAINS)
+from ..helpers.const import (
+    DEFAULT_NAME,
+    DOMAIN,
+    SCAN_INTERVAL,
+    SIGNALS,
+    SUPPORTED_DOMAINS,
+)
 from ..models.config_data import ConfigData
 from .configuration_manager import ConfigManager
 from .device_manager import DeviceManager
