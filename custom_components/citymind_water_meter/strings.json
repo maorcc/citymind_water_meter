@@ -1,0 +1,33 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up CityMind account",
+        "description": "Set up your CityMind credentials",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "invalid_credentials": "Invalid credentials"
+    }
+  },
+  "options": {
+      "step": {
+          "city_mind_additional_settings": {
+              "title": "Options for CityMind Water Meter.",
+              "description": "Set up options.",
+              "data": {
+                  "username": "Username",
+                  "password": "Password",
+                  "log_level": "Log level"
+              }
+          }
+      },
+      "error": {
+        "invalid_credentials": "Invalid credentials"
+      }
+  }
+}
