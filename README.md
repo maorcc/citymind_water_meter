@@ -54,7 +54,7 @@ Here is a partial list (may also be outdated) of supported water utilities and c
 ## Installation
 Make sure you have signed up at
  [https://cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com")
-  as mentioned above, and have a working username/password.
+  as mentioned above, and have a working username/password.  The username is usually your email address.
 
 It is recommended to install using HACS, but it is also easy to install
  manually
@@ -62,23 +62,23 @@ It is recommended to install using HACS, but it is also easy to install
 #### Install using HACS (Recommended)
 Add this repository to HACS as a custom repository.
  After few seconds (be patient), the option to install this integration
- will show up. 
+ will show up.  Just add it.
+
+After adding with HACS go to Integrations UI (under Configuration page) and add the "Citymind-water-meter" integration.
 
 #### Install Manually
 Copy the `/custom_components/citymind_water_meter` folder from this
  repository to your `<config_dir>/custom_components/` folder.
  Restart Home Assistant.
 
-## Configuration:
-Add the following entry in your `configuration.yaml`:
+After adding the custom component go to Integrations UI (under Configuration page), click "+" and add the "Citymind-water-meter" integration.
 
-```yaml
-sensor:
-  - platform: citymind_water_meter
-    scan_interval: 1800                     # 30 minutes in Seconds
-    username: !secret citymind_username     # Usually your email address
-    password: !secret citymind_password     # Your password to cp.city-mind.com website
-```
+## Configuration:
+Configure using the "Integrations" UI.  Just fill in your username/password as mentioned above.
+
+## Breaking Changes
+When upgrading from 1.x to 2.x, please remove any use of "citymind_water_meter" platform from configuration.yaml
+
 ## Example of a History Chart
 Below is a history graph of a 24 hours meter readings.
 
@@ -101,11 +101,8 @@ entities:
   - type: 'custom:mini-graph-card'
     name: 24 Hours Water Meter
     entities:
-      - entity: sensor.water_meter_reading
+      - entity: sensor.water_meter_XXXXXXXXX_last_reading
         name: Water Meter
-      - entity: sensor.water_consumption
-        name: Consumption Tics
-        y_axis: secondary
     points_per_hour: 12
     smoothing: false
     show:
