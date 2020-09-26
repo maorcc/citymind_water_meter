@@ -137,4 +137,6 @@ project, made by my neighbor [eyalcha](https://github.com/eyalcha/).
 I created this alternative project because I wanted it lighter, quicker, and easy to
 setup.  Mostly, I wanted to avoid the manual installation of a Selenium docker on Hass.io.
 
+Kudos to [Elad Bar](https://github.com/elad-bar/) for his help, a wonderful code contribution, and refactoring.
+
 [![Israel](https://raw.githubusercontent.com/hjnilsson/country-flags/master/png250px/il.png "Water Meter by Arad Technologies")](https://arad.co.il/products/residential/ "Israel Flag")
