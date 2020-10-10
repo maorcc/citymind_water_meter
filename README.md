@@ -80,7 +80,7 @@ After adding the custom component go to Integrations UI (under Configuration pag
 Configure using the "Integrations" UI.  Just fill in your username/password as mentioned above.
 
 ## Breaking Changes
-When upgrading from 1.x to 2.x, please remove any use of "citymind_water_meter" platform from `configuration.yaml`.
+When upgrading from v0.x.x to v1.0, please remove any use of "citymind_water_meter" platform from `configuration.yaml`.
 Configuration is now only available via the UI.
 
 ## Example of a History Chart
