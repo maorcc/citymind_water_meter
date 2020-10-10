@@ -115,7 +115,7 @@ entities:
     name: 7 Days Water Consumption
     hours_to_show: 168
     group_by: date
-    aggregate_func: sum
+    aggregate_func: delta
     entities:
       - sensor.water_meter_XXXXXXXXX_last_reading
     show:
