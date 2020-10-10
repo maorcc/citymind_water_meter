@@ -4,9 +4,12 @@ online water meters service that serves many תאגידי מים.
 
 #### Please ⭐️ this repo if you find it useful
 
-This integration provides Home Assistant with two **sensors** for water consumption in a minimum resolution of 100 liters:
-  - Water meter reading in cubic meters.
-  - Current consumption value in liters. (Multiplications of 100L.)
+This integration provides Home Assistant with five **sensors** for water consumption in a minimum resolution of 100 liters:
+  - Last Reading (Current meter reading in a resolution of 100 liters)
+  - Today's Consumption
+  - Yesterday's Consumption
+  - Monthly Consumption
+  - Consumption Predication
 
 <img src="https://user-images.githubusercontent.com/255973/88915377-d3352d80-d26c-11ea-8ffc-58d7adcca3b5.png" height="300" width="451" alt="24 hours water meter graph">
 
@@ -77,7 +80,8 @@ After adding the custom component go to Integrations UI (under Configuration pag
 Configure using the "Integrations" UI.  Just fill in your username/password as mentioned above.
 
 ## Breaking Changes
-When upgrading from 1.x to 2.x, please remove any use of "citymind_water_meter" platform from configuration.yaml
+When upgrading from 1.x to 2.x, please remove any use of "citymind_water_meter" platform from `configuration.yaml`.
+Configuration is now only available via the UI.
 
 ## Example of a History Chart
 Below is a history graph of a 24 hours meter readings.
@@ -106,18 +110,22 @@ entities:
     points_per_hour: 12
     smoothing: false
     show:
-      labels: true    
+      labels: true
   - type: 'custom:mini-graph-card'
     name: 7 Days Water Consumption
     hours_to_show: 168
     group_by: date
     aggregate_func: sum
     entities:
-      - sensor.water_consumption
+      - sensor.water_meter_XXXXXXXXX_last_reading
     show:
       graph: bar
       state: false
+  - type: weblink
+    url: 'https://cp.city-mind.com/Default.aspx'
 ```
+<img src="https://user-images.githubusercontent.com/255973/95665125-f70ecc80-0b55-11eb-887f-edb3e1463051.png" height="459" width="367" alt="Sample charts using mini-graph-card">
+
 
 ## Why water meters in Israel have the 100-Liter tics? (Only in Israel)
 Almost all water meters in Israel have the minimum resolution that is no less than 100 liters.
