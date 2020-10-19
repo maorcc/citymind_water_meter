@@ -1,13 +1,14 @@
+from copy import deepcopy
+from datetime import datetime, timedelta
 import json
 import logging
 import sys
-from copy import deepcopy
-from datetime import datetime, timedelta
 from typing import Optional
 
 import aiohttp
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
+
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
