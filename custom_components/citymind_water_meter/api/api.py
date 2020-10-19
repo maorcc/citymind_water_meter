@@ -1,14 +1,13 @@
-from copy import deepcopy
-from datetime import datetime, timedelta
 import json
 import logging
 import sys
+from copy import deepcopy
+from datetime import datetime, timedelta
 from typing import Optional
 
 import aiohttp
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
-
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
@@ -158,7 +157,7 @@ class CityMindApi:
             )
 
     async def async_update(self):
-        _LOGGER.info(f"Updating data from CityMind {self.config_data.name})")
+        _LOGGER.debug(f"Updating data from CityMind {self.config_data.name})")
 
         if await self.login():
             previous_reading = self.previous_data.last_read
@@ -169,10 +168,10 @@ class CityMindApi:
 
                 self.data.consumption = consumption_m3 * 1000
 
-            _LOGGER.info(f"CityMind data updated: {self.data}")
+            _LOGGER.debug(f"CityMind data updated: {self.data}")
 
     async def load_request_data(self):
-        _LOGGER.info("Retrieving session ID")
+        _LOGGER.debug("Retrieving session ID")
 
         self.request_data = None
 
@@ -198,12 +197,12 @@ class CityMindApi:
             if name in INPUTS and value is not None:
                 session[name] = value
 
-        _LOGGER.info("Session data created successfully")
+        _LOGGER.debug("Session data created successfully")
 
         self.request_data = session
 
     async def login(self):
-        _LOGGER.info("Performing login")
+        _LOGGER.debug("Performing login")
 
         message = None
 
@@ -296,7 +295,7 @@ class CityMindApi:
 
         daily_consumption: Optional[float] = None
 
-        _LOGGER.info(f"{response}")
+        _LOGGER.debug(f"{response}")
 
         if response.status == 200:
             try:
