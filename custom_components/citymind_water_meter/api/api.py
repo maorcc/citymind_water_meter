@@ -5,8 +5,7 @@ import logging
 import sys
 from typing import Optional
 
-import aiohttp
-from aiohttp import ClientSession
+from aiohttp.client import ClientSession
 from bs4 import BeautifulSoup
 
 from homeassistant.core import HomeAssistant
@@ -144,7 +143,7 @@ class CityMindApi:
                 if self.session is not None:
                     await self.session.close()
 
-                self.session = aiohttp.client.ClientSession()
+                self.session = ClientSession()
             else:
                 self.session = async_create_clientsession(hass=self.hass)
 
