@@ -1,4 +1,3 @@
-import logging
 from typing import Optional
 
 from homeassistant.config_entries import ConfigEntry
@@ -11,8 +10,6 @@ from ..helpers.const import (
 )
 from ..models.config_data import ConfigData
 from .password_manager import PasswordManager
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class ConfigManager:
