@@ -1,6 +1,4 @@
 """Storage handers."""
-import logging
-
 from homeassistant.helpers.json import JSONEncoder
 from homeassistant.helpers.storage import Store
 
@@ -8,8 +6,6 @@ from ..helpers.const import *
 from ..models.storage_data import StorageData
 
 STORAGE_VERSION = 1
-
-_LOGGER = logging.getLogger(__name__)
 
 
 class StorageManager:
