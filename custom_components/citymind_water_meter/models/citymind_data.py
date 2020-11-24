@@ -24,6 +24,8 @@ class CityMindData:
         self.consumption_predication = None
         self.today_consumption = None
         self.yesterday_consumption = None
+        self.provider = None
+        self.consumption_estimation = None
 
     def to_dict(self):
         obj = {
@@ -37,6 +39,7 @@ class CityMindData:
             "consumption_predication": self.consumption_predication,
             "today_consumption": self.today_consumption,
             "yesterday_consumption": self.yesterday_consumption,
+            "consumption_estimation": self.consumption_estimation,
         }
 
         return obj
