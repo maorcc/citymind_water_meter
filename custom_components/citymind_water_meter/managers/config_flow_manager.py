@@ -244,7 +244,7 @@ class ConfigFlowManager:
 
             _LOGGER.warning(msg)
 
-            errors = {"base": "invalid_credentials"}
+            errors = {"base": "invalid_auth"}
 
         if errors is not None:
             raise LoginError(errors)
