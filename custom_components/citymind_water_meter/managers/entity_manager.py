@@ -2,13 +2,12 @@ import logging
 import sys
 from typing import Dict, List, Optional
 
-from homeassistant.const import VOLUME_CUBIC_METERS
+from homeassistant.const import VOLUME_CUBIC_METERS, ATTR_FRIENDLY_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import EntityRegistry
 
 from ..api.api import CityMindApi
 from ..helpers.const import (
-    ATTR_FRIENDLY_NAME,
     DEFAULT_ICON,
     DOMAIN,
     DOMAIN_SENSOR,

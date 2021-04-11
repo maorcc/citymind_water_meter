@@ -38,8 +38,6 @@ NOTIFICATION_TITLE = f"{DEFAULT_NAME} Setup"
 
 DEFAULT_ICON = "mdi:alarm-light"
 
-ATTR_FRIENDLY_NAME = "friendly_name"
-
 SCAN_INTERVAL = timedelta(minutes=30)
 
 DISCOVERY = f"{DOMAIN}_discovery"
