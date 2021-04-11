@@ -5,7 +5,7 @@ from typing import Any, Callable, Optional, Union
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.entity import SensorEntity
 
 from ..helpers import get_ha
 from ..helpers.const import SIGNALS
@@ -37,7 +37,7 @@ async def async_setup_base_entry(
         _LOGGER.error(f"Failed to load {domain}, error: {ex}, line: {line}")
 
 
-class CityMindEntity(Entity):
+class CityMindEntity(SensorEntity):
     """Representation a sensor that is updated."""
 
     hass: HomeAssistant = None
