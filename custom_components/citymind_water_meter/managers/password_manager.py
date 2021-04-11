@@ -5,7 +5,7 @@ from cryptography.fernet import Fernet
 
 from homeassistant.core import HomeAssistant
 
-from ..helpers.const import *
+from ..helpers.const import DOMAIN_KEY_FILE
 from ..models.storage_data import StorageData
 from .storage_manager import StorageManager
 

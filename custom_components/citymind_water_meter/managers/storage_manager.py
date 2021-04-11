@@ -2,7 +2,7 @@
 from homeassistant.helpers.json import JSONEncoder
 from homeassistant.helpers.storage import Store
 
-from ..helpers.const import *
+from ..helpers.const import DOMAIN
 from ..models.storage_data import StorageData
 
 STORAGE_VERSION = 1
