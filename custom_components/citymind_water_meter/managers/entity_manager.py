@@ -214,9 +214,8 @@ class EntityManager:
 
                                     _LOGGER.info(msg)
 
-                            if restored:
-                                if entity_item is None or not is_disabled:
-                                    entities_to_add.append(entity_component)
+                            if restored and (entity_item is None or not is_disabled):
+                                entities_to_add.append(entity_component)
                         else:
                             entities_to_add.append(entity_component)
 
