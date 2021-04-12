@@ -1,7 +1,6 @@
 """
 Support for CityMind Water Meter.
 """
-from datetime import timedelta
 
 from homeassistant.components.sensor import DOMAIN as DOMAIN_SENSOR
 from homeassistant.const import CONF_NAME, CONF_PASSWORD, CONF_USERNAME
@@ -37,8 +36,6 @@ NOTIFICATION_ID = f"{DOMAIN}_notification"
 NOTIFICATION_TITLE = f"{DEFAULT_NAME} Setup"
 
 DEFAULT_ICON = "mdi:alarm-light"
-
-SCAN_INTERVAL = timedelta(minutes=30)
 
 DISCOVERY = f"{DOMAIN}_discovery"
 
