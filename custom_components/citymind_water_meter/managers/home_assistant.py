@@ -20,12 +20,7 @@ from homeassistant.helpers.entity_registry import (
 from homeassistant.helpers.event import async_track_time_interval
 
 from ..api.api import CityMindApi
-from ..helpers.const import (
-    DEFAULT_NAME,
-    DOMAIN,
-    SIGNALS,
-    SUPPORTED_DOMAINS,
-)
+from ..helpers.const import DEFAULT_NAME, DOMAIN, SIGNALS, SUPPORTED_DOMAINS
 from ..models.config_data import ConfigData
 from .configuration_manager import ConfigManager
 from .device_manager import DeviceManager

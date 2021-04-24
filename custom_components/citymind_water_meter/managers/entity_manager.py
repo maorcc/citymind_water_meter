@@ -2,7 +2,7 @@ import logging
 import sys
 from typing import Dict, List, Optional
 
-from homeassistant.const import VOLUME_CUBIC_METERS, ATTR_FRIENDLY_NAME
+from homeassistant.const import ATTR_FRIENDLY_NAME, VOLUME_CUBIC_METERS
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import EntityRegistry
 
