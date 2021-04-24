@@ -2,13 +2,12 @@ import logging
 import sys
 from typing import Dict, List, Optional
 
-from homeassistant.const import VOLUME_CUBIC_METERS
+from homeassistant.const import VOLUME_CUBIC_METERS, ATTR_FRIENDLY_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import EntityRegistry
 
 from ..api.api import CityMindApi
 from ..helpers.const import (
-    ATTR_FRIENDLY_NAME,
     DEFAULT_ICON,
     DOMAIN,
     DOMAIN_SENSOR,
@@ -214,9 +213,8 @@ class EntityManager:
 
                                     _LOGGER.info(msg)
 
-                            if restored:
-                                if entity_item is None or not is_disabled:
-                                    entities_to_add.append(entity_component)
+                            if restored and (entity_item is None or not is_disabled):
+                                entities_to_add.append(entity_component)
                         else:
                             entities_to_add.append(entity_component)
 
