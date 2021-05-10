@@ -13,5 +13,6 @@
     "requests",
     "beautifulsoup4"
   ],
-  "config_flow": true
+  "config_flow": true,
+  "iot_class": "cloud_polling"
 }
