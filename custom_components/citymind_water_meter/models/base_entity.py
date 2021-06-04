@@ -2,10 +2,10 @@ import logging
 import sys
 from typing import Any, Callable, Optional, Union
 
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
-from homeassistant.components.sensor import SensorEntity
 
 from ..helpers import get_ha
 from ..helpers.const import SIGNALS
