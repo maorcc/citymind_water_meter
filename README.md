@@ -114,7 +114,7 @@ For this example you would need to have the [Lovelace Mini Graph Card](https://g
 It is a highly recommended UI feature.
 Install it using HACS.
 
-In the UI, add the following card to see a 24-hours, and a 7-days charts:
+In the UI, add the following card to see a 24-hours, and a 7-days charts.  Replace the XXXXXXXXX with the Meter ID (מספר מונה):
 
 ```yaml
 type: entities
