@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import logging
 import sys
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -8,7 +10,7 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
 from ..helpers import get_ha
-from ..helpers.const import SIGNALS
+from ..helpers.const import *
 from .entity_data import EntityData
 
 _LOGGER = logging.getLogger(__name__)
@@ -79,6 +81,16 @@ class CityMindEntity(SensorEntity):
         return self.device_manager.get(self.entity.device_name)
 
     @property
+    def device_class(self) -> SensorDeviceClass | str | None:
+        """Return the class of this sensor."""
+        return self.entity.sensor_device_class
+
+    @property
+    def state_class(self) -> SensorStateClass | str | None:
+        """Return the class of this sensor."""
+        return self.entity.sensor_state_class
+
+    @property
     def name(self):
         """Return the name of the node."""
         return self.entity.name
@@ -89,7 +101,7 @@ class CityMindEntity(SensorEntity):
         return False
 
     @property
-    def device_state_attributes(self):
+    def extra_state_attributes(self):
         """Return true if the binary sensor is on."""
         return self.entity.attributes
 
@@ -98,7 +110,7 @@ class CityMindEntity(SensorEntity):
         return self.entity.unit
 
     @property
-    def state(self) -> Union[None, str, int, float]:
+    def native_value(self):
         """Return the state of the entity."""
         return self.entity.state
 

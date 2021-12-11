@@ -1,9 +1,10 @@
 import logging
 
+from homeassistant.const import ATTR_CONFIGURATION_URL
 from homeassistant.helpers.device_registry import async_get_registry
 
 from ..api.api import CityMindApi
-from ..helpers.const import DEFAULT_NAME
+from ..helpers.const import *
 from .configuration_manager import ConfigManager
 
 _LOGGER = logging.getLogger(__name__)
@@ -71,6 +72,7 @@ class DeviceManager:
             "name": device_name,
             "manufacturer": data.provider,
             "model": DEFAULT_NAME,
+            ATTR_CONFIGURATION_URL: BASE_URL
         }
 
         self.set(device_name, device_info)

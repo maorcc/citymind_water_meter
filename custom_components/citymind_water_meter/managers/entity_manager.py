@@ -7,15 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_registry import EntityRegistry
 
 from ..api.api import CityMindApi
-from ..helpers.const import (
-    DEFAULT_ICON,
-    DOMAIN,
-    DOMAIN_SENSOR,
-    ENTITY_STATUS_CREATED,
-    ENTITY_STATUS_EMPTY,
-    ENTITY_STATUS_READY,
-    SIGNALS,
-)
+from ..helpers.const import *
 from ..models.config_data import ConfigData
 from ..models.entity_data import EntityData
 from .configuration_manager import ConfigManager
@@ -267,9 +259,10 @@ class EntityManager:
             entity.icon = DEFAULT_ICON
             entity.device_name = device_name
             entity.unit = VOLUME_CUBIC_METERS
+            entity.sensor_state_class = SensorStateClass.TOTAL_INCREASING
             # VOLUME_LITERS
         except Exception as ex:
-            self.log_exception(ex, "Failed to get water consumption entity")
+            self.log_exception(ex, "Failed to get water last reading entity")
 
         return entity
 
@@ -308,8 +301,9 @@ class EntityManager:
             entity.icon = DEFAULT_ICON
             entity.device_name = device_name
             entity.unit = VOLUME_CUBIC_METERS
+            entity.sensor_state_class = SensorStateClass.TOTAL_INCREASING
         except Exception as ex:
-            self.log_exception(ex, "Failed to get water consumption entity")
+            self.log_exception(ex, "Failed to get water monthly consumption entity")
 
         return entity
 
@@ -337,7 +331,8 @@ class EntityManager:
             predication = data.consumption_predication
             current_monthly = data.monthly_consumption
 
-            percentage = (current_monthly / predication) * 100
+            percentage = 0 if predication == 0 else (current_monthly / predication) * 100
+
             state = f"{percentage:.2f}"
 
             attributes = {
@@ -355,9 +350,10 @@ class EntityManager:
             entity.icon = DEFAULT_ICON
             entity.device_name = device_name
             entity.unit = "%"
+            entity.sensor_state_class = SensorStateClass.MEASUREMENT
 
         except Exception as ex:
-            self.log_exception(ex, "Failed to get water consumption entity")
+            self.log_exception(ex, "Failed to get water consumption estimation entity")
 
         return entity
 
@@ -398,9 +394,10 @@ class EntityManager:
             entity.icon = DEFAULT_ICON
             entity.device_name = device_name
             entity.unit = VOLUME_CUBIC_METERS
+            entity.sensor_state_class = SensorStateClass.TOTAL_INCREASING
 
         except Exception as ex:
-            self.log_exception(ex, "Failed to get water consumption entity")
+            self.log_exception(ex, "Failed to get water daily consumption entity")
 
         return entity
 

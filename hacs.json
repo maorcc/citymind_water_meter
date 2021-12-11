@@ -6,5 +6,6 @@
   "country": "IL",
   "iot_class": [
     "Cloud Polling"
-  ]
+  ],
+  "homeassistant": "2021.12.0"
 }
