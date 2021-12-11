@@ -2,7 +2,11 @@
 Support for CityMind Water Meter.
 """
 
-from homeassistant.components.sensor import DOMAIN as DOMAIN_SENSOR
+from homeassistant.components.sensor import (
+    DOMAIN as DOMAIN_SENSOR,
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from homeassistant.const import CONF_NAME, CONF_PASSWORD, CONF_USERNAME
 
 CONF_LOG_LEVEL = "log_level"
@@ -50,7 +54,8 @@ ENTITY_STATE = "state"
 ENTITY_ATTRIBUTES = "attributes"
 ENTITY_ICON = "icon"
 ENTITY_UNIQUE_ID = "unique-id"
-ENTITY_DEVICE_CLASS = "device-class"
+ENTITY_SENSOR_DEVICE_CLASS = "sensor-device-class"
+ENTITY_SENSOR_STATE_CLASS = "sensor-state-class"
 ENTITY_DEVICE_NAME = "device-name"
 ENTITY_UNIT = "unit"
 ENTITY_DISABLED = "disabled"

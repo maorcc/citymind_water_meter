@@ -1,17 +1,6 @@
-from ..helpers.const import (
-    ENTITY_ATTRIBUTES,
-    ENTITY_DEVICE_CLASS,
-    ENTITY_DEVICE_NAME,
-    ENTITY_DISABLED,
-    ENTITY_ICON,
-    ENTITY_ID,
-    ENTITY_NAME,
-    ENTITY_STATE,
-    ENTITY_STATUS,
-    ENTITY_STATUS_CREATED,
-    ENTITY_UNIQUE_ID,
-    ENTITY_UNIT,
-)
+from typing import Optional
+
+from ..helpers.const import *
 
 
 class EntityData:
@@ -23,7 +12,8 @@ class EntityData:
     icon: str
     device_name: str
     status: str
-    device_class: str
+    sensor_device_class: Optional[SensorDeviceClass]
+    sensor_state_class: Optional[SensorStateClass]
     unit: str
     disabled: bool
 
@@ -36,7 +26,8 @@ class EntityData:
         self.icon = ""
         self.device_name = ""
         self.status = ENTITY_STATUS_CREATED
-        self.device_class = ""
+        self.sensor_device_class = None
+        self.sensor_state_class = None
         self.unit = ""
         self.disabled = False
 
@@ -50,7 +41,8 @@ class EntityData:
             ENTITY_ICON: self.icon,
             ENTITY_DEVICE_NAME: self.device_name,
             ENTITY_STATUS: self.status,
-            ENTITY_DEVICE_CLASS: self.device_class,
+            ENTITY_SENSOR_DEVICE_CLASS: self.sensor_device_class,
+            ENTITY_SENSOR_STATE_CLASS: self.sensor_state_class,
             ENTITY_UNIT: self.unit,
             ENTITY_DISABLED: self.disabled,
         }
