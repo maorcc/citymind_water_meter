@@ -56,9 +56,8 @@ class DeviceManager:
         self.generate_system_device()
 
     def get_system_device_name(self):
-        title = self.config_manager.config_entry.title
-
-        device_name = title
+        data = self._api.data
+        device_name = f"{data.consumer} [{data.serial_number}]"
 
         return device_name
 

@@ -227,9 +227,9 @@ class CityMindApi:
                     consumer = soup.select_one(HTML_DIV_CONSUMER)
                     serial_number = soup.select_one(HTML_DIV_SN)
 
-                    data.provider = factory.text
-                    data.consumer = consumer.text
-                    data.serial_number = serial_number.text
+                    data.provider = factory.text.strip()
+                    data.consumer = consumer.text.strip()
+                    data.serial_number = serial_number.text.strip()
 
                     if properties is None:
                         message = "Invalid response"
