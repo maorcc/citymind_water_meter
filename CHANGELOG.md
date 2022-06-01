@@ -1,7 +1,13 @@
 # Changelog
 
+## 1.0.5
+
+- Device and Entity registry - `async_get_registry` is deprecated, change to `async_get`
+- Update pre-commit
+
 ## v1.0.4
- - Whitespace cleanup from consumer, provider and serial number
+
+- Whitespace cleanup from consumer, provider and serial number
 
 ## v1.0.2
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -72,7 +72,7 @@ class CityMindEntity(SensorEntity):
         self.api = self.ha.api
 
     @property
-    def unique_id(self) -> Optional[str]:
+    def unique_id(self) -> str | None:
         """Return the name of the node."""
         return self.entity.unique_id
 
@@ -106,7 +106,7 @@ class CityMindEntity(SensorEntity):
         return self.entity.attributes
 
     @property
-    def unit_of_measurement(self) -> Optional[str]:
+    def unit_of_measurement(self) -> str | None:
         return self.entity.unit
 
     @property

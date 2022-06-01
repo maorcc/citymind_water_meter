@@ -13,10 +13,7 @@ from cryptography.fernet import InvalidToken
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.helpers.entity_registry import (
-    EntityRegistry,
-    async_get_registry as er_async_get_registry,
-)
+from homeassistant.helpers.entity_registry import EntityRegistry, async_get
 from homeassistant.helpers.event import async_track_time_interval
 
 from ..api.api import CityMindApi
@@ -90,7 +87,7 @@ class CityMindHomeAssistant:
             self._entity_manager = EntityManager(self._hass, self)
             self._device_manager = DeviceManager(self._hass, self)
 
-            self._entity_registry = await er_async_get_registry(self._hass)
+            self._entity_registry = async_get(self._hass)
 
             self._hass.loop.create_task(self._async_init())
         except InvalidToken:

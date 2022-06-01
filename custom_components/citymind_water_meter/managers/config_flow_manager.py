@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from cryptography.fernet import InvalidToken
 import voluptuous as vol
@@ -103,14 +103,14 @@ class ConfigFlowManager:
 
     def _get_default_fields(
         self, flow, config_data: ConfigData = None
-    ) -> Dict[vol.Marker, Any]:
+    ) -> dict[vol.Marker, Any]:
         if config_data is None:
             config_data = self.config_data
 
         username = config_data.username
         password_clear_text = config_data.password_clear_text
 
-        fields: Dict[vol.Marker, Any] = {
+        fields: dict[vol.Marker, Any] = {
             vol.Optional(CONF_USERNAME, default=username): str,
             vol.Optional(CONF_PASSWORD, default=password_clear_text): str,
         }

@@ -1,6 +1,6 @@
 import logging
 import sys
-from typing import Dict, List, Optional
+from typing import Optional
 
 from homeassistant.const import ATTR_FRIENDLY_NAME, VOLUME_CUBIC_METERS
 from homeassistant.core import HomeAssistant
@@ -74,7 +74,7 @@ class EntityManager:
 
         return result
 
-    def get_all_entities(self) -> List[EntityData]:
+    def get_all_entities(self) -> list[EntityData]:
         entities = []
         for domain in self.entities:
             for name in self.entities[domain]:
@@ -88,7 +88,7 @@ class EntityManager:
         if domain not in self.entities:
             self.entities[domain] = {}
 
-    def get_entities(self, domain) -> Dict[str, EntityData]:
+    def get_entities(self, domain) -> dict[str, EntityData]:
         self.check_domain(domain)
 
         return self.entities[domain]
