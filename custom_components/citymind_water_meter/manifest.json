@@ -1,7 +1,7 @@
 {
   "domain": "citymind_water_meter",
   "name": "CityMind Water Meter",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "documentation": "https://github.com/maorcc/citymind_water_meter",
   "issue_tracker": "https://github.com/maorcc/citymind_water_meter/issues",
   "dependencies": [],
