@@ -5,13 +5,15 @@
         "title": "Set up CityMind account",
         "description": "Set up your CityMind credentials",
         "data": {
-          "username": "Username",
+          "email": "Email",
           "password": "Password"
         }
       }
     },
     "error": {
-      "invalid_credentials": "Invalid credentials"
+        "invalid_credentials": "[%key:common::config_flow::error::invalid_auth%]",
+        "auth_general_error": "General failure, please try again",
+        "not_found": "URL not found"
     }
   },
   "options": {
@@ -20,14 +22,15 @@
               "title": "Options for CityMind Water Meter.",
               "description": "Set up options.",
               "data": {
-                  "username": "Username",
-                  "password": "Password",
-                  "log_level": "Log level"
+                  "email": "Email",
+                  "password": "Password"
               }
           }
       },
       "error": {
-        "invalid_credentials": "Invalid credentials"
+        "invalid_credentials": "[%key:common::config_flow::error::invalid_auth%]",
+        "auth_general_error": "General failure, please try again",
+        "not_found": "URL not found"
       }
   }
 }

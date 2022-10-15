@@ -3,38 +3,10 @@
 This is a [Home Assistant](https://www.home-assistant.io/) integration for the Israeli [cp.city-mind.com](https://cp.city-mind.com)
 online water meters service that serves many water services.
 
-#### Please ⭐️ this repo if you find it useful
-
-This integration provides Home Assistant with five **sensors** for water consumption in a minimum resolution of 100 liters:
-
-- Last Reading (Current meter reading in a resolution of 100 liters)
-- Today's Consumption
-- Yesterday's Consumption
-- Monthly Consumption
-- Consumption Predication
-
-<img src =
-  "https://user-images.githubusercontent.com/255973/88915377-d3352d80-d26c-11ea-8ffc-58d7adcca3b5.png"
-  height="300" width="451"
-  alt="24 hours water meter graph">
-
-This project is not associated in any way with Arad Group or any of its companies that own and operate the City Mind water services.
-
-<a href =
-  "https://user-images.githubusercontent.com/255973/87365347-ab607d00-c57e-11ea-9440-19e7805cf9ac.png"
-  target = "_blank">
-<img src =
-  "https://user-images.githubusercontent.com/255973/87365347-ab607d00-c57e-11ea-9440-19e7805cf9ac.png"
-  height="300" width="450"
-  alt="Water Meter by Arad Technologies">
-</a>
-
 ## Requirements
 
 You need to sign-up for the service at **[https://cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com")**.
 If your registration was successful, then you can use this integration.
-
-[![Self signup](https://user-images.githubusercontent.com/255973/88737784-c536be00-d141-11ea-819c-2199816e3511.png "https://cp.city-mind.com/")](https://cp.city-mind.com/)
 
 Registration may not succeed for one of the following reasons:
 
@@ -43,61 +15,79 @@ Registration may not succeed for one of the following reasons:
 
 Here is an outdated map showing water utilities companies in Israel that use Arad's water meters:
 
-![map](https://user-images.githubusercontent.com/255973/87733202-c4b03600-c7d7-11ea-9c8c-7aff8c1f9e81.png "Supported water utilities")
-
-Here is a partial list (may also be outdated) of supported water utilities and cities:
-
-אפשרי רק ללקוח של אחד**מתאגידי המים** שמקבלים שרותי קריאת מונים אונליין מארד טכנולוגיות, לדוגמא:
-
-- מיתב: פתח תקווה, אלעד
-- מי-נעם: נצרת עילית, עפולה, מגדל העמק
-- פלג הגליל: צפת ועוד
-- מעיינות הדרום: דימונה, ערד, ירוחם, ומצפה רמון
-- מי-מודיעין
-- מי ציונה: נס ציונה, מזכרת בתיה, קריית עקרון
-- מי התנור: קריית שמונה, מטולה, קצרין
-- מי רקת טבריה
-- מי עכו
-- מעיינות זיו: מעלות
-- מעיינות העמקים: יוקנעם, זכרון יעקב
-- מניב ראשון: ראשון לציון
-- יובלים בשומרון
-
----
-
 ## Installation
 
 Make sure you have signed up at [https://cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com") as mentioned above, and have a working username/password.  The username is usually your email address.
 
 It is recommended to install using HACS, but it is also easy to install manually
 
-### Install using HACS (Recommended)
+#### Installations via HACS
+- In HACS, look for "Citymind-water-meter" and install and restart
+- In Settings  --> Devices & Services - (Lower Right) "Add Integration"
 
-Add this repository to HACS as a custom repository.
- After few seconds (be patient), the option to install this integration
- will show up.  Just add it.
+#### Setup
 
-After adding with HACS go to Integrations UI (under Configuration page) and add the "Citymind-water-meter" integration.
+To add integration use Configuration -> Integrations -> Add `City-Mind Water Meter`
+Integration supports **multiple** City Mind accounts
 
-### Install Manually
+| Fields name | Type      | Required | Default | Description                                        |
+|-------------|-----------|----------|---------|----------------------------------------------------|
+| Email       | Textbox   | +        | -       | Email registered to City Mind v2                   |
+| Password    | Textbox   | +        | -       | Password of the account registered to City Mind v2 |
 
-Copy the `/custom_components/citymind_water_meter` folder from this repository to your `<config_dir>/custom_components/` folder.
-Restart Home Assistant.
 
-After adding the custom component go to Integrations UI (under Configuration page), click "+" and add the "Citymind-water-meter" integration.
+###### Encryption key got corrupted
 
----
+If a persistent notification popped up with the following message:
 
-## Configuration
+```
+Encryption key got corrupted, please remove the integration and re-add it
+```
 
-Configure using the "Integrations" UI.  Just fill in your username/password as mentioned above.
+It means that encryption key was modified from outside the code,
+Please remove the integration and re-add it to make it work again.
 
-### Breaking Changes
+#### Options
 
-When upgrading from v0.x.x to v1.0, please remove any use of "citymind_water_meter" platform from `configuration.yaml`.
-Configuration is now only available via the UI.
+_Configuration -> Integrations -> {Integration} -> Options_ <br />
 
----
+| Fields name | Type    | Required | Default | Description                                        |
+|-------------|---------|----------|---------|----------------------------------------------------|
+| Email       | Textbox | +        | -       | Email registered to City Mind v2                   |
+| Password    | Textbox | +        | -       | Password of the account registered to City Mind v2 |
+
+#### Debugging
+
+To set the log level of the component to DEBUG, please set it from the options of the component if installed, otherwise, set it within configuration YAML of HA:
+
+```yaml
+logger:
+  default: warning
+  logs:
+    custom_components.citymind_water_meter: debug
+```
+
+## Components
+
+### Account
+| Entity Name                                            | Type   | Description                                                                                                         | Additional information                       |
+|--------------------------------------------------------|--------|---------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| CityMind {Account ID} Account Store Debug Data         | Select | Sets whether to store API latest data for debugging                                                                 |                                              |
+| CityMind {Account ID} Account Alert Exceeded threshold | Select | Allows to control which communication channel should receive an alert when daily consumption exceeded threshold     | Available options are: None, Email, SMS, All |
+| CityMind {Account ID} Account Alert Leak               | Select | Allows to control which communication channel should receive an alert when leak identified                          | Available options are: None, Email, SMS, All |
+| CityMind {Account ID} Account Alert Leak While Away    | Select | Allows to control which communication channel should receive an alert when leak identified when vacation is defined | Available options are: None, Email, SMS, All |
+| CityMind {Account ID} Account Alerts                   | Sensor | Indicates number of alerts set in the portal                                                                        | Attributes holds the alerts list             |
+| CityMind {Account ID} Account Messages                 | Sensor | Indicates number of messages set in the portal                                                                      | Attributes holds the messages list           |
+| CityMind {Account ID} Account Vacations                | Sensor | Indicates number of vacations set in the portal                                                                     | Attributes holds the vacations list          |
+
+### Per meter
+| Entity Name                                          | Type   | Description                                      | Additional information                    |
+|------------------------------------------------------|--------|--------------------------------------------------|-------------------------------------------|
+| CityMind {Meter Count} Meter Last Read               | Sensor | Represents the last read in m³                   | Statistics: Total Increment               |
+| CityMind {Meter Count} Meter Daily Consumption       | Sensor | Represents the daily consumption in m³           | Statistics: Total, reset on daily basis   |
+| CityMind {Meter Count} Meter Monthly Consumption     | Sensor | Represents the monthly consumption in m³         | Statistics: Total, reset on monthly basis |
+| CityMind {Meter Count} Meter Yesterday's Consumption | Sensor | Represents the yesterday's consumption in m³     | Statistics: Total, reset on daily basis   |
+| CityMind {Meter Count} Meter Consumption Forcast     | Sensor | Represents the monthly consumption forcast in m³ | Statistics: Total, reset on monthly basis |
 
 ## Example of a History Chart
 

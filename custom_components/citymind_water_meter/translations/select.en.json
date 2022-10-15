@@ -1,0 +1,10 @@
+{
+  "state": {
+    "citymind_water_meter__media_type": {
+      "0": "None",
+      "1": "SMS",
+      "3": "EMail",
+      "4": "All"
+    }
+  }
+}
