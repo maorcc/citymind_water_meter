@@ -364,14 +364,14 @@ class IntegrationAPI(BaseAPI):
 
                 self.data[endpoint_key] = metered_data
 
-    async def async_set_alert_settings(self, alert_type_id: int, media_type_id: int, enabled: bool):
+    async def async_set_alert_settings(self, alert_type_id: int, media_type_id: str, enabled: bool):
         _LOGGER.info(f"Updating alert {alert_type_id} on media {media_type_id} to {enabled}")
 
         action: Callable[[str, dict | list], Awaitable[dict]] = self._async_put if enabled else self._async_delete
-        endpoint = self._build_endpoint(ENDPOINT_MY_ALERTS_SETTINGS)
+        endpoint = self._build_endpoint(ENDPOINT_MY_ALERTS_SETTINGS_UPDATE)
         url = f"{endpoint}/{alert_type_id}"
 
-        data = [media_type_id]
+        data = [int(media_type_id)]
 
         await action(url, data)
 

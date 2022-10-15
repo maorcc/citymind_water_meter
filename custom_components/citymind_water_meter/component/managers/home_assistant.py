@@ -197,15 +197,24 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
 
     def _load_alert_settings_select(self, account_name: str, alert_type: int):
         try:
+            is_leak_alert = alert_type == ALERT_TYPE_LEAK
+
             settings = self.api.data.get(API_DATA_SECTION_SETTINGS)
-            value = 0
+            value = int(MEDIA_TYPE_EMAIL) if is_leak_alert else 0
 
             for item in settings:
                 alert_type_id = item.get(SETTINGS_ALERT_TYPE_ID)
                 current_media_type_id = item.get(SETTINGS_MEDIA_TYPE_ID, 0)
 
-                if alert_type_id == alert_type:
+                skip = is_leak_alert and current_media_type_id == int(MEDIA_TYPE_EMAIL)
+
+                if alert_type_id == alert_type and not skip:
                     value += current_media_type_id
+
+            options = []
+            for media_id in MEDIA_TYPES:
+                if media_id not in [MEDIA_TYPE_NONE, MEDIA_TYPE_SMS] or not is_leak_alert:
+                    options.append(media_id)
 
             state = str(value)
             alert_type_name = ALERT_TYPES.get(alert_type)
@@ -217,14 +226,14 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SELECT, entity_name)
 
-            icon = None
+            icon = MEDIA_TYPE_ICONS.get(state)
 
             entity_description = SelectDescription(
                 key=unique_id,
                 name=entity_name,
                 icon=icon,
                 device_class=f"{DOMAIN}__{ATTR_MEDIA_TYPES}",
-                attr_options=tuple(MEDIA_TYPES.keys()),
+                attr_options=tuple(options),
                 entity_category=EntityCategory.CONFIG
             )
 
@@ -262,7 +271,7 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = "mdi:chip"
+            icon = "mdi:water-check" if state == 0 else "mdi:water-alert"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
@@ -300,7 +309,7 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = "mdi:chip"
+            icon = "mdi:water-check" if state == 0 else "mdi:water-alert"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
@@ -338,7 +347,7 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = "mdi:chip"
+            icon = "mdi:home-remove"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
@@ -423,7 +432,7 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = "mdi:chip"
+            icon = "mdi:meter-gas"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
@@ -480,7 +489,7 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = None
+            icon = "mdi:meter-gas"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
@@ -524,7 +533,7 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = None
+            icon = "mdi:meter-gas"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
@@ -567,7 +576,7 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = None
+            icon = "mdi:meter-gas"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
@@ -593,12 +602,12 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
     async def _enable_store_debug_data(self, entity: EntityData):
         await self.storage_api.set_store_debug_data(True)
 
-        await self._reload_integration()
+        self._update_entities(None)
 
     async def _disable_store_debug_data(self, entity: EntityData):
         await self.storage_api.set_store_debug_data(False)
 
-        await self._reload_integration()
+        self._update_entities(None)
 
     async def _reload_integration(self):
         data = {
@@ -655,6 +664,8 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
                 await self.api.async_set_alert_settings(alert_type_id, MEDIA_TYPE_EMAIL, expected_email_state)
 
             await self.async_update_data_providers()
+
+            self._update_entities(None)
 
     @staticmethod
     def _format_number(value: int | float | None, digits: int = 0) -> int | float:
