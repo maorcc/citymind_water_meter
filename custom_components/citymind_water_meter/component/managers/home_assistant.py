@@ -1,7 +1,5 @@
 """
-Support for Shinobi Video.
-For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/shinobi/
+HA Manager.
 """
 from __future__ import annotations
 
@@ -30,7 +28,7 @@ from ..helpers.const import *
 _LOGGER = logging.getLogger(__name__)
 
 
-class ShinobiHomeAssistantManager(HomeAssistantManager):
+class CityMindHomeAssistantManager(HomeAssistantManager):
     def __init__(self, hass: HomeAssistant):
         super().__init__(hass, WEEKDAY_UPDATE_DATA_INTERVAL)
 
@@ -639,7 +637,6 @@ class ShinobiHomeAssistantManager(HomeAssistantManager):
 
         if alert_type_id is not None:
             settings = self.api.data.get(API_DATA_SECTION_SETTINGS)
-            mode_id = int(option)
 
             current_sms_state = False
             current_email_state = False

@@ -1,11 +1,7 @@
 """
-Support for Shinobi Video.
-For more details about this platform, please refer to the documentation at
-https://home-assistant.io/components/switch.shinobi/
+constants.
 """
 from datetime import timedelta
-
-from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 
 from ...core.helpers.const import *
 

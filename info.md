@@ -80,8 +80,6 @@ logger:
 | CityMind {Account ID} Account Messages                 | Sensor | Indicates number of messages set in the portal                                                                      | Attributes holds the messages list           |
 | CityMind {Account ID} Account Vacations                | Sensor | Indicates number of vacations set in the portal                                                                     | Attributes holds the vacations list          |
 
-*Changing the unit will reload the integration*
-
 ### Per meter
 | Entity Name                                          | Type   | Description                                      | Additional information                    |
 |------------------------------------------------------|--------|--------------------------------------------------|-------------------------------------------|

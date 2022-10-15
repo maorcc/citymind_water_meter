@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-import json
 import logging
 import sys
 from typing import Awaitable, Callable
@@ -58,7 +57,7 @@ class IntegrationAPI(BaseAPI):
             line_number = tb.tb_lineno
 
             _LOGGER.error(
-                f"Failed to load Shinobi Video API, error: {ex}, line: {line_number}"
+                f"Failed to initialize CityMind API, error: {ex}, line: {line_number}"
             )
 
     @property
@@ -76,7 +75,7 @@ class IntegrationAPI(BaseAPI):
         await self.set_status(ConnectivityStatus.Disconnected)
 
     async def initialize(self, config_data: ConfigData):
-        _LOGGER.info("Initializing Shinobi Video")
+        _LOGGER.info("Initializing CityMind API")
 
         try:
             await self.set_status(ConnectivityStatus.Connecting)
@@ -98,7 +97,7 @@ class IntegrationAPI(BaseAPI):
             line_number = tb.tb_lineno
 
             _LOGGER.error(
-                f"Failed to initialize Shinobi Video API ({self.base_url}), error: {ex}, line: {line_number}"
+                f"Failed to initialize City Mind API ({self.base_url}), error: {ex}, line: {line_number}"
             )
 
             await self.set_status(ConnectivityStatus.Failed)
