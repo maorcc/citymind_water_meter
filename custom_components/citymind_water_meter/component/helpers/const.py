@@ -21,6 +21,8 @@ UPDATE_DATA_INTERVALS = {
 API_URL_OLD = "https://api.city-mind.com"
 API_URL_NEW = "https://api-ctm.city-mind.com"
 
+CITY_MIND_WEBSITE = "https://rym-pro.com"
+
 ENDPOINT_CONSUMER_OLD = f"{API_URL_OLD}/consumer"
 ENDPOINT_CONSUMER_NEW = f"{API_URL_NEW}/consumer"
 

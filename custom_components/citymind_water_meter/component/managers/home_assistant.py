@@ -11,7 +11,7 @@ import sys
 from homeassistant.components.sensor import SensorEntityDescription, SensorStateClass
 from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import VOLUME_CUBIC_METERS
+from homeassistant.const import ATTR_CONFIGURATION_URL, VOLUME_CUBIC_METERS
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 
@@ -143,7 +143,8 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             "identifiers": {(DEFAULT_NAME, account_name)},
             "name": account_name,
             "manufacturer": DEFAULT_NAME,
-            "model": "Account"
+            "model": "Account",
+            ATTR_CONFIGURATION_URL: CITY_MIND_WEBSITE
         }
 
         if account_device is None or account_device != account_device_info:
