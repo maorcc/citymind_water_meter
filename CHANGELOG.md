@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.0
+
+***Breaking Changes inside!***
+
+- Switched to new API of City Mind
+
+
 ## 1.0.5
 
 - Device and Entity registry - `async_get_registry` is deprecated, change to `async_get`
