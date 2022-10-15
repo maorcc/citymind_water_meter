@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+- Fix data loading
+
 ## 2.0.0
 
 ***Breaking Changes inside!***
