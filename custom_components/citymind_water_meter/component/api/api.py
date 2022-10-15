@@ -67,11 +67,14 @@ class IntegrationAPI(BaseAPI):
     @property
     def municipal_id(self) -> str | None:
         customer_service = self.data.get(API_DATA_SECTION_ME, {})
+
         municipal_id = customer_service.get(ME_MUNICIPAL_ID)
 
         return municipal_id
 
     async def terminate(self):
+        self.data = {}
+
         await self.set_status(ConnectivityStatus.Disconnected)
 
     async def initialize(self, config_data: ConfigData):
@@ -298,7 +301,7 @@ class IntegrationAPI(BaseAPI):
         if self.status == ConnectivityStatus.Connected:
             self._set_date()
 
-            if API_DATA_SECTION_ME not in self.data:
+            if self.municipal_id is None:
                 await self._load_data(ENDPOINT_DATA_INITIALIZE)
 
             await self._load_data(ENDPOINT_DATA_UPDATE)
@@ -322,6 +325,7 @@ class IntegrationAPI(BaseAPI):
 
         try:
             self.data[API_DATA_TOKEN] = None
+            self._municipal_id = None
 
             config_data = self.config_data
 
@@ -366,6 +370,9 @@ class IntegrationAPI(BaseAPI):
                     data = await self._async_get(endpoint, meter_count)
 
                     if meter_count is None:
+                        self.data[endpoint_key] = data
+
+                    else:
                         metered_data = self.data.get(endpoint_key, {})
                         metered_data[meter_count] = data
 
