@@ -67,6 +67,9 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
 
             self._update_entities(None)
 
+        if status == ConnectivityStatus.NotConnected:
+            await self.api.initialize(self.config_data)
+
     async def async_component_initialize(self, entry: ConfigEntry):
         try:
             self._config_manager = ConfigurationManager(self._hass, self.api)

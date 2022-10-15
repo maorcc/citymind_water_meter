@@ -206,6 +206,9 @@ class IntegrationAPI(BaseAPI):
                 f"Failed to get data from {endpoint}, HTTP Status: {crex.message} ({crex.status})"
             )
 
+            if response.status == 401:
+                await self.set_status(ConnectivityStatus.NotConnected)
+
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
             line_number = tb.tb_lineno
@@ -238,6 +241,9 @@ class IntegrationAPI(BaseAPI):
                 f"Failed to get data from {url}, HTTP Status: {crex.message} ({crex.status})"
             )
 
+            if response.status == 401:
+                await self.set_status(ConnectivityStatus.NotConnected)
+
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
             line_number = tb.tb_lineno
@@ -269,6 +275,9 @@ class IntegrationAPI(BaseAPI):
             _LOGGER.error(
                 f"Failed to get data from {url}, HTTP Status: {crex.message} ({crex.status})"
             )
+
+            if response.status == 401:
+                await self.set_status(ConnectivityStatus.NotConnected)
 
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
@@ -349,19 +358,18 @@ class IntegrationAPI(BaseAPI):
         _LOGGER.log(log_level, message)
 
     async def _load_data(self, endpoints: dict, meter_count: str | None = None):
-        for endpoint_key in endpoints:
-            endpoint = endpoints.get(endpoint_key)
+        if self.status == ConnectivityStatus.Connected:
+            for endpoint_key in endpoints:
+                if self.status == ConnectivityStatus.Connected:
+                    endpoint = endpoints.get(endpoint_key)
 
-            data = await self._async_get(endpoint, meter_count)
+                    data = await self._async_get(endpoint, meter_count)
 
-            if meter_count is None:
-                self.data[endpoint_key] = data
+                    if meter_count is None:
+                        metered_data = self.data.get(endpoint_key, {})
+                        metered_data[meter_count] = data
 
-            else:
-                metered_data = self.data.get(endpoint_key, {})
-                metered_data[meter_count] = data
-
-                self.data[endpoint_key] = metered_data
+                        self.data[endpoint_key] = metered_data
 
     async def async_set_alert_settings(self, alert_type_id: int, media_type_id: str, enabled: bool):
         _LOGGER.info(f"Updating alert {alert_type_id} on media {media_type_id} to {enabled}")
