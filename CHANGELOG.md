@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+- Add error handling for failed login
+- Updated documentation
+- Fixed login error message on installation / configuration UI
+
 ## 2.0.1
 
 - Fix data loading

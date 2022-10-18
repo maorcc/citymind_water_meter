@@ -11,7 +11,7 @@
       }
     },
     "error": {
-        "invalid_credentials": "[%key:common::config_flow::error::invalid_auth%]",
+        "invalid_credentials": "Email and/or password are not valid",
         "auth_general_error": "General failure, please try again",
         "not_found": "URL not found"
     }
@@ -28,7 +28,7 @@
           }
       },
       "error": {
-        "invalid_credentials": "[%key:common::config_flow::error::invalid_auth%]",
+        "invalid_credentials": "Email and/or password are not valid",
         "auth_general_error": "General failure, please try again",
         "not_found": "URL not found"
       }

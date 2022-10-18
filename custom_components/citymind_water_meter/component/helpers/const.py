@@ -142,7 +142,12 @@ LOGIN_DEVICE_ID = "deviceId"
 DEVICE_ID = "home-assistant"
 
 API_DATA_TOKEN = "token"
+API_DATA_ERROR_CODE = "code"
+API_DATA_ERROR_REASON = "error"
+
 API_DATA_LAST_UPDATE = "last-update"
+
+ERROR_REASON_INVALID_CREDENTIALS = 5060
 
 API_HEADER_TOKEN = "x-access-token"
 
