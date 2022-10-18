@@ -1,28 +1,36 @@
 # Home-Assistant City-Mind Water Meter (Israel only)
 
-This is a [Home Assistant](https://www.home-assistant.io/) integration for the Israeli [cp.city-mind.com](https://cp.city-mind.com)
-online water meters service that serves many water services.
+This is a [Home Assistant](https://www.home-assistant.io/) integration for the Israeli online water meters service that serves many water services.
+
+## Breaking Change - v1 to v2
+
+Version 1.x of integration created to support [cp.city-mind.com](https://cp.city-mind.com) portal,
+this portal is end of life set to 31/12/2022.
+
+Version 2.x of integration is to support the new portal of [Read Your Meter Pro](https://rym-pro.com/#/),
+Please note that if credentials for 2 portals are different and requires registration,
+Please follow the prerequisites section below to make sure the integration will work for you.
+
+If your city is not supported by new Read Your Meter Pro portal, you can keep using v1.x of integration up until the previous portal is EOL.
 
 ## Requirements
 
-You need to sign-up for the service at **[https://cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com")**.
+You need to sign-up for the service at **[Read Your Meter Pro](https://rym-pro.com/#/)**.
 If your registration was successful, then you can use this integration.
 
 Registration may not succeed for one of the following reasons:
 
 - Your home water meters is not made by the brand "ARAD", as shown in the image above.
-- Your water utility company does not allow residents access to the ["Read Your Meter"](https://cp.city-mind.com/ "https://cp.city-mind.com/") service (website cp.city-mind.com) that is offered by Arad Technologies.
-
-Here is an outdated map showing water utilities companies in Israel that use Arad's water meters:
+- Your water utility company does not allow residents access to the [Read Your Meter Pro](https://rym-pro.com/#/) service that is offered by Arad Technologies.
 
 ## Installation
 
-Make sure you have signed up at [https://cp.city-mind.com](https://cp.city-mind.com/ "cp.city-mind.com") as mentioned above, and have a working username/password.  The username is usually your email address.
+Make sure you have signed up at [Read Your Meter Pro](https://rym-pro.com/#/) as mentioned above, and have a working credentials.
 
 It is recommended to install using HACS, but it is also easy to install manually
 
 #### Installations via HACS
-- In HACS, look for "Citymind-water-meter" and install and restart
+- In HACS, look for `City-Mind Water Meter` and install and restart
 - In Settings  --> Devices & Services - (Lower Right) "Add Integration"
 
 #### Setup
@@ -58,6 +66,8 @@ _Configuration -> Integrations -> {Integration} -> Options_ <br />
 
 #### Debugging
 
+**Logging**
+
 To set the log level of the component to DEBUG, please set it from the options of the component if installed, otherwise, set it within configuration YAML of HA:
 
 ```yaml
@@ -66,6 +76,12 @@ logger:
   logs:
     custom_components.citymind_water_meter: debug
 ```
+
+**Debug files**
+
+Integration support store debug files which saves the data provided by `Read Your Meter Pro` to:
+
+`/config/.storage/citymind_water_meter.{entry_id}.debug.api.json`
 
 ## Components
 
@@ -113,7 +129,7 @@ entities:
   - type: 'custom:mini-graph-card'
     name: 24 Hours Water Meter
     entities:
-      - entity: sensor.water_meter_XXXXXXXXX_last_reading
+      - entity: sensor.citymind_XXXXXXXX_meter_last_read
         name: Water Meter
     points_per_hour: 12
     smoothing: false
@@ -125,18 +141,13 @@ entities:
     group_by: date
     aggregate_func: delta
     entities:
-      - sensor.water_meter_XXXXXXXXX_last_reading
+      - sensor.citymind_XXXXXXXX_meter_last_read
     show:
       graph: bar
       state: false
   - type: weblink
-    url: 'https://cp.city-mind.com/Default.aspx'
+    url: 'https://rym-pro.com/#/'
 ```
-
-<img src =
-  "https://user-images.githubusercontent.com/255973/95665125-f70ecc80-0b55-11eb-887f-edb3e1463051.png"
-  height="459" width="367"
-  alt="Sample charts using mini-graph-card">
 
 ## Why water meters in Israel have the 100-Liter tics? (Only in Israel)
 
@@ -156,9 +167,6 @@ Unfortunately, the 100 liter limitation in Israel reduces the water meter capabi
 
 This project was inspired by the [Read Your Meter](https://github.com/eyalcha/read_your_meter "Read Your Meter")
 project, made by my neighbor [eyalcha](https://github.com/eyalcha/).
-
-I created this alternative project because I wanted it lighter, quicker, and easy to
-setup.  Mostly, I wanted to avoid the manual installation of a Selenium docker on Hass.io.
 
 Kudos to [Elad Bar](https://github.com/elad-bar/) for his help, a wonderful code contribution, and refactoring.
 

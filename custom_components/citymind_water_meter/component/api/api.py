@@ -159,17 +159,14 @@ class IntegrationAPI(BaseAPI):
             async with self.session.post(url, json=request_data, ssl=False) as response:
                 _LOGGER.debug(f"Status of {url}: {response.status}")
 
-                response.raise_for_status()
-
                 result = await response.json()
+
+                response.raise_for_status()
 
         except ClientResponseError as crex:
             _LOGGER.error(
-                f"Failed to post JSON to {endpoint}, HTTP Status: {crex.message} ({crex.status})"
+                f"Failed to post JSON to {endpoint}, HTTP Status: {crex.message} ({crex.status}), Data: {result}"
             )
-
-            if crex.status in [404, 405]:
-                self.status = ConnectivityStatus.NotFound
 
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
@@ -178,8 +175,6 @@ class IntegrationAPI(BaseAPI):
             _LOGGER.error(
                 f"Failed to post JSON to {endpoint}, Error: {ex}, Line: {line_number}"
             )
-
-            self.status = ConnectivityStatus.Failed
 
         return result
 
@@ -339,12 +334,17 @@ class IntegrationAPI(BaseAPI):
 
             if payload is not None:
                 token = payload.get(API_DATA_TOKEN)
-                self.data[API_DATA_TOKEN] = token
+                error_code = payload.get(API_DATA_ERROR_CODE)
+                error_reason = payload.get(API_DATA_ERROR_REASON)
 
-                if token is None:
-                    status = ConnectivityStatus.MissingAPIKey
+                if error_code == ERROR_REASON_INVALID_CREDENTIALS:
+                    status = ConnectivityStatus.InvalidCredentials
 
-                else:
+                    exception_data = f"Error #{error_code}: {error_reason}"
+
+                if token is not None:
+                    self.data[API_DATA_TOKEN] = token
+
                     status = ConnectivityStatus.Connected
 
         except Exception as ex:
