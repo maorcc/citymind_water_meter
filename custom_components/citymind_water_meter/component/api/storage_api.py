@@ -33,7 +33,9 @@ class StorageAPI(BaseAPI):
 
         super().__init__(hass, async_on_data_changed, async_on_status_changed)
 
+        self._config_data = None
         self._stores = None
+        self._data = {}
 
     @property
     def _storage_config(self) -> Store:
