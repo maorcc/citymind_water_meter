@@ -30,7 +30,7 @@ class IntegrationAPI(BaseAPI):
     today: str | None
     yesterday: str | None
     _last_day_of_current_month: str | None
-    _current_month: str | None
+    current_month: str | None
 
     def __init__(self,
                  hass: HomeAssistant,
@@ -50,7 +50,7 @@ class IntegrationAPI(BaseAPI):
             self.today = None
             self.yesterday = None
             self._last_day_of_current_month = None
-            self._current_month = None
+            self.current_month = None
 
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
@@ -122,7 +122,7 @@ class IntegrationAPI(BaseAPI):
 
         self.today = today.strftime(FORMAT_DATE_ISO)
         self.yesterday = yesterday.strftime(FORMAT_DATE_ISO)
-        self._current_month = today.strftime(FORMAT_DATE_YEAR_MONTH)
+        self.current_month = today.strftime(FORMAT_DATE_YEAR_MONTH)
         self._last_day_of_current_month = last_day_of_current_month.strftime(FORMAT_DATE_ISO)
 
     def _build_endpoint(self, endpoint, meter_count: str = None):
@@ -136,7 +136,7 @@ class IntegrationAPI(BaseAPI):
             endpoint = endpoint.replace(PH_YESTERDAY, self.yesterday)
 
         if PH_CURRENT_MONTH in endpoint:
-            endpoint = endpoint.replace(PH_CURRENT_MONTH, self._current_month)
+            endpoint = endpoint.replace(PH_CURRENT_MONTH, self.current_month)
 
         if PH_LAST_DAY_MONTH in endpoint:
             endpoint = endpoint.replace(PH_LAST_DAY_MONTH, self._last_day_of_current_month)

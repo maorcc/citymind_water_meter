@@ -88,7 +88,6 @@ Integration support store debug files which saves the data provided by `Read You
 ### Account
 | Entity Name                                            | Type   | Description                                                                                                         | Additional information                       |
 |--------------------------------------------------------|--------|---------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| CityMind {Account ID} Account Store Debug Data         | Select | Sets whether to store API latest data for debugging                                                                 |                                              |
 | CityMind {Account ID} Account Alert Exceeded threshold | Select | Allows to control which communication channel should receive an alert when daily consumption exceeded threshold     | Available options are: None, Email, SMS, All |
 | CityMind {Account ID} Account Alert Leak               | Select | Allows to control which communication channel should receive an alert when leak identified                          | Available options are: None, Email, SMS, All |
 | CityMind {Account ID} Account Alert Leak While Away    | Select | Allows to control which communication channel should receive an alert when leak identified when vacation is defined | Available options are: None, Email, SMS, All |
@@ -104,6 +103,37 @@ Integration support store debug files which saves the data provided by `Read You
 | CityMind {Meter Count} Meter Monthly Consumption     | Sensor | Represents the monthly consumption in m³         | Statistics: Total, reset on monthly basis |
 | CityMind {Meter Count} Meter Yesterday's Consumption | Sensor | Represents the yesterday's consumption in m³     | Statistics: Total, reset on daily basis   |
 | CityMind {Meter Count} Meter Consumption Forcast     | Sensor | Represents the monthly consumption forcast in m³ | Statistics: Total, reset on monthly basis |
+
+
+## Endpoints
+
+| Endpoint Name                            | Method | Description                                                                                         |
+|------------------------------------------|--------|-----------------------------------------------------------------------------------------------------|
+| /api/citymind_water_meter/list           | GET    | List all the endpoints available (supporting multiple integrations), available once for integration |
+| /api/citymind_water_meter/{ENTRY_ID}/api | GET    | JSON of all raw data from the Read Your Meter Pro API, per integration                              |
+
+**Authentication: Requires long-living token from HA**
+
+
+### Examples
+
+#### List
+
+*Request*
+```bash
+curl https://ha_url:8123/api/citymind_water_meter/list
+   -H "Accept: application/json"
+   -H "Authorization: Bearer {token}"
+```
+
+#### API Data
+
+```bash
+curl https://ha_url:8123/api/citymind_water_meter/{ENTRY_ID}/api
+   -H "Accept: application/json"
+   -H "Authorization: Bearer {token}"
+```
+
 
 ## Example of a History Chart
 

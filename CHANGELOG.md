@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.3
+
+- Fix multi-meter support [#34](https://github.com/maorcc/citymind_water_meter/issues/34)
+- Removed store debug data to files and its configuration
+- Add endpoints to expose data from `Read Your Meter Pro` API
+
+| Endpoint Name                            | Method | Description                                                                                         |
+|------------------------------------------|--------|-----------------------------------------------------------------------------------------------------|
+| /api/citymind_water_meter/list           | GET    | List all the endpoints available (supporting multiple integrations), available once for integration |
+| /api/citymind_water_meter/{ENTRY_ID}/api | GET    | JSON of all raw data from the Read Your Meter Pro API, per integration                              |
+
+**Authentication: Requires long-living token from HA**
+
+
 ## 2.0.2
 
 - Add error handling for failed login

@@ -9,7 +9,6 @@ import logging
 import sys
 
 from homeassistant.components.sensor import SensorEntityDescription, SensorStateClass
-from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_CONFIGURATION_URL, VOLUME_CUBIC_METERS
 from homeassistant.core import HomeAssistant
@@ -176,8 +175,6 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
         meters = data.get(API_DATA_SECTION_METERS, [])
 
         account_name = self._account_number
-
-        self._load_store_debug_data_switch(account_name)
 
         for alert_type in ALERT_TYPES:
             self._load_alert_settings_select(account_name, alert_type)
@@ -370,42 +367,6 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
                 ex, f"Failed to load sensor for {entity_name}"
             )
 
-    def _load_store_debug_data_switch(self, device_name: str):
-        entity_name = f"{device_name} Store Debug Data"
-
-        try:
-            state = self.storage_api.store_debug_data
-
-            attributes = {
-                ATTR_FRIENDLY_NAME: entity_name
-            }
-
-            unique_id = EntityData.generate_unique_id(DOMAIN_SWITCH, entity_name)
-
-            icon = "mdi:file-download"
-
-            entity_description = SwitchEntityDescription(
-                key=unique_id,
-                name=entity_name,
-                icon=icon,
-                entity_category=EntityCategory.CONFIG
-            )
-
-            self.entity_manager.set_entity(DOMAIN_SWITCH,
-                                           self.entry_id,
-                                           state,
-                                           attributes,
-                                           device_name,
-                                           entity_description)
-
-            self.set_action(unique_id, ACTION_CORE_ENTITY_TURN_ON, self._enable_store_debug_data)
-            self.set_action(unique_id, ACTION_CORE_ENTITY_TURN_OFF, self._disable_store_debug_data)
-
-        except Exception as ex:
-            self.log_exception(
-                ex, f"Failed to load store debug data switch for {entity_name}"
-            )
-
     def _load_last_read_sensor(
             self,
             meter_name: str,
@@ -467,24 +428,9 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
         entity_name = f"{meter_name} {day_title}'s Consumption"
 
         try:
-            meter_count = meter_details.get(METER_COUNT)
-            consumption_daily_section = self.api.data.get(API_DATA_SECTION_CONSUMPTION_DAILY)
-            consumption_daily_info = consumption_daily_section.get(str(meter_count))
-            consumption_value = float(0)
-
-            for consumption_daily_item in consumption_daily_info:
-                consumption_meter_count = consumption_daily_item.get(CONSUMPTION_METER_COUNT)
-                consumption_date = consumption_daily_item.get(CONSUMPTION_DATE)
-
-                is_meter_relevant = consumption_meter_count == meter_count or consumption_meter_count == 0
-                is_date_relevant = consumption_date.startswith(date_iso)
-
-                if is_meter_relevant and is_date_relevant:
-                    consumption_value = float(consumption_daily_item.get(CONSUMPTION_VALUE, 0))
-
-                    break
-
-            state = self._format_number(consumption_value, 3)
+            state = self._get_consumption_state(meter_details,
+                                                API_DATA_SECTION_CONSUMPTION_DAILY,
+                                                date_iso)
 
             attributes = {
                 ATTR_FRIENDLY_NAME: entity_name
@@ -522,13 +468,9 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
         entity_name = f"{meter_name} Monthly Consumption"
 
         try:
-            meter_count = meter_details.get(METER_COUNT)
-            consumption_monthly_section = self.api.data.get(API_DATA_SECTION_CONSUMPTION_MONTHLY)
-            consumption_monthly = consumption_monthly_section.get(str(meter_count))
-            consumption_details = consumption_monthly[0]
-
-            consumption_value = consumption_details.get(CONSUMPTION_VALUE, 0)
-            state = self._format_number(consumption_value, 3)
+            state = self._get_consumption_state(meter_details,
+                                                API_DATA_SECTION_CONSUMPTION_MONTHLY,
+                                                self.api.current_month)
 
             attributes = {
                 ATTR_FRIENDLY_NAME: entity_name
@@ -601,16 +543,6 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
                 ex, f"Failed to load sensor for {entity_name}"
             )
 
-    async def _enable_store_debug_data(self, entity: EntityData):
-        await self.storage_api.set_store_debug_data(True)
-
-        self._update_entities(None)
-
-    async def _disable_store_debug_data(self, entity: EntityData):
-        await self.storage_api.set_store_debug_data(False)
-
-        self._update_entities(None)
-
     async def _reload_integration(self):
         data = {
             ENTITY_CONFIG_ENTRY_ID: self.entry_id
@@ -667,6 +599,29 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             await self.async_update_data_providers()
 
             self._update_entities(None)
+
+    def _get_consumption_state(self, meter_details: dict, section_key: str, date_iso: str):
+        meter_count = meter_details.get(METER_COUNT)
+        data = self.api.data.get(section_key)
+
+        consumption_info = data.get(str(meter_count))
+        consumption_value = float(0)
+
+        for consumption_item in consumption_info:
+            consumption_meter_count = consumption_item.get(CONSUMPTION_METER_COUNT)
+            consumption_date = consumption_item.get(CONSUMPTION_DATE)
+
+            is_meter_relevant = consumption_meter_count == meter_count
+            is_date_relevant = consumption_date.startswith(date_iso)
+
+            if is_meter_relevant and is_date_relevant:
+                consumption_value = float(consumption_item.get(CONSUMPTION_VALUE, 0))
+
+                break
+
+        state = self._format_number(consumption_value, 3)
+
+        return state
 
     @staticmethod
     def _format_number(value: int | float | None, digits: int = 0) -> int | float:
