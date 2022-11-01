@@ -9,7 +9,6 @@ import logging
 import sys
 
 from homeassistant.components.sensor import SensorEntityDescription, SensorStateClass
-from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_CONFIGURATION_URL, VOLUME_CUBIC_METERS
 from homeassistant.core import HomeAssistant
@@ -176,8 +175,6 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
         meters = data.get(API_DATA_SECTION_METERS, [])
 
         account_name = self._account_number
-
-        self._load_store_debug_data_switch(account_name)
 
         for alert_type in ALERT_TYPES:
             self._load_alert_settings_select(account_name, alert_type)
@@ -368,42 +365,6 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
         except Exception as ex:
             self.log_exception(
                 ex, f"Failed to load sensor for {entity_name}"
-            )
-
-    def _load_store_debug_data_switch(self, device_name: str):
-        entity_name = f"{device_name} Store Debug Data"
-
-        try:
-            state = self.storage_api.store_debug_data
-
-            attributes = {
-                ATTR_FRIENDLY_NAME: entity_name
-            }
-
-            unique_id = EntityData.generate_unique_id(DOMAIN_SWITCH, entity_name)
-
-            icon = "mdi:file-download"
-
-            entity_description = SwitchEntityDescription(
-                key=unique_id,
-                name=entity_name,
-                icon=icon,
-                entity_category=EntityCategory.CONFIG
-            )
-
-            self.entity_manager.set_entity(DOMAIN_SWITCH,
-                                           self.entry_id,
-                                           state,
-                                           attributes,
-                                           device_name,
-                                           entity_description)
-
-            self.set_action(unique_id, ACTION_CORE_ENTITY_TURN_ON, self._enable_store_debug_data)
-            self.set_action(unique_id, ACTION_CORE_ENTITY_TURN_OFF, self._disable_store_debug_data)
-
-        except Exception as ex:
-            self.log_exception(
-                ex, f"Failed to load store debug data switch for {entity_name}"
             )
 
     def _load_last_read_sensor(
@@ -600,16 +561,6 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             self.log_exception(
                 ex, f"Failed to load sensor for {entity_name}"
             )
-
-    async def _enable_store_debug_data(self, entity: EntityData):
-        await self.storage_api.set_store_debug_data(True)
-
-        self._update_entities(None)
-
-    async def _disable_store_debug_data(self, entity: EntityData):
-        await self.storage_api.set_store_debug_data(False)
-
-        self._update_entities(None)
 
     async def _reload_integration(self):
         data = {

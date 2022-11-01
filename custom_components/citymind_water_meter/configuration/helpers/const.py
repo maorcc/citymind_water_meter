@@ -10,7 +10,7 @@ from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, STATE_OFF, STATE_ON
 DOMAIN = "citymind_water_meter"
 DEFAULT_NAME = "CityMind"
 
-CONFIGURATION_MANAGER = f"cm_{DOMAIN}"
+MAIN_VIEW = f"main_view_{DOMAIN}"
 
 DATA_KEYS = [
     CONF_EMAIL,
