@@ -428,24 +428,9 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
         entity_name = f"{meter_name} {day_title}'s Consumption"
 
         try:
-            meter_count = meter_details.get(METER_COUNT)
-            consumption_daily_section = self.api.data.get(API_DATA_SECTION_CONSUMPTION_DAILY)
-            consumption_daily_info = consumption_daily_section.get(str(meter_count))
-            consumption_value = float(0)
-
-            for consumption_daily_item in consumption_daily_info:
-                consumption_meter_count = consumption_daily_item.get(CONSUMPTION_METER_COUNT)
-                consumption_date = consumption_daily_item.get(CONSUMPTION_DATE)
-
-                is_meter_relevant = consumption_meter_count == meter_count or consumption_meter_count == 0
-                is_date_relevant = consumption_date.startswith(date_iso)
-
-                if is_meter_relevant and is_date_relevant:
-                    consumption_value = float(consumption_daily_item.get(CONSUMPTION_VALUE, 0))
-
-                    break
-
-            state = self._format_number(consumption_value, 3)
+            state = self._get_consumption_state(meter_details,
+                                                API_DATA_SECTION_CONSUMPTION_DAILY,
+                                                date_iso)
 
             attributes = {
                 ATTR_FRIENDLY_NAME: entity_name
@@ -483,13 +468,9 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
         entity_name = f"{meter_name} Monthly Consumption"
 
         try:
-            meter_count = meter_details.get(METER_COUNT)
-            consumption_monthly_section = self.api.data.get(API_DATA_SECTION_CONSUMPTION_MONTHLY)
-            consumption_monthly = consumption_monthly_section.get(str(meter_count))
-            consumption_details = consumption_monthly[0]
-
-            consumption_value = consumption_details.get(CONSUMPTION_VALUE, 0)
-            state = self._format_number(consumption_value, 3)
+            state = self._get_consumption_state(meter_details,
+                                                API_DATA_SECTION_CONSUMPTION_MONTHLY,
+                                                self.api.current_month)
 
             attributes = {
                 ATTR_FRIENDLY_NAME: entity_name
@@ -618,6 +599,29 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             await self.async_update_data_providers()
 
             self._update_entities(None)
+
+    def _get_consumption_state(self, meter_details: dict, section_key: str, date_iso: str):
+        meter_count = meter_details.get(METER_COUNT)
+        data = self.api.data.get(section_key)
+
+        consumption_info = data.get(str(meter_count))
+        consumption_value = float(0)
+
+        for consumption_item in consumption_info:
+            consumption_meter_count = consumption_item.get(CONSUMPTION_METER_COUNT)
+            consumption_date = consumption_item.get(CONSUMPTION_DATE)
+
+            is_meter_relevant = consumption_meter_count == meter_count
+            is_date_relevant = consumption_date.startswith(date_iso)
+
+            if is_meter_relevant and is_date_relevant:
+                consumption_value = float(consumption_item.get(CONSUMPTION_VALUE, 0))
+
+                break
+
+        state = self._format_number(consumption_value, 3)
+
+        return state
 
     @staticmethod
     def _format_number(value: int | float | None, digits: int = 0) -> int | float:

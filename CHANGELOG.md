@@ -2,6 +2,7 @@
 
 ## 2.0.3
 
+- Fix multi-meter support [#34](https://github.com/maorcc/citymind_water_meter/issues/34)
 - Removed store debug data to files and its configuration
 - Add endpoints to expose data from `Read Your Meter Pro` API
 
