@@ -8,7 +8,12 @@ from datetime import datetime
 import logging
 import sys
 
-from homeassistant.components.sensor import SensorEntityDescription, SensorStateClass
+from homeassistant.components.select import SelectEntityDescription
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntityDescription,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_CONFIGURATION_URL, VOLUME_CUBIC_METERS
 from homeassistant.core import HomeAssistant
@@ -19,7 +24,6 @@ from ...configuration.models.config_data import ConfigData
 from ...core.helpers.enums import ConnectivityStatus
 from ...core.managers.home_assistant import HomeAssistantManager
 from ...core.models.entity_data import EntityData
-from ...core.models.select_description import SelectDescription
 from ..api.api import IntegrationAPI
 from ..api.storage_api import StorageAPI
 from ..helpers.const import *
@@ -227,12 +231,12 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
 
             icon = MEDIA_TYPE_ICONS.get(state)
 
-            entity_description = SelectDescription(
+            entity_description = SelectEntityDescription(
                 key=unique_id,
                 name=entity_name,
                 icon=icon,
                 device_class=f"{DOMAIN}__{ATTR_MEDIA_TYPES}",
-                attr_options=tuple(options),
+                options=options,
                 entity_category=EntityCategory.CONFIG
             )
 
@@ -395,12 +399,11 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = "mdi:meter-gas"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
                 name=entity_name,
-                icon=icon,
+                device_class=SensorDeviceClass.WATER,
                 state_class=SensorStateClass.TOTAL_INCREASING,
                 native_unit_of_measurement=VOLUME_CUBIC_METERS
             )
@@ -437,14 +440,12 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = "mdi:meter-gas"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
                 name=entity_name,
-                icon=icon,
-                state_class=SensorStateClass.TOTAL,
-                last_reset=self._today_date,
+                device_class=SensorDeviceClass.WATER,
+                state_class=SensorStateClass.TOTAL_INCREASING,
                 native_unit_of_measurement=VOLUME_CUBIC_METERS
             )
 
@@ -477,13 +478,12 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             }
 
             unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
-            icon = "mdi:meter-gas"
 
             entity_description = SensorEntityDescription(
                 key=unique_id,
                 name=entity_name,
-                icon=icon,
-                state_class=SensorStateClass.TOTAL,
+                device_class=SensorDeviceClass.WATER,
+                state_class=SensorStateClass.TOTAL_INCREASING,
                 last_reset=self._month_date,
                 native_unit_of_measurement=VOLUME_CUBIC_METERS
             )

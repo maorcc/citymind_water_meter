@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.5
+
+**Version requires HA v2022.11.0 and above**
+
+- Add support for HA energy, daily consumption device class changed to water
+- Aligned *Core Select* according to new HA *SelectEntityDescription* object
+
 ## 2.0.4
 
 - Fix error when consumption value is empty
