@@ -600,26 +600,29 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
 
             self._update_entities(None)
 
-    def _get_consumption_state(self, meter_details: dict, section_key: str, date_iso: str):
+    def _get_consumption_state(self, meter_details: dict, section_key: str, date_iso: str) -> int | float | None:
         meter_count = meter_details.get(METER_COUNT)
         data = self.api.data.get(section_key)
 
         consumption_info = data.get(str(meter_count))
-        consumption_value = float(0)
+        state = None
 
         for consumption_item in consumption_info:
-            consumption_meter_count = consumption_item.get(CONSUMPTION_METER_COUNT)
-            consumption_date = consumption_item.get(CONSUMPTION_DATE)
+            if consumption_item is not None:
+                consumption_meter_count = consumption_item.get(CONSUMPTION_METER_COUNT)
+                consumption_date = consumption_item.get(CONSUMPTION_DATE)
+                consumption_value = consumption_item.get(CONSUMPTION_VALUE, 0)
 
-            is_meter_relevant = consumption_meter_count == meter_count
-            is_date_relevant = consumption_date.startswith(date_iso)
+                is_meter_relevant = consumption_meter_count == meter_count
+                is_date_relevant = consumption_date.startswith(date_iso)
 
-            if is_meter_relevant and is_date_relevant:
-                consumption_value = float(consumption_item.get(CONSUMPTION_VALUE, 0))
+                if is_meter_relevant and is_date_relevant:
+                    if consumption_value is not None:
+                        consumption = float(consumption_value)
 
-                break
+                        state = self._format_number(consumption, 3)
 
-        state = self._format_number(consumption_value, 3)
+                    break
 
         return state
 

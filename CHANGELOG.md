@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.4
+
+- Fix error when consumption value is empty
+
 ## 2.0.3
 
 - Fix multi-meter support [#34](https://github.com/maorcc/citymind_water_meter/issues/34)
