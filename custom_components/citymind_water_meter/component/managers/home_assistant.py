@@ -554,7 +554,6 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
                 name=entity_name,
                 device_class=SensorDeviceClass.WATER,
                 state_class=SensorStateClass.TOTAL_INCREASING,
-                last_reset=self._month_date,
                 native_unit_of_measurement=UnitOfVolume.CUBIC_METERS
             )
 
