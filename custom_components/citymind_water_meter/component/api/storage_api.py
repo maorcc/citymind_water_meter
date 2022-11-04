@@ -1,8 +1,6 @@
 """Storage handlers."""
 from __future__ import annotations
 
-from datetime import datetime
-import json
 import logging
 import sys
 from typing import Awaitable, Callable
@@ -42,6 +40,12 @@ class StorageAPI(BaseAPI):
         storage = self._stores.get(STORAGE_DATA_FILE_CONFIG)
 
         return storage
+
+    def get_meter_config(self, meter_serial_number: str) -> dict | None:
+        meters = self.data.get(STORAGE_DATA_METERS, {})
+        meter = meters.get(meter_serial_number)
+
+        return meter
 
     async def initialize(self, config_data: ConfigData):
         self._config_data = config_data
@@ -138,3 +142,42 @@ class StorageAPI(BaseAPI):
                 data[entry_id] = entry_data
 
         return data
+
+    async def set_cost_parameters(self, meter_serial_number: str, data: dict):
+        result = False
+        meters = self.data.get(STORAGE_DATA_METERS, {})
+        current_meter_data = meters.get(meter_serial_number, {})
+        current_meter_data_hash = str(current_meter_data)
+
+        meter_data = {}
+        for data_key in data:
+            if data_key != CONF_DEVICE_ID:
+                meter_data[data_key] = data[data_key]
+
+        latest_meter_data_hash = str(meter_data)
+
+        if latest_meter_data_hash != current_meter_data_hash:
+            meters[meter_serial_number] = meter_data
+
+            self.data[STORAGE_DATA_METERS] = meters
+
+            result = True
+
+            await self._async_save()
+
+        return result
+
+    async def remove_cost_parameters(self, meter_serial_number: str, data: dict):
+        result = False
+        meters = self.data.get(STORAGE_DATA_METERS, {})
+
+        if meter_serial_number in meters:
+            del meters[meter_serial_number]
+
+            self.data[STORAGE_DATA_METERS] = meters
+
+            result = True
+
+            await self._async_save()
+
+        return result

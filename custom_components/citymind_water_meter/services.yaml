@@ -1,0 +1,72 @@
+
+set_cost_parameters:
+  name: Set cost parameters
+  description: Set cost parameters for specific water meter
+  fields:
+    device_id:
+      name: Water meter
+      description: Water meter device to set the cost parameters
+      required: true
+      example: "Water Meter XXX"
+      selector:
+        device:
+          integration: citymind_water_meter
+          model: Water Meter
+    low_rate:
+      name: Low rate per cubic meter (m³)
+      description: Low rate in ILS per cubic meter (m³) for consumption below the threshold
+      required: true
+      example: 6.5
+      selector:
+        number:
+          min: 0.1
+          max: 50
+          unit_of_measurement: ILS/m³
+          mode: box
+    high_rate:
+      name: High rate in ILS per cubic meter (m³)
+      description: High rate per cubic meter (m³) for consumption above the threshold
+      required: true
+      example: 13.5
+      selector:
+        number:
+          min: 0
+          max: 50
+          unit_of_measurement: ILS/m³
+          mode: box
+    sewage_rate:
+      name: Sewage rate in ILS per cubic meter (m³)
+      description: Sewage rate per cubic meter (m³)
+      required: true
+      example: 3.5
+      selector:
+        number:
+          min: 0
+          max: 50
+          unit_of_measurement: ILS/m³
+          mode: box
+    low_rate_consumption_threshold:
+      name: Low rate consumption threshold in cubic meter (m³)
+      description: Low rate consumption threshold in cubic meter (m³), usually number of people * 7 cubic meter (m³), check if entitled for more (e.g. disability)
+      required: true
+      example: 7
+      selector:
+        number:
+          min: 0
+          max: 10000000
+          unit_of_measurement: cubic meter (m³)
+          mode: box
+
+remove_cost_parameters:
+  name: Remove cost parameters
+  description: Remove cost parameters for specific water meter
+  fields:
+    device_id:
+      name: Water meter
+      description: Water meter device to remove the cost parameters
+      required: true
+      example: "Water Meter XXX"
+      selector:
+        device:
+          integration: citymind_water_meter
+          model: Water Meter
