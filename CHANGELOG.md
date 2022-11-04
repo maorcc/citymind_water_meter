@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.7
+
+- Remove last reset parameter for monthly consumption sensor
+
 ## 2.0.6
 
 New feature: Monthly cost per meter for the water energy dashboard
