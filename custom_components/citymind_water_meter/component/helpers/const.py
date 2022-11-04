@@ -3,6 +3,11 @@ constants.
 """
 from datetime import timedelta
 
+import voluptuous as vol
+
+from homeassistant.const import CONF_DEVICE_ID, UnitOfVolume
+import homeassistant.helpers.config_validation as cv
+
 from ...core.helpers.const import *
 
 VERSION = "1.0.0"
@@ -193,6 +198,13 @@ ALERT_TYPES = {
 
 ATTR_MEDIA_TYPES = "media_type"
 ATTR_ALERT_TYPES = "alert_type"
+ATTR_MONTHLY_CONSUMPTION = "Monthly Consumption"
+ATTR_LOW_RATE_CONSUMPTION = "Low Rate Consumption"
+ATTR_HIGH_RATE_CONSUMPTION = "High Rate Consumption"
+ATTR_LOW_RATE_COST = "Low Rate Cost"
+ATTR_HIGH_RATE_COST = "High Rate Cost"
+ATTR_SEWAGE_COST = "Sewage Cost"
+ATTR_TOTAL_COST = "Monthly Cost"
 
 MEDIA_TYPES = {
     MEDIA_TYPE_NONE: "None",
@@ -207,3 +219,60 @@ MEDIA_TYPE_ICONS = {
     MEDIA_TYPE_SMS: "mdi:android-messages",
     MEDIA_TYPE_ALL: "mdi:email-open-multiple",
 }
+
+SERVICE_SET_COST_PARAMETERS = "set_cost_parameters"
+SERVICE_REMOVE_COST_PARAMETERS = "remove_cost_parameters"
+
+STORAGE_DATA_METERS = "meters"
+STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD = "low_rate_consumption_threshold"
+STORAGE_DATA_METER_LOW_RATE = "low_rate"
+STORAGE_DATA_METER_HIGH_RATE = "high_rate"
+STORAGE_DATA_METER_SEWAGE_RATE = "sewage_rate"
+
+UNIT_COST = "ILS/m³"
+
+METER_CONFIG_SENSOR_NAMES = {
+    STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD: "Low Rate Consumption Threshold",
+    STORAGE_DATA_METER_LOW_RATE: "Low Rate",
+    STORAGE_DATA_METER_HIGH_RATE: "High Rate",
+    STORAGE_DATA_METER_SEWAGE_RATE: "Sewage Rate",
+}
+
+METER_CONFIG_SENSOR_UNIT_OF_MEASUREMENTS = {
+    STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD: UnitOfVolume.CUBIC_METERS,
+    STORAGE_DATA_METER_LOW_RATE: UNIT_COST,
+    STORAGE_DATA_METER_HIGH_RATE: UNIT_COST,
+    STORAGE_DATA_METER_SEWAGE_RATE: UNIT_COST,
+}
+
+METER_CONFIG_SENSOR_ICONS = {
+    STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD: "mdi:cup-water",
+    STORAGE_DATA_METER_LOW_RATE: "mdi:currency-ils",
+    STORAGE_DATA_METER_HIGH_RATE: "mdi:currency-ils",
+    STORAGE_DATA_METER_SEWAGE_RATE: "mdi:currency-ils",
+}
+
+SERVICE_SCHEMA_SET_COST_PARAMETERS = vol.Schema(
+    {
+        vol.Required(CONF_DEVICE_ID): cv.string,
+        vol.Required(STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD): vol.Range(1, 10000000),
+        vol.Required(STORAGE_DATA_METER_LOW_RATE): vol.Range(0.1, 50),
+        vol.Required(STORAGE_DATA_METER_HIGH_RATE): vol.Range(0, 50),
+        vol.Required(STORAGE_DATA_METER_SEWAGE_RATE): vol.Range(0, 50)
+    }
+)
+
+SERVICE_SCHEMA_REMOVE_COST_PARAMETERS = vol.Schema(
+    {
+        vol.Required(CONF_DEVICE_ID): cv.string
+    }
+)
+
+METER_RATES_CONFIGURATION_SCHEMA = vol.Schema(
+    {
+        vol.Required(STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD): vol.Range(1, 10000000),
+        vol.Required(STORAGE_DATA_METER_LOW_RATE): vol.Range(0.1, 50),
+        vol.Required(STORAGE_DATA_METER_HIGH_RATE): vol.Range(0, 50),
+        vol.Required(STORAGE_DATA_METER_SEWAGE_RATE): vol.Range(0, 50)
+    }
+)

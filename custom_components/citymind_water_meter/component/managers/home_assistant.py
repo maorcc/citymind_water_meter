@@ -7,6 +7,7 @@ import calendar
 from datetime import datetime
 import logging
 import sys
+from typing import Awaitable, Callable
 
 from homeassistant.components.select import SelectEntityDescription
 from homeassistant.components.sensor import (
@@ -15,8 +16,12 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_CONFIGURATION_URL, VOLUME_CUBIC_METERS
-from homeassistant.core import HomeAssistant
+from homeassistant.const import ATTR_CONFIGURATION_URL
+from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.helpers.device_registry import (
+    DeviceEntry,
+    async_get as async_get_device_registry,
+)
 from homeassistant.helpers.entity import EntityCategory
 
 from ...configuration.managers.configuration_manager import ConfigurationManager
@@ -45,6 +50,11 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
         self._month_date: datetime | None = None
         self._account_number: str | None = None
         self._provider: str | None = None
+
+        self._service_handlers: dict[str, Callable[[str, dict], Awaitable[bool]]] = {
+            SERVICE_SET_COST_PARAMETERS: self._storage_api.set_cost_parameters,
+            SERVICE_REMOVE_COST_PARAMETERS: self._storage_api.remove_cost_parameters
+        }
 
     @property
     def api(self) -> IntegrationAPI:
@@ -132,6 +142,17 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
 
         return meter_name
 
+    def register_services(self, entry: ConfigEntry | None = None):
+        self._hass.services.async_register(DOMAIN,
+                                           SERVICE_SET_COST_PARAMETERS,
+                                           self._set_cost_parameters,
+                                           SERVICE_SCHEMA_SET_COST_PARAMETERS)
+
+        self._hass.services.async_register(DOMAIN,
+                                           SERVICE_REMOVE_COST_PARAMETERS,
+                                           self._remove_cost_parameters,
+                                           SERVICE_SCHEMA_REMOVE_COST_PARAMETERS)
+
     def load_devices(self):
         data = self.api.data
 
@@ -163,7 +184,7 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             meter_device = self.device_manager.get(account_name)
 
             meter_device_info = {
-                "identifiers": {(DEFAULT_NAME, meter_name)},
+                "identifiers": {(DEFAULT_NAME, meter_serial_number)},
                 "name": meter_name,
                 "manufacturer": provider,
                 "model": "Water Meter"
@@ -192,11 +213,60 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
 
             meter_name = self._get_meter_name(meter_serial_number)
 
+            meter_config = self.storage_api.get_meter_config(meter_serial_number)
+
             self._load_last_read_sensor(meter_name, meter)
             self._load_daily_consumption_sensor(meter_name, meter, "Today", self.api.today)
             self._load_daily_consumption_sensor(meter_name, meter, "Yesterday", self.api.yesterday)
             self._load_monthly_consumption_sensor(meter_name, meter)
             self._load_consumption_forcast_sensor(meter_name, meter)
+
+            if meter_config is not None:
+                self._load_cost_entities(meter_name, meter, meter_config)
+
+    def _load_cost_entities(self, meter_name, meter_details, meter_config):
+        try:
+            # Configuration validation
+            METER_RATES_CONFIGURATION_SCHEMA(meter_config)
+
+            monthly_consumption = self._get_consumption_state(meter_details,
+                                                              API_DATA_SECTION_CONSUMPTION_MONTHLY,
+                                                              self.api.current_month)
+
+            low_rate_consumption = monthly_consumption
+            high_rate_consumption = 0
+
+            low_rate_threshold = int(float(meter_config.get(STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD)))
+
+            has_threshold = low_rate_threshold > 0
+            above_threshold = monthly_consumption > low_rate_threshold
+
+            if has_threshold and above_threshold:
+                low_rate_consumption = low_rate_threshold
+                high_rate_consumption = monthly_consumption - low_rate_threshold
+
+            # low_rate = float(meter_config.get(STORAGE_DATA_METER_LOW_RATE))
+            # high_rate = float(meter_config.get(STORAGE_DATA_METER_HIGH_RATE))
+            # sewage_rate = float(meter_config.get(STORAGE_DATA_METER_SEWAGE_RATE))
+
+            # low_rate_cost = low_rate_consumption * low_rate
+            # high_rate_cost = high_rate_consumption * high_rate
+
+            # sewage_cost = sewage_rate * monthly_consumption
+            # cost = low_rate_cost + high_rate_cost + sewage_cost
+
+            for key in METER_CONFIG_SENSOR_NAMES:
+                self._load_meter_configuration_parameter_sensor(meter_name, key, meter_config)
+
+            self._load_cost_consumption_sensor(meter_name, ATTR_LOW_RATE_CONSUMPTION, low_rate_consumption)
+
+            self._load_cost_consumption_sensor(meter_name, ATTR_HIGH_RATE_CONSUMPTION, high_rate_consumption)
+
+        except Exception as ex:
+            exc_type, exc_obj, tb = sys.exc_info()
+            line_number = tb.tb_lineno
+
+            _LOGGER.error(f"Failed to load cost's sensors for meter {meter_name}, Error: {ex}, Line: {line_number}")
 
     def _load_alert_settings_select(self, account_name: str, alert_type: int):
         try:
@@ -405,7 +475,7 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
                 name=entity_name,
                 device_class=SensorDeviceClass.WATER,
                 state_class=SensorStateClass.TOTAL_INCREASING,
-                native_unit_of_measurement=VOLUME_CUBIC_METERS
+                native_unit_of_measurement=UnitOfVolume.CUBIC_METERS
             )
 
             self.entity_manager.set_entity(DOMAIN_SENSOR,
@@ -446,7 +516,7 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
                 name=entity_name,
                 device_class=SensorDeviceClass.WATER,
                 state_class=SensorStateClass.TOTAL_INCREASING,
-                native_unit_of_measurement=VOLUME_CUBIC_METERS
+                native_unit_of_measurement=UnitOfVolume.CUBIC_METERS
             )
 
             self.entity_manager.set_entity(DOMAIN_SENSOR,
@@ -485,7 +555,7 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
                 device_class=SensorDeviceClass.WATER,
                 state_class=SensorStateClass.TOTAL_INCREASING,
                 last_reset=self._month_date,
-                native_unit_of_measurement=VOLUME_CUBIC_METERS
+                native_unit_of_measurement=UnitOfVolume.CUBIC_METERS
             )
 
             self.entity_manager.set_entity(DOMAIN_SENSOR,
@@ -528,7 +598,123 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
                 icon=icon,
                 state_class=SensorStateClass.TOTAL,
                 last_reset=self._month_date,
-                native_unit_of_measurement=VOLUME_CUBIC_METERS
+                native_unit_of_measurement=UnitOfVolume.CUBIC_METERS
+            )
+
+            self.entity_manager.set_entity(DOMAIN_SENSOR,
+                                           self.entry_id,
+                                           state,
+                                           attributes,
+                                           meter_name,
+                                           entity_description)
+
+        except Exception as ex:
+            self.log_exception(
+                ex, f"Failed to load sensor for {entity_name}"
+            )
+
+    def _load_meter_configuration_parameter_sensor(
+            self,
+            meter_name: str,
+            config_key: str,
+            data: dict
+    ):
+        config_name = METER_CONFIG_SENSOR_NAMES.get(config_key)
+        entity_name = f"{meter_name} {config_name}"
+
+        try:
+            config_unit = METER_CONFIG_SENSOR_UNIT_OF_MEASUREMENTS.get(config_key)
+            config_value = data.get(config_key)
+
+            if config_value is not None:
+                attributes = {
+                    ATTR_FRIENDLY_NAME: entity_name
+                }
+
+                unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
+                icon = METER_CONFIG_SENSOR_ICONS.get(config_key)
+
+                entity_description = SensorEntityDescription(
+                    key=unique_id,
+                    name=entity_name,
+                    state_class=SensorStateClass.MEASUREMENT,
+                    icon=icon,
+                    native_unit_of_measurement=config_unit,
+                    entity_category=EntityCategory.CONFIG
+                )
+
+                self.entity_manager.set_entity(DOMAIN_SENSOR,
+                                               self.entry_id,
+                                               config_value,
+                                               attributes,
+                                               meter_name,
+                                               entity_description)
+
+        except Exception as ex:
+            self.log_exception(
+                ex, f"Failed to load sensor for {entity_name}"
+            )
+
+    def _load_cost_consumption_sensor(
+            self,
+            meter_name: str,
+            rate_name: str,
+            state: float | int | None
+
+    ):
+        entity_name = f"{meter_name} {rate_name}"
+
+        try:
+            attributes = {
+                ATTR_FRIENDLY_NAME: entity_name
+            }
+
+            unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
+
+            entity_description = SensorEntityDescription(
+                key=unique_id,
+                name=entity_name,
+                device_class=SensorDeviceClass.WATER,
+                state_class=SensorStateClass.TOTAL_INCREASING,
+                native_unit_of_measurement=UnitOfVolume.CUBIC_METERS
+            )
+
+            self.entity_manager.set_entity(DOMAIN_SENSOR,
+                                           self.entry_id,
+                                           state,
+                                           attributes,
+                                           meter_name,
+                                           entity_description)
+
+        except Exception as ex:
+            self.log_exception(
+                ex, f"Failed to load sensor for {entity_name}"
+            )
+
+    def _load_meter_cost_sensor(
+            self,
+            meter_name: str,
+            cost_type: str,
+            state: float | int | None
+    ):
+        entity_name = f"{meter_name} {cost_type}"
+
+        try:
+            state = self._format_number(state, 3)
+
+            attributes = {
+                ATTR_FRIENDLY_NAME: entity_name,
+            }
+
+            unique_id = EntityData.generate_unique_id(DOMAIN_SENSOR, entity_name)
+            icon = "mdi:currency-ils"
+
+            entity_description = SensorEntityDescription(
+                key=unique_id,
+                name=entity_name,
+                icon=icon,
+                state_class=SensorStateClass.MEASUREMENT,
+                native_unit_of_measurement=UNIT_COST
             )
 
             self.entity_manager.set_entity(DOMAIN_SENSOR,
@@ -599,6 +785,41 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             await self.async_update_data_providers()
 
             self._update_entities(None)
+
+    def _set_cost_parameters(self, service_call: ServiceCall):
+        self._hass.async_create_task(self._async_update_cost_parameters(service_call))
+
+    def _remove_cost_parameters(self, service_call: ServiceCall):
+        self._hass.async_create_task(self._async_update_cost_parameters(service_call))
+
+    async def _async_update_cost_parameters(self, service_call: ServiceCall):
+        service_data = service_call.data
+        service_name = service_call.service
+
+        device_id = service_data.get(CONF_DEVICE_ID)
+
+        _LOGGER.info(f"Service {service_name} called with data: {service_data}")
+        handler = self._service_handlers.get(service_name)
+
+        if device_id is None:
+            _LOGGER.error("Operation cannot be performed, missing device information")
+
+        elif handler is None:
+            _LOGGER.error(f"Operation cannot be performed, handler not found for {service_name}")
+
+        else:
+            dr = async_get_device_registry(self._hass)
+            device: DeviceEntry = dr.devices.get(device_id)
+            can_handle_device = self.entry_id in device.config_entries
+
+            if can_handle_device:
+                identifiers = list(device.identifiers)[0]
+
+                meter_serial_number = identifiers[1]
+                updated = await handler(meter_serial_number, service_data)
+
+                if updated:
+                    await self._reload_integration()
 
     def _get_consumption_state(self, meter_details: dict, section_key: str, date_iso: str) -> int | float | None:
         meter_count = meter_details.get(METER_COUNT)

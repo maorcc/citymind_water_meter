@@ -1,5 +1,64 @@
 # Changelog
 
+## 2.0.6
+
+New feature: Monthly cost per meter for the water energy dashboard
+
+In v2.0.5 running at HA v2022.11.0 and above introduced the support for water energy dashboard,
+since in Israel has 3 rates (low, high and sewage) that defines the monthly cost based on consumption and thresholds - introducing new set of configurations to provide the costs breakdown in dashboard.
+
+Configuration is per meter to support the multiple meter that can have different rates and thresholds
+
+### New Sensors per meter
+| Entity Name                                           | Type   | Description                                                                                | Additional information  |
+|-------------------------------------------------------|--------|--------------------------------------------------------------------------------------------|-------------------------|
+| CityMind {Meter Count} Low Rate Consumption Threshold | Sensor | Represents the configuration parameter of low rate consumption's threshold in m³           | Statistics: Measurement |
+| CityMind {Meter Count} Low Rate                       | Sensor | Represents the configuration parameter of low rate in ILS/m³                               | Statistics: Measurement |
+| CityMind {Meter Count} High Rate                      | Sensor | Represents the configuration parameter of high rate configuration in ILS/m³                | Statistics: Measurement |
+| CityMind {Meter Count} Sewage Rate                    | Sensor | Represents the configuration parameter of sewage rate configuration in ILS/m³              | Statistics: Measurement |
+| CityMind {Meter Count} Low Rate Consumption           | Sensor | Represents the consumption below the threshold in m³                                       | Statistics: Measurement |
+| CityMind {Meter Count} High Rate Consumption          | Sensor | Represents the consumption above the threshold in m³                                       | Statistics: Measurement |
+
+*Last read and daily, monthly, low / high rate consumption's sensors are supporting Water energy*
+*Low, High, Sewage rates and threshold sensors category is configuration and will be available only when set by the service*
+
+### New Services
+
+#### Set Cost Parameters
+Set cost's parameters for specific meter:
+- Low Rate Consumption Threshold - Time to consider a device without activity as AWAY (any value between 10 and 1800 in seconds)
+- Low Rate - Low rate per cubic meter (m³) for consumption below the threshold
+- High Rate - High rate per cubic meter (m³) for consumption above the threshold
+- Sewage Rate - Sewage rate in ILS per cubic meter (m³)
+
+More details available in `Developer tools` -> `Services` -> `citymind_water_meter.set_cost_parameters`
+
+```yaml
+service: citymind_water_meter.set_cost_parameters
+data:
+  device_id: {Meter device ID}
+  low_rate_consumption_threshold: 7
+  low_rate: 6.5
+  high_rate: 13.5
+  sewage_rate: 3.5
+```
+
+*Will reload the integration*
+
+#### Remove Cost Parameters
+Remove cost's parameters for specific meter
+
+More details available in `Developer tools` -> `Services` -> `citymind_water_meter.remove_cost_parameters`
+
+```yaml
+service: citymind_water_meter.remove_cost_parameters
+data:
+  device_id: {Meter device ID}
+```
+
+*Will reload the integration*
+
+
 ## 2.0.5
 
 **Version requires HA v2022.11.0 and above**
