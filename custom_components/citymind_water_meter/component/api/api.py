@@ -5,11 +5,9 @@ import logging
 import sys
 from typing import Awaitable, Callable
 
-import aiohttp
-from aiohttp import ClientResponseError, ClientSession
+from aiohttp import ClientResponseError
 
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from ...configuration.models.config_data import ConfigData
 from ...core.api.base_api import BaseAPI
@@ -22,18 +20,17 @@ _LOGGER = logging.getLogger(__name__)
 class IntegrationAPI(BaseAPI):
     """The Class for handling the data retrieval."""
 
-    session: ClientSession | None
-    hass: HomeAssistant
     config_data: ConfigData | None
-    base_url: str | None
 
     today: str | None
     yesterday: str | None
     _last_day_of_current_month: str | None
     current_month: str | None
 
+    _alert_settings_actions: dict[bool, Callable[[str, list[int]], Awaitable[dict]]]
+
     def __init__(self,
-                 hass: HomeAssistant,
+                 hass: HomeAssistant | None,
                  async_on_data_changed: Callable[[], Awaitable[None]] | None = None,
                  async_on_status_changed: Callable[[ConnectivityStatus], Awaitable[None]] | None = None
                  ):
@@ -42,8 +39,6 @@ class IntegrationAPI(BaseAPI):
 
         try:
             self.config_data = None
-            self.session = None
-            self.base_url = None
 
             self.data = {}
 
@@ -51,6 +46,11 @@ class IntegrationAPI(BaseAPI):
             self.yesterday = None
             self._last_day_of_current_month = None
             self.current_month = None
+
+            self._alert_settings_actions = {
+                True: self._async_put,
+                False: self._async_delete,
+            }
 
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
@@ -72,11 +72,6 @@ class IntegrationAPI(BaseAPI):
 
         return municipal_id
 
-    async def terminate(self):
-        self.data = {}
-
-        await self.set_status(ConnectivityStatus.Disconnected)
-
     async def initialize(self, config_data: ConfigData):
         _LOGGER.info("Initializing CityMind API")
 
@@ -85,22 +80,14 @@ class IntegrationAPI(BaseAPI):
 
             self.config_data = config_data
 
-            if self.hass is None:
-                if self.session is not None:
-                    await self.session.close()
-
-                self.session = aiohttp.client.ClientSession()
-            else:
-                self.session = async_create_clientsession(hass=self.hass)
-
-            await self._login()
+            await self.initialize_session()
 
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
             line_number = tb.tb_lineno
 
             _LOGGER.error(
-                f"Failed to initialize City Mind API ({self.base_url}), error: {ex}, line: {line_number}"
+                f"Failed to initialize City Mind API, error: {ex}, line: {line_number}"
             )
 
             await self.set_status(ConnectivityStatus.Failed)
@@ -125,26 +112,25 @@ class IntegrationAPI(BaseAPI):
         self.current_month = today.strftime(FORMAT_DATE_YEAR_MONTH)
         self._last_day_of_current_month = last_day_of_current_month.strftime(FORMAT_DATE_ISO)
 
-    def _build_endpoint(self, endpoint, meter_count: str = None):
-        if PH_MUNICIPALITY in endpoint and self.municipal_id is not None:
-            endpoint = endpoint.replace(PH_MUNICIPALITY, str(self.municipal_id))
+    def _build_endpoint(self,
+                        endpoint,
+                        meter_count: str | None = None,
+                        alert_type: int | None = None
+                        ):
 
-        if PH_TODAY in endpoint:
-            endpoint = endpoint.replace(PH_TODAY, self.today)
+        data = {
+            ENDPOINT_PARAMETER_METER_ID: meter_count,
+            ENDPOINT_PARAMETER_YESTERDAY: self.yesterday,
+            ENDPOINT_PARAMETER_TODAY: self.today,
+            ENDPOINT_PARAMETER_LAST_DAY_MONTH: self._last_day_of_current_month,
+            ENDPOINT_PARAMETER_MUNICIPALITY_ID: self.municipal_id,
+            ENDPOINT_PARAMETER_CURRENT_MONTH: self.current_month,
+            ENDPOINT_PARAMETER_ALERT_TYPE: alert_type
+        }
 
-        if PH_YESTERDAY in endpoint:
-            endpoint = endpoint.replace(PH_YESTERDAY, self.yesterday)
+        url = endpoint.format(**data)
 
-        if PH_CURRENT_MONTH in endpoint:
-            endpoint = endpoint.replace(PH_CURRENT_MONTH, self.current_month)
-
-        if PH_LAST_DAY_MONTH in endpoint:
-            endpoint = endpoint.replace(PH_LAST_DAY_MONTH, self._last_day_of_current_month)
-
-        if PH_METER in endpoint and meter_count is not None:
-            endpoint = endpoint.replace(PH_METER, meter_count)
-
-        return endpoint
+        return url
 
     async def _async_post(self,
                           endpoint,
@@ -182,7 +168,7 @@ class IntegrationAPI(BaseAPI):
         result = None
 
         try:
-            url = self._build_endpoint(endpoint, meter_count)
+            url = self._build_endpoint(endpoint, meter_count=meter_count)
 
             headers = {
                 API_HEADER_TOKEN: self.token
@@ -217,13 +203,15 @@ class IntegrationAPI(BaseAPI):
 
         return result
 
-    async def _async_put(self, url: str, data: dict | list):
+    async def _async_put(self, endpoint: str, data: list[int]):
         result = None
 
         try:
             headers = {
                 API_HEADER_TOKEN: self.token
             }
+
+            url = self._build_endpoint(endpoint, alert_type=data[0])
 
             async with self.session.put(url, headers=headers, json=data, ssl=False) as response:
                 _LOGGER.debug(f"Status of {url}: {response.status}")
@@ -236,7 +224,7 @@ class IntegrationAPI(BaseAPI):
 
         except ClientResponseError as crex:
             _LOGGER.error(
-                f"Failed to get data from {url}, HTTP Status: {crex.message} ({crex.status})"
+                f"Failed to get data from {endpoint}, Data: {data}, HTTP Status: {crex.message} ({crex.status})"
             )
 
             if response.status == 401:
@@ -247,12 +235,12 @@ class IntegrationAPI(BaseAPI):
             line_number = tb.tb_lineno
 
             _LOGGER.error(
-                f"Failed to get data from {url}, Error: {ex}, Line: {line_number}"
+                f"Failed to get data from {endpoint}, Data: {data}, Error: {ex}, Line: {line_number}"
             )
 
         return result
 
-    async def _async_delete(self, url: str, data: dict | list):
+    async def _async_delete(self, url: str, data: list[int]):
         result = None
 
         try:
@@ -310,17 +298,15 @@ class IntegrationAPI(BaseAPI):
 
             await self.fire_data_changed_event()
 
-    async def _login(self):
-        _LOGGER.info("Performing login")
-        exception_data = None
+    async def login(self):
+        await super().login()
 
-        await self.set_status(ConnectivityStatus.Connecting)
+        exception_data = None
 
         status = ConnectivityStatus.Failed
 
         try:
             self.data[API_DATA_TOKEN] = None
-            self._municipal_id = None
 
             config_data = self.config_data
 
@@ -381,12 +367,9 @@ class IntegrationAPI(BaseAPI):
     async def async_set_alert_settings(self, alert_type_id: int, media_type_id: str, enabled: bool):
         _LOGGER.info(f"Updating alert {alert_type_id} on media {media_type_id} to {enabled}")
 
-        action: Callable[[str, dict | list], Awaitable[dict]] = self._async_put if enabled else self._async_delete
-        endpoint = self._build_endpoint(ENDPOINT_MY_ALERTS_SETTINGS_UPDATE)
-        url = f"{endpoint}/{alert_type_id}"
-
+        action = self._alert_settings_actions[enabled]
         data = [int(media_type_id)]
 
-        await action(url, data)
+        await action(ENDPOINT_MY_ALERTS_SETTINGS_UPDATE, data)
 
         await self._load_data(ENDPOINT_DATA_RELOAD)
