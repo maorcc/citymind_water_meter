@@ -96,19 +96,19 @@ Integration support store debug files which saves the data provided by `Read You
 | CityMind {Account ID} Account Vacations                | Sensor | Indicates number of vacations set in the portal                                                                     | Attributes holds the vacations list          |
 
 ### Per meter
-| Entity Name                                           | Type   | Description                                                                                | Additional information                                 |
-|-------------------------------------------------------|--------|--------------------------------------------------------------------------------------------|--------------------------------------------------------|
-| CityMind {Meter Count} Meter Last Read                | Sensor | Represents the last read in m³                                                             | Statistics: Total Increment                            |
-| CityMind {Meter Count} Meter Monthly Consumption      | Sensor | Represents the monthly consumption in m³                                                   | Statistics: Total Increment                            |
-| CityMind {Meter Count} Meter Today's Consumption      | Sensor | Represents the daily consumption in m³                                                     | Statistics: Total Increment                            |
-| CityMind {Meter Count} Meter Yesterday's Consumption  | Sensor | Represents the yesterday's consumption in m³                                               | Statistics: Total Increment                            |
-| CityMind {Meter Count} Meter Consumption Forcast      | Sensor | Represents the monthly consumption forcast in m³                                           | Statistics: Total, reset at the beginning of the month |
-| CityMind {Meter Count} Low Rate Consumption Threshold | Sensor | Represents the configuration parameter of low rate consumption's threshold in m³           | Statistics: Measurement                                |
-| CityMind {Meter Count} Low Rate                       | Sensor | Represents the configuration parameter of low rate in ILS/m³                               | Statistics: Measurement                                |
-| CityMind {Meter Count} High Rate                      | Sensor | Represents the configuration parameter of high rate configuration in ILS/m³                | Statistics: Measurement                                |
-| CityMind {Meter Count} Sewage Rate                    | Sensor | Represents the configuration parameter of sewage rate configuration in ILS/m³              | Statistics: Measurement                                |
-| CityMind {Meter Count} Low Rate Consumption           | Sensor | Represents the consumption below the threshold in m³                                       | Statistics: Measurement                                |
-| CityMind {Meter Count} High Rate Consumption          | Sensor | Represents the consumption above the threshold in m³                                       | Statistics: Measurement                                |
+| Entity Name                                           | Type   | Description                                                                      | Additional information                                 |
+|-------------------------------------------------------|--------|----------------------------------------------------------------------------------|--------------------------------------------------------|
+| CityMind {Meter Count} Meter Last Read                | Sensor | Represents the last read in m³                                                   | Statistics: Total Increment                            |
+| CityMind {Meter Count} Meter Monthly Consumption      | Sensor | Represents the monthly consumption in m³                                         | Statistics: Total Increment                            |
+| CityMind {Meter Count} Meter Today's Consumption      | Sensor | Represents the daily consumption in m³                                           | Statistics: Total Increment                            |
+| CityMind {Meter Count} Meter Yesterday's Consumption  | Sensor | Represents the yesterday's consumption in m³                                     | Statistics: Total Increment                            |
+| CityMind {Meter Count} Meter Consumption Forecast     | Sensor | Represents the monthly consumption forecast in m³                                | Statistics: Total, reset at the beginning of the month |
+| CityMind {Meter Count} Low Rate Consumption Threshold | Sensor | Represents the configuration parameter of low rate consumption's threshold in m³ | Statistics: Measurement                                |
+| CityMind {Meter Count} Low Rate                       | Sensor | Represents the configuration parameter of low rate in ILS/m³                     | Statistics: Measurement                                |
+| CityMind {Meter Count} High Rate                      | Sensor | Represents the configuration parameter of high rate configuration in ILS/m³      | Statistics: Measurement                                |
+| CityMind {Meter Count} Sewage Rate                    | Sensor | Represents the configuration parameter of sewage rate configuration in ILS/m³    | Statistics: Measurement                                |
+| CityMind {Meter Count} Low Rate Consumption           | Sensor | Represents the consumption below the threshold in m³                             | Statistics: Measurement                                |
+| CityMind {Meter Count} High Rate Consumption          | Sensor | Represents the consumption above the threshold in m³                             | Statistics: Measurement                                |
 
 *Last read and daily, monthly, low / high rate consumption's sensors are supporting Water energy*
 *Low, High, Sewage rates and threshold sensors category is configuration and will be available only when set by the service*
