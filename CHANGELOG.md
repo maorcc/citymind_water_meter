@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.8
+
+- Add test file to run locally (requires environment variables)
+- Extend Core BaseAPI to handle session initialization and termination
+- Cleaner code to resolve URLs
+- Remove unused constants
+- Core fix: wrongfully reported logs of entities getting updated when no update perform
+
 ## 2.0.7
 
 - Remove last reset parameter for monthly consumption sensor
