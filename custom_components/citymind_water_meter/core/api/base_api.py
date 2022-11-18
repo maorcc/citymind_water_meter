@@ -44,9 +44,6 @@ class BaseAPI:
 
     async def initialize_session(self, cookies=None, cookie_jar=None):
         try:
-            if self.session is not None:
-                await self.session.close()
-
             if self.is_home_assistant:
                 self.session = async_create_clientsession(hass=self.hass, cookies=cookies, cookie_jar=cookie_jar)
 
@@ -72,8 +69,7 @@ class BaseAPI:
         pass
 
     async def terminate(self):
-        if self.session is not None:
-            await self.session.close()
+        self.data = {}
 
         await self.set_status(ConnectivityStatus.Disconnected)
 
