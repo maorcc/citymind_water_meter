@@ -4,10 +4,10 @@ HA Manager.
 from __future__ import annotations
 
 import calendar
+from collections.abc import Awaitable, Callable
 from datetime import datetime
 import logging
 import sys
-from typing import Awaitable, Callable
 
 from homeassistant.components.select import SelectEntityDescription
 from homeassistant.components.sensor import (
@@ -219,7 +219,7 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
             self._load_daily_consumption_sensor(meter_name, meter, "Today", self.api.today)
             self._load_daily_consumption_sensor(meter_name, meter, "Yesterday", self.api.yesterday)
             self._load_monthly_consumption_sensor(meter_name, meter)
-            self._load_consumption_forcast_sensor(meter_name, meter)
+            self._load_consumption_forecast_sensor(meter_name, meter)
 
             if meter_config is not None:
                 self._load_cost_entities(meter_name, meter, meter_config)
@@ -569,19 +569,19 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
                 ex, f"Failed to load sensor for {entity_name}"
             )
 
-    def _load_consumption_forcast_sensor(
+    def _load_consumption_forecast_sensor(
             self,
             meter_name: str,
             meter_details: dict
     ):
-        entity_name = f"{meter_name} Consumption Forcast"
+        entity_name = f"{meter_name} Consumption Forecast"
 
         try:
             meter_count = meter_details.get(METER_COUNT)
-            consumption_forcast_section = self.api.data.get(API_DATA_SECTION_CONSUMPTION_FORCAST)
-            consumption_forcast = consumption_forcast_section.get(str(meter_count))
+            consumption_forecast_section = self.api.data.get(API_DATA_SECTION_CONSUMPTION_FORECAST)
+            consumption_forecast = consumption_forecast_section.get(str(meter_count))
 
-            estimated_value = consumption_forcast.get(CONSUMPTION_FORCAST_ESTIMATED_CONSUMPTION, 0)
+            estimated_value = consumption_forecast.get(CONSUMPTION_FORECAST_ESTIMATED_CONSUMPTION, 0)
             state = self._format_number(estimated_value, 3)
 
             attributes = {

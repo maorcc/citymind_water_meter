@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.9
+
+- Fix typo
+- Update pre-commit and hassfest packages to latest
+
 ## 2.0.8
 
 - Add test file to run locally (requires environment variables)
@@ -127,13 +132,13 @@ data:
 | CityMind {Account ID} Account Vacations                | Sensor | Indicates number of vacations set in the portal                                                                     | Attributes holds the vacations list          |
 
 ### Per meter
-| Entity Name                                          | Type   | Description                                      | Additional information                    |
-|------------------------------------------------------|--------|--------------------------------------------------|-------------------------------------------|
-| CityMind {Meter Count} Meter Last Read               | Sensor | Represents the last read in m³                   | Statistics: Total Increment               |
-| CityMind {Meter Count} Meter Daily Consumption       | Sensor | Represents the daily consumption in m³           | Statistics: Total, reset on daily basis   |
-| CityMind {Meter Count} Meter Monthly Consumption     | Sensor | Represents the monthly consumption in m³         | Statistics: Total, reset on monthly basis |
-| CityMind {Meter Count} Meter Yesterday's Consumption | Sensor | Represents the yesterday's consumption in m³     | Statistics: Total, reset on daily basis   |
-| CityMind {Meter Count} Meter Consumption Forcast     | Sensor | Represents the monthly consumption forcast in m³ | Statistics: Total, reset on monthly basis |
+| Entity Name                                          | Type   | Description                                       | Additional information                    |
+|------------------------------------------------------|--------|---------------------------------------------------|-------------------------------------------|
+| CityMind {Meter Count} Meter Last Read               | Sensor | Represents the last read in m³                    | Statistics: Total Increment               |
+| CityMind {Meter Count} Meter Daily Consumption       | Sensor | Represents the daily consumption in m³            | Statistics: Total, reset on daily basis   |
+| CityMind {Meter Count} Meter Monthly Consumption     | Sensor | Represents the monthly consumption in m³          | Statistics: Total, reset on monthly basis |
+| CityMind {Meter Count} Meter Yesterday's Consumption | Sensor | Represents the yesterday's consumption in m³      | Statistics: Total, reset on daily basis   |
+| CityMind {Meter Count} Meter Consumption Forecast    | Sensor | Represents the monthly consumption forecast in m³ | Statistics: Total, reset on monthly basis |
 
 
 
