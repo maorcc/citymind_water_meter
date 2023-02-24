@@ -12,8 +12,14 @@ from homeassistant.helpers.device_registry import DeviceEntry
 
 from .component.helpers.common import get_ha
 from .component.helpers.const import (
-    STORAGE_DATA_METERS, API_DATA_SECTION_METERS, API_DATA_SECTION_MY_ALERTS, API_DATA_SECTION_MY_MESSAGES,
-    API_DATA_SECTION_SETTINGS, METER_SERIAL_NUMBER, ENDPOINT_DATA_UPDATE_PER_METER, METER_COUNT
+    API_DATA_SECTION_METERS,
+    API_DATA_SECTION_MY_ALERTS,
+    API_DATA_SECTION_MY_MESSAGES,
+    API_DATA_SECTION_SETTINGS,
+    ENDPOINT_DATA_UPDATE_PER_METER,
+    METER_COUNT,
+    METER_SERIAL_NUMBER,
+    STORAGE_DATA_METERS,
 )
 from .component.managers.home_assistant import CityMindHomeAssistantManager
 from .configuration.helpers.const import DEFAULT_NAME
@@ -66,7 +72,7 @@ def _async_get_diagnostics(
     additional_details = [
         API_DATA_SECTION_MY_MESSAGES,
         API_DATA_SECTION_MY_ALERTS,
-        API_DATA_SECTION_SETTINGS
+        API_DATA_SECTION_SETTINGS,
     ]
 
     consumptions = {}
@@ -86,13 +92,9 @@ def _async_get_diagnostics(
         for meter in meters:
             meter_id = meter.get(METER_SERIAL_NUMBER)
             if manager.get_meter_name(meter_id) == device_name:
-                _LOGGER.debug(
-                    f"Getting diagnostic information for meter #{meter_id}"
-                )
+                _LOGGER.debug(f"Getting diagnostic information for meter #{meter_id}")
 
-                data |= _async_device_as_dict(
-                    hass, meter, meter_id, consumptions
-                )
+                data |= _async_device_as_dict(hass, meter, meter_id, consumptions)
 
                 break
     else:
@@ -101,10 +103,7 @@ def _async_get_diagnostics(
         data.update(
             meters=[
                 _async_device_as_dict(
-                    hass,
-                    meter,
-                    meter.get(METER_SERIAL_NUMBER),
-                    consumptions
+                    hass, meter, meter.get(METER_SERIAL_NUMBER), consumptions
                 )
                 for meter in meters
             ]
@@ -120,7 +119,9 @@ def _async_device_as_dict(
     """Represent a Shinobi monitor as a dictionary."""
     device_registry = dr.async_get(hass)
     entity_registry = er.async_get(hass)
-    ha_device = device_registry.async_get_device(identifiers={(DEFAULT_NAME, unique_id)})
+    ha_device = device_registry.async_get_device(
+        identifiers={(DEFAULT_NAME, unique_id)}
+    )
 
     meter_count = data.get(METER_COUNT)
 
@@ -131,7 +132,9 @@ def _async_device_as_dict(
             consumption_data = consumptions[consumption_key]
             consumption_info = consumption_data.get(str(meter_count))
 
-            meter_consumptions[consumption_key.replace("consumption-", "")] = consumption_info
+            meter_consumptions[
+                consumption_key.replace("consumption-", "")
+            ] = consumption_info
 
         data["consumptions"] = meter_consumptions
 
