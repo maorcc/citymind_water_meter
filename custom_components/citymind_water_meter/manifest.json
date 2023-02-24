@@ -4,13 +4,8 @@
   "version": "2.0.10",
   "documentation": "https://github.com/maorcc/citymind_water_meter",
   "issue_tracker": "https://github.com/maorcc/citymind_water_meter/issues",
-  "dependencies": [
-    "http"
-  ],
-  "codeowners": [
-    "@maorcc",
-    "@elad-bar"
-  ],
+  "dependencies": ["http"],
+  "codeowners": ["@maorcc", "@elad-bar"],
   "requirements": [],
   "config_flow": true,
   "iot_class": "cloud_polling"

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import sys
 
@@ -12,7 +12,37 @@ from homeassistant.core import HomeAssistant
 from ...configuration.models.config_data import ConfigData
 from ...core.api.base_api import BaseAPI
 from ...core.helpers.enums import ConnectivityStatus
-from ..helpers.const import *
+from ..helpers.const import (
+    API_DATA_ERROR_CODE,
+    API_DATA_ERROR_REASON,
+    API_DATA_LAST_UPDATE,
+    API_DATA_SECTION_ME,
+    API_DATA_SECTION_METERS,
+    API_DATA_TOKEN,
+    API_HEADER_TOKEN,
+    DEVICE_ID,
+    ENDPOINT_DATA_INITIALIZE,
+    ENDPOINT_DATA_RELOAD,
+    ENDPOINT_DATA_UPDATE,
+    ENDPOINT_DATA_UPDATE_PER_METER,
+    ENDPOINT_LOGIN,
+    ENDPOINT_MY_ALERTS_SETTINGS_UPDATE,
+    ENDPOINT_PARAMETER_ALERT_TYPE,
+    ENDPOINT_PARAMETER_CURRENT_MONTH,
+    ENDPOINT_PARAMETER_LAST_DAY_MONTH,
+    ENDPOINT_PARAMETER_METER_ID,
+    ENDPOINT_PARAMETER_MUNICIPALITY_ID,
+    ENDPOINT_PARAMETER_TODAY,
+    ENDPOINT_PARAMETER_YESTERDAY,
+    ERROR_REASON_INVALID_CREDENTIALS,
+    FORMAT_DATE_ISO,
+    FORMAT_DATE_YEAR_MONTH,
+    LOGIN_DEVICE_ID,
+    LOGIN_EMAIL,
+    LOGIN_PASSWORD,
+    ME_MUNICIPAL_ID,
+    METER_COUNT,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -29,12 +59,13 @@ class IntegrationAPI(BaseAPI):
 
     _alert_settings_actions: dict[bool, Callable[[str, list[int]], Awaitable[dict]]]
 
-    def __init__(self,
-                 hass: HomeAssistant | None,
-                 async_on_data_changed: Callable[[], Awaitable[None]] | None = None,
-                 async_on_status_changed: Callable[[ConnectivityStatus], Awaitable[None]] | None = None
-                 ):
-
+    def __init__(
+        self,
+        hass: HomeAssistant | None,
+        async_on_data_changed: Callable[[], Awaitable[None]] | None = None,
+        async_on_status_changed: Callable[[ConnectivityStatus], Awaitable[None]]
+        | None = None,
+    ):
         super().__init__(hass, async_on_data_changed, async_on_status_changed)
 
         try:
@@ -110,14 +141,13 @@ class IntegrationAPI(BaseAPI):
         self.today = today.strftime(FORMAT_DATE_ISO)
         self.yesterday = yesterday.strftime(FORMAT_DATE_ISO)
         self.current_month = today.strftime(FORMAT_DATE_YEAR_MONTH)
-        self._last_day_of_current_month = last_day_of_current_month.strftime(FORMAT_DATE_ISO)
+        self._last_day_of_current_month = last_day_of_current_month.strftime(
+            FORMAT_DATE_ISO
+        )
 
-    def _build_endpoint(self,
-                        endpoint,
-                        meter_count: str | None = None,
-                        alert_type: int | None = None
-                        ):
-
+    def _build_endpoint(
+        self, endpoint, meter_count: str | None = None, alert_type: int | None = None
+    ):
         data = {
             ENDPOINT_PARAMETER_METER_ID: meter_count,
             ENDPOINT_PARAMETER_YESTERDAY: self.yesterday,
@@ -125,16 +155,14 @@ class IntegrationAPI(BaseAPI):
             ENDPOINT_PARAMETER_LAST_DAY_MONTH: self._last_day_of_current_month,
             ENDPOINT_PARAMETER_MUNICIPALITY_ID: self.municipal_id,
             ENDPOINT_PARAMETER_CURRENT_MONTH: self.current_month,
-            ENDPOINT_PARAMETER_ALERT_TYPE: alert_type
+            ENDPOINT_PARAMETER_ALERT_TYPE: alert_type,
         }
 
         url = endpoint.format(**data)
 
         return url
 
-    async def _async_post(self,
-                          endpoint,
-                          request_data: dict):
+    async def _async_post(self, endpoint, request_data: dict):
         result = None
 
         try:
@@ -170,9 +198,7 @@ class IntegrationAPI(BaseAPI):
         try:
             url = self._build_endpoint(endpoint, meter_count=meter_count)
 
-            headers = {
-                API_HEADER_TOKEN: self.token
-            }
+            headers = {API_HEADER_TOKEN: self.token}
 
             _LOGGER.debug(f"GET {url}")
 
@@ -207,13 +233,13 @@ class IntegrationAPI(BaseAPI):
         result = None
 
         try:
-            headers = {
-                API_HEADER_TOKEN: self.token
-            }
+            headers = {API_HEADER_TOKEN: self.token}
 
             url = self._build_endpoint(endpoint, alert_type=data[0])
 
-            async with self.session.put(url, headers=headers, json=data, ssl=False) as response:
+            async with self.session.put(
+                url, headers=headers, json=data, ssl=False
+            ) as response:
                 _LOGGER.debug(f"Status of {url}: {response.status}")
 
                 response.raise_for_status()
@@ -244,11 +270,11 @@ class IntegrationAPI(BaseAPI):
         result = None
 
         try:
-            headers = {
-                API_HEADER_TOKEN: self.token
-            }
+            headers = {API_HEADER_TOKEN: self.token}
 
-            async with self.session.delete(url, headers=headers, json=data, ssl=False) as response:
+            async with self.session.delete(
+                url, headers=headers, json=data, ssl=False
+            ) as response:
                 _LOGGER.debug(f"Status of {url}: {response.status}")
 
                 response.raise_for_status()
@@ -313,7 +339,7 @@ class IntegrationAPI(BaseAPI):
             data = {
                 LOGIN_EMAIL: config_data.email,
                 LOGIN_PASSWORD: config_data.password,
-                LOGIN_DEVICE_ID: DEVICE_ID
+                LOGIN_DEVICE_ID: DEVICE_ID,
             }
 
             payload = await self._async_post(ENDPOINT_LOGIN, data)
@@ -356,16 +382,32 @@ class IntegrationAPI(BaseAPI):
                     data = await self._async_get(endpoint, meter_count)
 
                     if meter_count is None:
-                        self.data[endpoint_key] = data
+                        if data is None:
+                            _LOGGER.debug(
+                                f"Cannot update {endpoint_key} due to empty data"
+                            )
+
+                        else:
+                            self.data[endpoint_key] = data
 
                     else:
                         metered_data = self.data.get(endpoint_key, {})
                         metered_data[meter_count] = data
 
-                        self.data[endpoint_key] = metered_data
+                        if metered_data is None:
+                            _LOGGER.debug(
+                                f"Cannot update {endpoint_key} for meter '{meter_count}' due to empty data"
+                            )
 
-    async def async_set_alert_settings(self, alert_type_id: int, media_type_id: str, enabled: bool):
-        _LOGGER.info(f"Updating alert {alert_type_id} on media {media_type_id} to {enabled}")
+                        else:
+                            self.data[endpoint_key] = metered_data
+
+    async def async_set_alert_settings(
+        self, alert_type_id: int, media_type_id: str, enabled: bool
+    ):
+        _LOGGER.info(
+            f"Updating alert {alert_type_id} on media {media_type_id} to {enabled}"
+        )
 
         action = self._alert_settings_actions[enabled]
         data = [int(media_type_id)]

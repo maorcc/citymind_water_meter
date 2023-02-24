@@ -30,19 +30,19 @@ Make sure you have signed up at [Read Your Meter Pro](https://rym-pro.com/#/) as
 It is recommended to install using HACS, but it is also easy to install manually
 
 #### Installations via HACS
+
 - In HACS, look for `City-Mind Water Meter` and install and restart
-- In Settings  --> Devices & Services - (Lower Right) "Add Integration"
+- In Settings --> Devices & Services - (Lower Right) "Add Integration"
 
 #### Setup
 
 To add integration use Configuration -> Integrations -> Add `City-Mind Water Meter`
 Integration supports **multiple** City Mind accounts
 
-| Fields name | Type      | Required | Default | Description                                        |
-|-------------|-----------|----------|---------|----------------------------------------------------|
-| Email       | Textbox   | +        | -       | Email registered to City Mind v2                   |
-| Password    | Textbox   | +        | -       | Password of the account registered to City Mind v2 |
-
+| Fields name | Type    | Required | Default | Description                                        |
+| ----------- | ------- | -------- | ------- | -------------------------------------------------- |
+| Email       | Textbox | +        | -       | Email registered to City Mind v2                   |
+| Password    | Textbox | +        | -       | Password of the account registered to City Mind v2 |
 
 ###### Encryption key got corrupted
 
@@ -60,7 +60,7 @@ Please remove the integration and re-add it to make it work again.
 _Configuration -> Integrations -> {Integration} -> Options_ <br />
 
 | Fields name | Type    | Required | Default | Description                                        |
-|-------------|---------|----------|---------|----------------------------------------------------|
+| ----------- | ------- | -------- | ------- | -------------------------------------------------- |
 | Email       | Textbox | +        | -       | Email registered to City Mind v2                   |
 | Password    | Textbox | +        | -       | Password of the account registered to City Mind v2 |
 
@@ -86,8 +86,9 @@ Integration support store debug files which saves the data provided by `Read You
 ## Components
 
 ### Account
+
 | Entity Name                                            | Type   | Description                                                                                                         | Additional information                       |
-|--------------------------------------------------------|--------|---------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| ------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | CityMind {Account ID} Account Alert Exceeded threshold | Select | Allows to control which communication channel should receive an alert when daily consumption exceeded threshold     | Available options are: None, Email, SMS, All |
 | CityMind {Account ID} Account Alert Leak               | Select | Allows to control which communication channel should receive an alert when leak identified                          | Available options are: None, Email, SMS, All |
 | CityMind {Account ID} Account Alert Leak While Away    | Select | Allows to control which communication channel should receive an alert when leak identified when vacation is defined | Available options are: None, Email, SMS, All |
@@ -96,8 +97,9 @@ Integration support store debug files which saves the data provided by `Read You
 | CityMind {Account ID} Account Vacations                | Sensor | Indicates number of vacations set in the portal                                                                     | Attributes holds the vacations list          |
 
 ### Per meter
+
 | Entity Name                                           | Type   | Description                                                                      | Additional information                                 |
-|-------------------------------------------------------|--------|----------------------------------------------------------------------------------|--------------------------------------------------------|
+| ----------------------------------------------------- | ------ | -------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | CityMind {Meter Count} Meter Last Read                | Sensor | Represents the last read in m³                                                   | Statistics: Total Increment                            |
 | CityMind {Meter Count} Meter Monthly Consumption      | Sensor | Represents the monthly consumption in m³                                         | Statistics: Total Increment                            |
 | CityMind {Meter Count} Meter Today's Consumption      | Sensor | Represents the daily consumption in m³                                           | Statistics: Total Increment                            |
@@ -110,13 +112,15 @@ Integration support store debug files which saves the data provided by `Read You
 | CityMind {Meter Count} Low Rate Consumption           | Sensor | Represents the consumption below the threshold in m³                             | Statistics: Measurement                                |
 | CityMind {Meter Count} High Rate Consumption          | Sensor | Represents the consumption above the threshold in m³                             | Statistics: Measurement                                |
 
-*Last read and daily, monthly, low / high rate consumption's sensors are supporting Water energy*
-*Low, High, Sewage rates and threshold sensors category is configuration and will be available only when set by the service*
+_Last read and daily, monthly, low / high rate consumption's sensors are supporting Water energy_
+_Low, High, Sewage rates and threshold sensors category is configuration and will be available only when set by the service_
 
 ## Services
 
 ### Set Cost Parameters
+
 Set cost's parameters for specific meter:
+
 - Low Rate Consumption Threshold - Time to consider a device without activity as AWAY (any value between 10 and 1800 in seconds)
 - Low Rate - Low rate per cubic meter (m³) for consumption below the threshold
 - High Rate - High rate per cubic meter (m³) for consumption above the threshold
@@ -127,16 +131,17 @@ More details available in `Developer tools` -> `Services` -> `citymind_water_met
 ```yaml
 service: citymind_water_meter.set_cost_parameters
 data:
-  device_id: {Meter device ID}
+  device_id: { Meter device ID }
   low_rate_consumption_threshold: 7
   low_rate: 6.5
   high_rate: 13.5
   sewage_rate: 3.5
 ```
 
-*Will reload the integration*
+_Will reload the integration_
 
 ### Remove Cost Parameters
+
 Remove cost's parameters for specific meter
 
 More details available in `Developer tools` -> `Services` -> `citymind_water_meter.remove_cost_parameters`
@@ -144,27 +149,26 @@ More details available in `Developer tools` -> `Services` -> `citymind_water_met
 ```yaml
 service: citymind_water_meter.remove_cost_parameters
 data:
-  device_id: {Meter device ID}
+  device_id: { Meter device ID }
 ```
 
-*Will reload the integration*
-
+_Will reload the integration_
 
 ## Endpoints
 
 | Endpoint Name                            | Method | Description                                                                                         |
-|------------------------------------------|--------|-----------------------------------------------------------------------------------------------------|
+| ---------------------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
 | /api/citymind_water_meter/list           | GET    | List all the endpoints available (supporting multiple integrations), available once for integration |
 | /api/citymind_water_meter/{ENTRY_ID}/api | GET    | JSON of all raw data from the Read Your Meter Pro API, per integration                              |
 
 **Authentication: Requires long-living token from HA**
 
-
 ### Examples
 
 #### List
 
-*Request*
+_Request_
+
 ```bash
 curl https://ha_url:8123/api/citymind_water_meter/list
    -H "Accept: application/json"
@@ -178,7 +182,6 @@ curl https://ha_url:8123/api/citymind_water_meter/{ENTRY_ID}/api
    -H "Accept: application/json"
    -H "Authorization: Bearer {token}"
 ```
-
 
 ## Example of a History Chart
 
@@ -195,13 +198,13 @@ For this example you would need to have the [Lovelace Mini Graph Card](https://g
 It is a highly recommended UI feature.
 Install it using HACS.
 
-In the UI, add the following card to see a 24-hours, and a 7-days charts.  Replace the XXXXXXXXX with the Meter ID (מספר מונה):
+In the UI, add the following card to see a 24-hours, and a 7-days charts. Replace the XXXXXXXXX with the Meter ID (מספר מונה):
 
 ```yaml
 type: entities
 title: Water Meter
 entities:
-  - type: 'custom:mini-graph-card'
+  - type: "custom:mini-graph-card"
     name: 24 Hours Water Meter
     entities:
       - entity: sensor.citymind_XXXXXXXX_meter_last_read
@@ -210,7 +213,7 @@ entities:
     smoothing: false
     show:
       labels: true
-  - type: 'custom:mini-graph-card'
+  - type: "custom:mini-graph-card"
     name: 7 Days Water Consumption
     hours_to_show: 168
     group_by: date
@@ -221,7 +224,7 @@ entities:
       graph: bar
       state: false
   - type: weblink
-    url: 'https://rym-pro.com/#/'
+    url: "https://rym-pro.com/#/"
 ```
 
 ## Why water meters in Israel have the 100-Liter tics? (Only in Israel)
@@ -234,7 +237,7 @@ You can find all kosher water meters reasoning [in this article](https://www.zom
 
 Unfortunately, the 100 liter limitation in Israel reduces the water meter capabilities to identify water leaks.
 
-*Glatt Kosher water meters* can support fine metering resolution because they have automatic timers that shut the meter down completely during Saturdays.
+_Glatt Kosher water meters_ can support fine metering resolution because they have automatic timers that shut the meter down completely during Saturdays.
 
 ---
 
