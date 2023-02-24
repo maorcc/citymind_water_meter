@@ -1,11 +1,7 @@
 {
   "name": "City-Mind Water Meter",
-  "domains": [
-    "sensor"
-  ],
+  "domains": ["sensor"],
   "country": "IL",
-  "iot_class": [
-    "Cloud Polling"
-  ],
+  "iot_class": ["Cloud Polling"],
   "homeassistant": "2022.11.0"
 }

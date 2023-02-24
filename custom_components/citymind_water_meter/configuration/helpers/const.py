@@ -5,14 +5,9 @@ Following constants are mandatory for CORE:
     SUPPORTED_PLATFORMS - list of supported HA components to initialize
 """
 
-from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, STATE_OFF, STATE_ON
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 
 DOMAIN = "citymind_water_meter"
 DEFAULT_NAME = "CityMind"
 
-MAIN_VIEW = f"main_view_{DOMAIN}"
-
-DATA_KEYS = [
-    CONF_EMAIL,
-    CONF_PASSWORD
-]
+DATA_KEYS = [CONF_EMAIL, CONF_PASSWORD]

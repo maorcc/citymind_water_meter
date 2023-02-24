@@ -11,26 +11,26 @@
       }
     },
     "error": {
-        "invalid_credentials": "Email and/or password are not valid",
-        "auth_general_error": "General failure, please try again",
-        "not_found": "URL not found"
+      "invalid_credentials": "Email and/or password are not valid",
+      "auth_general_error": "General failure, please try again",
+      "not_found": "URL not found"
     }
   },
   "options": {
-      "step": {
-          "city_mind_additional_settings": {
-              "title": "Options for CityMind Water Meter.",
-              "description": "Set up options.",
-              "data": {
-                  "email": "Email",
-                  "password": "Password"
-              }
-          }
-      },
-      "error": {
-        "invalid_credentials": "Email and/or password are not valid",
-        "auth_general_error": "General failure, please try again",
-        "not_found": "URL not found"
+    "step": {
+      "city_mind_additional_settings": {
+        "title": "Options for CityMind Water Meter.",
+        "description": "Set up options.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
       }
+    },
+    "error": {
+      "invalid_credentials": "Email and/or password are not valid",
+      "auth_general_error": "General failure, please try again",
+      "not_found": "URL not found"
+    }
   }
 }

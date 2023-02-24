@@ -5,7 +5,3 @@ voluptuous
 
 aiohttp
 cryptography
-
-beautifulsoup4
-
-numpy

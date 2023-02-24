@@ -1,4 +1,3 @@
-
 set_cost_parameters:
   name: Set cost parameters
   description: Set cost parameters for specific water meter
