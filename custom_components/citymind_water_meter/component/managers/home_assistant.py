@@ -712,7 +712,6 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
                     state_class=SensorStateClass.MEASUREMENT,
                     icon=icon,
                     native_unit_of_measurement=config_unit,
-                    entity_category=EntityCategory.CONFIG,
                 )
 
                 self.entity_manager.set_entity(
