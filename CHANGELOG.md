@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.0.12
+
+_Minimum HA Version: 2024.1.0b0_
+
+- Adjust code to HA 2024.1.0
+- Remove sensor entity category
+
 ## 2.0.11
 
 - Fix error messages when data is not available
