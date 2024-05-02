@@ -271,7 +271,7 @@ class HomeAssistantManager:
 
         self.entity_manager.update()
 
-        self._hass.async_create_task(self.dispatch_all())
+        self._hass.create_task(self.dispatch_all())
 
         self._update_lock = False
 
