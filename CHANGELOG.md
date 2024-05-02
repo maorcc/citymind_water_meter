@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.14
+
+- Fix thread safe issues (HA v2024.5.x) - additional function called as async
+
 ## v2.0.13
 
 - Fix thread safe issues (HA v2024.5.x)
