@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.0.13
+
+- Fix thread safe issues (HA v2024.5.x)
+
 ## v2.0.12
 
 _Minimum HA Version: 2024.1.0b0_

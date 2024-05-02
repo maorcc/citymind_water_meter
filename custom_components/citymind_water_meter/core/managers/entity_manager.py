@@ -47,7 +47,7 @@ class EntityManager:
         return domain_data
 
     def update(self):
-        self.hass.async_create_task(self._async_update())
+        self.hass.create_task(self._async_update())
 
     async def _handle_disabled_entity(self, entity_id, entity: EntityData):
         entity_item = self.entity_registry.async_get(entity_id)
