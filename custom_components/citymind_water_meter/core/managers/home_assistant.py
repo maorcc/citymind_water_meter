@@ -180,7 +180,7 @@ class HomeAssistantManager:
         await self.async_update_entry()
 
     def _update_data_providers(self, now):
-        self._hass.async_create_task(self.async_update_data_providers())
+        self._hass.create_task(self.async_update_data_providers())
 
     async def async_update_entry(self, entry: ConfigEntry | None = None):
         entry_changed = entry is not None

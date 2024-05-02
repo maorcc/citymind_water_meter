@@ -9,11 +9,11 @@ import os
 import sys
 
 from custom_components.citymind_water_meter.component.api.api import IntegrationAPI
-from custom_components.citymind_water_meter.component.helpers.const import *
 from custom_components.citymind_water_meter.configuration.models.config_data import (
     ConfigData,
 )
 from custom_components.citymind_water_meter.core.helpers.enums import ConnectivityStatus
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 
 DATA_KEYS = [CONF_EMAIL, CONF_PASSWORD]
 
@@ -108,7 +108,9 @@ try:
 
 except KeyboardInterrupt:
     _LOGGER.info("Aborted")
-    loop.run_until_complete(instance.terminate())
 
 except Exception as rex:
     _LOGGER.error(f"Error: {rex}")
+
+finally:
+    loop.run_until_complete(instance.terminate())
