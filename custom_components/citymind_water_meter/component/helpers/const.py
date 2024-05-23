@@ -1,6 +1,7 @@
 """
 constants.
 """
+
 from datetime import timedelta
 
 import voluptuous as vol
@@ -23,7 +24,6 @@ UPDATE_DATA_INTERVALS = {
 }
 
 API_URL = "https://eu-customerportal-api.harmonyencoremdm.com"
-API_URL_V1 = f"{API_URL}/v1.1"
 
 CITY_MIND_WEBSITE = "https://rym-pro.com"
 
@@ -38,7 +38,6 @@ ENDPOINT_PARAMETER_ALERT_TYPE = "alert_type"
 ENDPOINT_CONSUMER = f"{API_URL}/consumer"
 
 ENDPOINT_CONSUMPTION = f"{API_URL}/consumption"
-ENDPOINT_CONSUMPTION_V1 = f"{API_URL_V1}/consumption"
 
 ENDPOINT_MUNICIPALS_OLD = f"{API_URL}/municipals"
 ENDPOINT_MUNICIPALS_NEW = f"{API_URL}/municipality"
@@ -52,8 +51,10 @@ ENDPOINT_CUSTOMER_SERVICE = f"{ENDPOINT_MUNICIPALS_OLD}/municipalCustomerService
 ENDPOINT_ALERTS_FOR_SETTINGS = f"{ENDPOINT_CONSUMER}/alertsForSettings"
 
 ENDPOINT_LAST_READ = f"{ENDPOINT_CONSUMPTION}/last-read"
-ENDPOINT_CONSUMPTION_DAILY = f"{ENDPOINT_CONSUMPTION}/daily/{{meter_id}}/{{yesterday}}/{{today}}"
-ENDPOINT_CONSUMPTION_MONTHLY = f"{ENDPOINT_CONSUMPTION_V1}/monthly/{{meter_id}}/{{current_month}}/{{last_day_month}}"
+ENDPOINT_CONSUMPTION_DAILY = (
+    f"{ENDPOINT_CONSUMPTION}/daily/{{meter_id}}/{{yesterday}}/{{today}}"
+)
+ENDPOINT_CONSUMPTION_MONTHLY = f"{API_URL}/v1.1/consumption/monthly/{{meter_id}}/{{current_month}}/{{last_day_month}}"
 ENDPOINT_VACATIONS = f"{ENDPOINT_CONSUMER}/vacations"
 ENDPOINT_MY_ALERTS = f"{ENDPOINT_CONSUMER}/myalerts"
 ENDPOINT_MY_ALERTS_SETTINGS = f"{ENDPOINT_CONSUMER}/myalerts/settings"
@@ -103,7 +104,9 @@ ME_MUNICIPAL_ID = "municipalId"
 
 CONSUMPTION_METER_COUNT = METER_COUNT
 CONSUMPTION_VALUE = "cons"
+CONSUMPTION_DATA = "consumptionData"
 CONSUMPTION_DATE = "consDate"
+
 CONSUMPTION_ESTIMATION_TYPE = "estimationType"
 CONSUMPTION_METER_STATUS_DESC = "meterStatusDesc"
 
@@ -128,6 +131,7 @@ ENDPOINT_DATA_UPDATE = {
     API_DATA_SECTION_MY_ALERTS: ENDPOINT_MY_ALERTS,
     API_DATA_SECTION_SETTINGS: ENDPOINT_MY_ALERTS_SETTINGS,
 }
+
 
 ENDPOINT_DATA_UPDATE_PER_METER = {
     API_DATA_SECTION_CONSUMPTION_DAILY: ENDPOINT_CONSUMPTION_DAILY,
