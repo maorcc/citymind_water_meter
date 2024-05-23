@@ -392,7 +392,10 @@ class IntegrationAPI(BaseAPI):
 
                     else:
                         metered_data = self.data.get(endpoint_key, {})
-                        metered_data[meter_count] = data
+                        if isinstance(data, dict) and "consumptionData" in data:
+                            metered_data[meter_count] = data.get("consumptionData")
+                        else:
+                            metered_data[meter_count] = data
 
                         if metered_data is None:
                             _LOGGER.debug(

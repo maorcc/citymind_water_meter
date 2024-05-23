@@ -23,6 +23,7 @@ UPDATE_DATA_INTERVALS = {
 }
 
 API_URL = "https://eu-customerportal-api.harmonyencoremdm.com"
+API_URL_V1 = f"{API_URL}/v1.1"
 
 CITY_MIND_WEBSITE = "https://rym-pro.com"
 
@@ -37,6 +38,7 @@ ENDPOINT_PARAMETER_ALERT_TYPE = "alert_type"
 ENDPOINT_CONSUMER = f"{API_URL}/consumer"
 
 ENDPOINT_CONSUMPTION = f"{API_URL}/consumption"
+ENDPOINT_CONSUMPTION_V1 = f"{API_URL_V1}/consumption"
 
 ENDPOINT_MUNICIPALS_OLD = f"{API_URL}/municipals"
 ENDPOINT_MUNICIPALS_NEW = f"{API_URL}/municipality"
@@ -51,7 +53,7 @@ ENDPOINT_ALERTS_FOR_SETTINGS = f"{ENDPOINT_CONSUMER}/alertsForSettings"
 
 ENDPOINT_LAST_READ = f"{ENDPOINT_CONSUMPTION}/last-read"
 ENDPOINT_CONSUMPTION_DAILY = f"{ENDPOINT_CONSUMPTION}/daily/{{meter_id}}/{{yesterday}}/{{today}}"
-ENDPOINT_CONSUMPTION_MONTHLY = f"{ENDPOINT_CONSUMPTION}/monthly/{{meter_id}}/{{current_month}}/{{last_day_month}}"
+ENDPOINT_CONSUMPTION_MONTHLY = f"{ENDPOINT_CONSUMPTION_V1}/monthly/{{meter_id}}/{{current_month}}/{{last_day_month}}"
 ENDPOINT_VACATIONS = f"{ENDPOINT_CONSUMER}/vacations"
 ENDPOINT_MY_ALERTS = f"{ENDPOINT_CONSUMER}/myalerts"
 ENDPOINT_MY_ALERTS_SETTINGS = f"{ENDPOINT_CONSUMER}/myalerts/settings"
