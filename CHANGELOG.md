@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.0.15
+
+- Use https://eu-customerportal-api.harmonyencoremdm.com as the new api url
+
+  Known issues:
+  Wrong url for municipality/{municipality_id}/messages
+
 ## v2.0.14
 
 - Fix thread safe issues (HA v2024.5.x) - additional function called as async

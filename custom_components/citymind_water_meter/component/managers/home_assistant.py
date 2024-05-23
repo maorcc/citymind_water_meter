@@ -1,6 +1,7 @@
 """
 HA Manager.
 """
+
 from __future__ import annotations
 
 from asyncio import sleep
@@ -64,6 +65,7 @@ from ..helpers.const import (
     ATTR_LOW_RATE_CONSUMPTION,
     ATTR_MEDIA_TYPES,
     CITY_MIND_WEBSITE,
+    CONSUMPTION_DATA,
     CONSUMPTION_DATE,
     CONSUMPTION_FORECAST_ESTIMATED_CONSUMPTION,
     CONSUMPTION_METER_COUNT,
@@ -898,7 +900,10 @@ class CityMindHomeAssistantManager(HomeAssistantManager):
 
             if data is not None:
                 consumption_info = data.get(str(meter_count))
-
+                if isinstance(consumption_info, dict) and consumption_info.get(
+                    CONSUMPTION_DATA
+                ):
+                    consumption_info = consumption_info.get(CONSUMPTION_DATA)
                 for consumption_item in consumption_info:
                     if consumption_item is not None:
                         consumption_meter_count = consumption_item.get(
