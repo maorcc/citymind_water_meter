@@ -1,32 +1,58 @@
-"""
-Support for sensors.
-"""
-from __future__ import annotations
-
 import logging
 
-from .core.components.sensor import CoreSensor
-from .core.helpers.setup_base_entry import async_setup_base_entry
+from homeassistant.components.sensor import SensorEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ATTR_ICON, ATTR_STATE, Platform
+from homeassistant.core import HomeAssistant
+
+from .common.base_entity import IntegrationBaseEntity, async_setup_base_entry
+from .common.entity_descriptions import IntegrationSensorEntityDescription
+from .common.enums import EntityType
+from .managers.coordinator import Coordinator
 
 _LOGGER = logging.getLogger(__name__)
 
 
-async def async_setup_entry(hass, config_entry, async_add_devices):
-    """Set up the component."""
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities
+):
     await async_setup_base_entry(
         hass,
-        config_entry,
-        async_add_devices,
-        CoreSensor.get_domain(),
-        CoreSensor.get_component,
+        entry,
+        Platform.SENSOR,
+        IntegrationSensorEntity,
+        async_add_entities,
     )
 
 
-async def async_unload_entry(hass, config_entry):
-    _LOGGER.info(f"Unload entry for {CoreSensor.get_domain()} domain: {config_entry}")
+class IntegrationSensorEntity(IntegrationBaseEntity, SensorEntity):
+    """Representation of a sensor."""
 
-    return True
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entity_description: IntegrationSensorEntityDescription,
+        coordinator: Coordinator,
+        entity_type: EntityType,
+        item_id: str | None,
+    ):
+        super().__init__(hass, entity_description, coordinator, entity_type, item_id)
 
+        self._attr_device_class = entity_description.device_class
+        self._attr_native_unit_of_measurement = (
+            entity_description.native_unit_of_measurement
+        )
 
-async def async_remove_entry(hass, entry) -> None:
-    _LOGGER.info(f"Remove entry for {CoreSensor.get_domain()} entry: {entry}")
+    def update_component(self, data):
+        """Fetch new state parameters for the sensor."""
+        if data is not None:
+            state = data.get(ATTR_STATE)
+            icon = data.get(ATTR_ICON)
+
+            self._attr_native_value = state
+
+            if icon is not None:
+                self._attr_icon = icon
+
+        else:
+            self._attr_native_value = None

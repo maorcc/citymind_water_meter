@@ -5,24 +5,13 @@ import logging
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_PASSWORD
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.helpers.device_registry import DeviceEntry
 
-from .component.helpers.common import get_ha
-from .component.helpers.const import (
-    API_DATA_SECTION_METERS,
-    API_DATA_SECTION_MY_ALERTS,
-    API_DATA_SECTION_MY_MESSAGES,
-    API_DATA_SECTION_SETTINGS,
-    ENDPOINT_DATA_UPDATE_PER_METER,
-    METER_COUNT,
-    METER_SERIAL_NUMBER,
-    STORAGE_DATA_METERS,
-)
-from .component.managers.home_assistant import CityMindHomeAssistantManager
-from .configuration.helpers.const import DEFAULT_NAME
+from .common.consts import DOMAIN
+from .common.enums import EntityType
+from .managers.coordinator import Coordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,80 +22,79 @@ async def async_get_config_entry_diagnostics(
     """Return diagnostics for a config entry."""
     _LOGGER.debug("Starting diagnostic tool")
 
-    manager = get_ha(hass, entry.entry_id)
+    coordinator = hass.data[DOMAIN][entry.entry_id]
 
-    return _async_get_diagnostics(hass, manager, entry)
+    return _async_get_diagnostics(hass, coordinator, entry)
 
 
 async def async_get_device_diagnostics(
     hass: HomeAssistant, entry: ConfigEntry, device: DeviceEntry
 ) -> dict[str, Any]:
     """Return diagnostics for a device entry."""
-    manager = get_ha(hass, entry.entry_id)
+    coordinator = hass.data[DOMAIN][entry.entry_id]
 
-    return _async_get_diagnostics(hass, manager, entry, device)
+    return _async_get_diagnostics(hass, coordinator, entry, device)
 
 
 @callback
 def _async_get_diagnostics(
     hass: HomeAssistant,
-    manager: CityMindHomeAssistantManager,
+    coordinator: Coordinator,
     entry: ConfigEntry,
     device: DeviceEntry | None = None,
 ) -> dict[str, Any]:
     """Return diagnostics for a config entry."""
     _LOGGER.debug("Getting diagnostic information")
 
-    data = manager.config_data.to_dict()
+    debug_data = coordinator.get_debug_data()
 
-    data[STORAGE_DATA_METERS] = manager.storage_api.data[STORAGE_DATA_METERS]
-
-    if CONF_PASSWORD in data:
-        data.pop(CONF_PASSWORD)
-
-    data["disabled_by"] = entry.disabled_by
-    data["disabled_polling"] = entry.pref_disable_polling
-
-    meters = manager.api.data.get(API_DATA_SECTION_METERS, [])
-
-    additional_details = [
-        API_DATA_SECTION_MY_MESSAGES,
-        API_DATA_SECTION_MY_ALERTS,
-        API_DATA_SECTION_SETTINGS,
-    ]
-
-    consumptions = {}
-
-    for consumption_key in ENDPOINT_DATA_UPDATE_PER_METER.keys():
-        consumptions[consumption_key] = manager.api.data.get(consumption_key)
-
-    for additional_details_key in additional_details:
-        data[additional_details_key] = manager.api.data.get(additional_details_key)
-
-    if CONF_PASSWORD in data:
-        data.pop(CONF_PASSWORD)
+    data = {
+        "disabled_by": entry.disabled_by,
+        "disabled_polling": entry.pref_disable_polling,
+    }
 
     if device:
-        device_name = next(iter(device.identifiers))[1]
+        data["config"] = debug_data["config"]
+        data["data"] = debug_data["data"]
+        data["processors"] = debug_data["processors"]
 
-        for meter in meters:
-            meter_id = meter.get(METER_SERIAL_NUMBER)
-            if manager.get_meter_name(meter_id) == device_name:
-                _LOGGER.debug(f"Getting diagnostic information for meter #{meter_id}")
+        device_data = coordinator.get_device_data(device.model, device.identifiers)
 
-                data |= _async_device_as_dict(hass, meter, meter_id, consumptions)
+        data |= _async_device_as_dict(
+            hass,
+            device.identifiers,
+            device_data,
+        )
 
-                break
     else:
-        _LOGGER.debug("Getting diagnostic information for all meters")
+        _LOGGER.debug("Getting diagnostic information for all devices")
+
+        data = {
+            "config": debug_data["config"],
+            "data": debug_data["data"],
+            "processors": debug_data["processors"],
+        }
+
+        processor_data = debug_data["processors"]
+        account_data = processor_data[EntityType.ACCOUNT]
+        meter_data = processor_data[EntityType.METER]
 
         data.update(
             meters=[
                 _async_device_as_dict(
-                    hass, meter, meter.get(METER_SERIAL_NUMBER), consumptions
+                    hass,
+                    coordinator.get_device_identifiers(
+                        EntityType.METER, item.get("meter_id")
+                    ),
+                    item,
                 )
-                for meter in meters
-            ]
+                for item in meter_data
+            ],
+            account=_async_device_as_dict(
+                hass,
+                coordinator.get_device_identifiers(EntityType.ACCOUNT),
+                account_data,
+            ),
         )
 
     return data
@@ -114,36 +102,22 @@ def _async_get_diagnostics(
 
 @callback
 def _async_device_as_dict(
-    hass: HomeAssistant, data: dict, unique_id: str, consumptions: dict
+    hass: HomeAssistant, identifiers, additional_data: dict
 ) -> dict[str, Any]:
-    """Represent a Shinobi monitor as a dictionary."""
+    """Represent an EdgeOS based device as a dictionary."""
     device_registry = dr.async_get(hass)
     entity_registry = er.async_get(hass)
-    ha_device = device_registry.async_get_device(
-        identifiers={(DEFAULT_NAME, unique_id)}
-    )
 
-    meter_count = data.get(METER_COUNT)
-
-    if meter_count is not None:
-        meter_consumptions = {}
-
-        for consumption_key in consumptions:
-            consumption_data = consumptions[consumption_key]
-            consumption_info = consumption_data.get(str(meter_count))
-
-            meter_consumptions[
-                consumption_key.replace("consumption-", "")
-            ] = consumption_info
-
-        data["consumptions"] = meter_consumptions
+    ha_device = device_registry.async_get_device(identifiers=identifiers)
+    data = {}
 
     if ha_device:
-        data["home_assistant"] = {
+        data["device"] = {
             "name": ha_device.name,
             "name_by_user": ha_device.name_by_user,
             "disabled": ha_device.disabled,
             "disabled_by": ha_device.disabled_by,
+            "data": additional_data,
             "entities": [],
         }
 
@@ -162,7 +136,7 @@ def _async_device_as_dict(
                 # The context doesn't provide useful information in this case.
                 state_dict.pop("context", None)
 
-            data["home_assistant"]["entities"].append(
+            data["device"]["entities"].append(
                 {
                     "disabled": entity_entry.disabled,
                     "disabled_by": entity_entry.disabled_by,

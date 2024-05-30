@@ -1,36 +1,107 @@
 {
-  "config": {
-    "step": {
-      "user": {
-        "title": "Set up CityMind account",
-        "description": "Set up your CityMind credentials",
-        "data": {
-          "email": "Email",
-          "password": "Password"
+    "config": {
+        "error": {
+            "auth_general_error": "General failure, please try again",
+            "invalid_credentials": "Email and/or password are not valid",
+            "not_found": "URL not found"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "email": "Email",
+                    "password": "Password"
+                },
+                "description": "Set up your CityMind credentials",
+                "title": "Set up CityMind account"
+            }
         }
-      }
     },
-    "error": {
-      "invalid_credentials": "Email and/or password are not valid",
-      "auth_general_error": "General failure, please try again",
-      "not_found": "URL not found"
-    }
-  },
-  "options": {
-    "step": {
-      "city_mind_additional_settings": {
-        "title": "Options for CityMind Water Meter.",
-        "description": "Set up options.",
-        "data": {
-          "email": "Email",
-          "password": "Password"
+    "entity": {
+        "number": {
+            "high_rate_cost": {
+                "name": "High Rate Cost"
+            },
+            "low_rate_consumption_threshold": {
+                "name": "Low Rate Consumption Threshold"
+            },
+            "low_rate_cost": {
+                "name": "Low Rate Cost"
+            },
+            "sewage_cost": {
+                "name": "Sewage Cost"
+            }
+        },
+        "select": {
+            "alert_exceeded_threshold": {
+                "name": "Daily Threshold Exceeded",
+                "state": {
+                    "0": "None",
+                    "1": "SMS",
+                    "3": "EMail",
+                    "4": "All"
+                }
+            },
+            "alert_leak": {
+                "name": "Leak Alert",
+                "state": {
+                    "0": "None",
+                    "1": "SMS",
+                    "3": "EMail",
+                    "4": "All"
+                }
+            },
+            "alert_leak_while_away": {
+                "name": "Consumption Alert While Away",
+                "state": {
+                    "0": "None",
+                    "1": "SMS",
+                    "3": "EMail",
+                    "4": "All"
+                }
+            }
+        },
+        "sensor": {
+            "alerts": {
+                "name": "Alert"
+            },
+            "consumption_forecast": {
+                "name": "Consumption Forecast"
+            },
+            "high_rate_consumption": {
+                "name": "High Rate Consumption"
+            },
+            "last_read": {
+                "name": "Last Read"
+            },
+            "low_rate_consumption": {
+                "name": "Low Rate Consumption"
+            },
+            "monthly_consumption": {
+                "name": "Monthly Consumption"
+            },
+            "todays_consumption": {
+                "name": "Today's Consumption"
+            },
+            "yesterdays_consumption": {
+                "name": "Yesterday's Consumption"
+            }
         }
-      }
     },
-    "error": {
-      "invalid_credentials": "Email and/or password are not valid",
-      "auth_general_error": "General failure, please try again",
-      "not_found": "URL not found"
+    "options": {
+        "error": {
+            "auth_general_error": "General failure, please try again",
+            "invalid_credentials": "Email and/or password are not valid",
+            "not_found": "URL not found"
+        },
+        "step": {
+            "city_mind_additional_settings": {
+                "data": {
+                    "email": "Email",
+                    "password": "Password"
+                },
+                "description": "Set up options.",
+                "title": "Options for CityMind Water Meter."
+            }
+        }
     }
-  }
 }

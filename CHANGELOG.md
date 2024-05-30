@@ -1,5 +1,11 @@
 # Changelog
 
+## v3.0.0
+
+- Refactor integration
+- Fully translated to Hebrew
+- Isolated API logic, data processing and HA functionality
+
 ## v2.0.15
 
 - Use https://eu-customerportal-api.harmonyencoremdm.com as the new api url

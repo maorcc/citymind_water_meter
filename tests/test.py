@@ -8,11 +8,26 @@ import logging
 import os
 import sys
 
-from custom_components.citymind_water_meter.component.api.api import IntegrationAPI
-from custom_components.citymind_water_meter.configuration.models.config_data import (
-    ConfigData,
+from custom_components.citymind_water_meter.common.connectivity_status import (
+    ConnectivityStatus,
 )
-from custom_components.citymind_water_meter.core.helpers.enums import ConnectivityStatus
+from custom_components.citymind_water_meter.common.consts import (
+    SIGNAL_API_STATUS,
+    SIGNAL_DATA_CHANGED,
+)
+from custom_components.citymind_water_meter.common.enums import EntityType
+from custom_components.citymind_water_meter.data_processors.account_processor import (
+    AccountProcessor,
+)
+from custom_components.citymind_water_meter.data_processors.base_processor import (
+    BaseProcessor,
+)
+from custom_components.citymind_water_meter.data_processors.meter_processor import (
+    MeterProcessor,
+)
+from custom_components.citymind_water_meter.managers.config_manager import ConfigManager
+from custom_components.citymind_water_meter.managers.rest_api import RestAPI
+from custom_components.citymind_water_meter.models.config_data import ConfigData
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 
 DATA_KEYS = [CONF_EMAIL, CONF_PASSWORD]
@@ -36,14 +51,17 @@ _LOGGER = logging.getLogger(__name__)
 class Test:
     """Test Class."""
 
-    def __init__(self):
+    def __init__(self, event_loop):
         """Do initialization of test class instance, Returns None."""
 
-        self._api = IntegrationAPI(
-            None, self._api_data_changed, self._api_status_changed
-        )
-
         self._config_data: ConfigData | None = None
+        self._api: RestAPI | None = None
+        self._loop = event_loop
+
+        self._config_manager = ConfigManager(None, None)
+        self._account_processor: AccountProcessor | None = None
+        self._meter_processor: MeterProcessor | None = None
+        self._processors: dict[EntityType, BaseProcessor] | None = None
 
     async def initialize(self):
         """Do initialization of test dependencies instances, Returns None."""
@@ -58,26 +76,60 @@ class Test:
 
             data[key] = value
 
-        self._config_data = ConfigData.from_dict(data)
+        await self._config_manager.initialize(data)
 
-        await self._api.initialize(self._config_data)
+        self._account_processor = AccountProcessor(self._config_manager)
+        self._meter_processor = MeterProcessor(self._config_manager)
+
+        self._processors = {
+            EntityType.ACCOUNT: self._account_processor,
+            EntityType.METER: self._meter_processor,
+        }
+
+        self._config_data = self._config_manager.config_data
+
+        self._api = RestAPI(None, self._config_data)
+        self._api.set_local_async_dispatcher_send(self.local_async_dispatcher_send)
+
+        await self._api.initialize()
 
     async def terminate(self):
         """Do termination of API, Returns None."""
-
         await self._api.terminate()
 
-    async def _api_data_changed(self):
-        data = self._get_api_data()
+    def local_async_dispatcher_send(self, signal, entry_id, *args):
+        _LOGGER.info(f"{signal} {entry_id} {args}")
 
-        _LOGGER.info(f"API Data: {data}")
+        if signal == SIGNAL_API_STATUS:
+            status = args[0]
 
-    async def _api_status_changed(self, status: ConnectivityStatus):
-        _LOGGER.info(f"API Status changed to {status.name}")
+            if status == ConnectivityStatus.Connected:
+                _LOGGER.debug("connected")
 
-        if self._api.status == ConnectivityStatus.Connected:
-            await self._api.async_update()
-            await self._api.terminate()
+        elif signal == SIGNAL_DATA_CHANGED:
+            _LOGGER.debug("data changed")
+
+    async def update(self):
+        for i in range(1, 10):
+            if self._api.status != ConnectivityStatus.Connected:
+                await asyncio.sleep(1000)
+
+        print("update")
+
+        await self._api.update()
+
+        for processor_type in self._processors:
+            processor = self._processors[processor_type]
+            processor.update(self._api.data, self._api.today, self._api.yesterday)
+
+        account = self._account_processor.get().to_dict()
+        meters = self._meter_processor.get_all()
+
+        _LOGGER.info(json.dumps(self._api.data, indent=4, default=str))
+        _LOGGER.info(f"account: {account}")
+
+        for meter in meters:
+            _LOGGER.info(f"{meter}")
 
     def _get_api_data(self) -> str:
         data = self._api.data
@@ -100,11 +152,13 @@ class Test:
         return result
 
 
-instance = Test()
+
 loop = asyncio.new_event_loop()
+instance = Test(loop)
 
 try:
     loop.run_until_complete(instance.initialize())
+    loop.run_until_complete(instance.update())
 
 except KeyboardInterrupt:
     _LOGGER.info("Aborted")

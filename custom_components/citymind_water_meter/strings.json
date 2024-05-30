@@ -32,5 +32,76 @@
       "auth_general_error": "General failure, please try again",
       "not_found": "URL not found"
     }
+  },
+  "entity": {
+    "number": {
+      "low_rate_cost": {
+        "name": "Low Rate Cost"
+      },
+      "high_rate_cost": {
+        "name": "High Rate Cost"
+      },
+      "sewage_cost": {
+        "name": "Sewage Cost"
+      },
+      "low_rate_consumption_threshold": {
+        "name": "Low Rate Consumption Threshold"
+      }
+    },
+    "select": {
+      "alert_exceeded_threshold": {
+        "name": "Daily Threshold Exceeded",
+        "state": {
+          "0": "None",
+          "1": "SMS",
+          "3": "EMail",
+          "4": "All"
+        }
+      },
+      "alert_leak": {
+        "name": "Leak Alert",
+        "state": {
+          "0": "None",
+          "1": "SMS",
+          "3": "EMail",
+          "4": "All"
+        }
+      },
+      "alert_leak_while_away": {
+        "name": "Consumption Alert While Away",
+        "state": {
+          "0": "None",
+          "1": "SMS",
+          "3": "EMail",
+          "4": "All"
+        }
+      }
+    },
+    "sensor": {
+      "consumption_forecast": {
+        "name": "Consumption Forecast"
+      },
+      "last_read": {
+        "name": "Last Read"
+      },
+      "monthly_consumption": {
+        "name": "Monthly Consumption"
+      },
+      "todays_consumption": {
+        "name": "Today's Consumption"
+      },
+      "yesterdays_consumption": {
+        "name": "Yesterday's Consumption"
+      },
+      "high_rate_consumption": {
+        "name": "High Rate Consumption"
+      },
+      "low_rate_consumption": {
+        "name": "Low Rate Consumption"
+      },
+      "alerts": {
+        "name": "Alert"
+      }
+    }
   }
 }

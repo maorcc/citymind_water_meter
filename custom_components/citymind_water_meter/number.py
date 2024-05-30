@@ -1,14 +1,14 @@
 from abc import ABC
 import logging
 
-from homeassistant.components.select import SelectEntity
+from homeassistant.components.number import NumberEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_STATE, Platform
 from homeassistant.core import HomeAssistant
 
 from .common.base_entity import IntegrationBaseEntity, async_setup_base_entry
-from .common.consts import ACTION_ENTITY_SELECT_OPTION
-from .common.entity_descriptions import IntegrationSelectEntityDescription
+from .common.consts import ACTION_ENTITY_SET_NATIVE_VALUE
+from .common.entity_descriptions import IntegrationNumberEntityDescription
 from .common.enums import EntityType
 from .managers.coordinator import Coordinator
 
@@ -21,19 +21,19 @@ async def async_setup_entry(
     await async_setup_base_entry(
         hass,
         entry,
-        Platform.SELECT,
-        IntegrationSelectEntity,
+        Platform.NUMBER,
+        IntegrationNumberEntity,
         async_add_entities,
     )
 
 
-class IntegrationSelectEntity(IntegrationBaseEntity, SelectEntity, ABC):
+class IntegrationNumberEntity(IntegrationBaseEntity, NumberEntity, ABC):
     """Representation of a sensor."""
 
     def __init__(
         self,
         hass: HomeAssistant,
-        entity_description: IntegrationSelectEntityDescription,
+        entity_description: IntegrationNumberEntityDescription,
         coordinator: Coordinator,
         entity_type: EntityType,
         item_id: str | None,
@@ -42,19 +42,22 @@ class IntegrationSelectEntity(IntegrationBaseEntity, SelectEntity, ABC):
 
         self.entity_description = entity_description
 
-        self._attr_options = entity_description.options
-        self._attr_current_option = entity_description.options[0]
+        self._attr_native_min_value = entity_description.native_min_value
+        self._attr_native_max_value = entity_description.native_max_value
+        self._attr_native_step = 1
 
-    async def async_select_option(self, option: str) -> None:
+    async def async_set_native_value(self, value: float) -> None:
         """Change the selected option."""
-        await self.async_execute_device_action(ACTION_ENTITY_SELECT_OPTION, option)
+        await self.async_execute_device_action(
+            ACTION_ENTITY_SET_NATIVE_VALUE, int(value)
+        )
 
     def update_component(self, data):
         """Fetch new state parameters for the sensor."""
         if data is not None:
             state = data.get(ATTR_STATE)
 
-            self._attr_current_option = state
+            self._attr_native_value = int(state)
 
         else:
-            self._attr_current_option = self.entity_description.options[0]
+            self._attr_native_value = None
