@@ -128,7 +128,7 @@ class IntegrationBaseEntity(CoordinatorEntity):
             self._entity_description, self._meter_id, key
         )
 
-        if self._meter_id is None:
+        if self._entity_description.entity_type == EntityType.ACCOUNT:
             await async_device_action(self._entity_description, *kwargs)
 
         else:

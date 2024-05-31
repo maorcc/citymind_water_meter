@@ -40,12 +40,7 @@ class AccountProcessor(BaseProcessor):
         return self._account
 
     def _get_device_info_name(self, meter_id: str | None = None):
-        device = self.get()
-        parts = [device.full_name, str(device.account_number)]
-
-        relevant_parts = [part for part in parts if part is not None]
-
-        name = " ".join(relevant_parts)
+        name = self._get_account_name()
 
         return name
 
@@ -81,6 +76,9 @@ class AccountProcessor(BaseProcessor):
             settings = self._api_data.get(API_DATA_SECTION_SETTINGS)
 
             account.account_number = self._account_number
+            account.first_name = self._first_name
+            account.last_name = self._last_name
+
             account.municipal_id = customer_service_section.get(
                 CUSTOMER_SERVICE_PHONE_MUNICIPAL_ID
             )

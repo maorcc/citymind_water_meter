@@ -33,13 +33,6 @@ class AccountData:
         self.alert_exceeded_threshold = None
         self.alert_leak_while_away = None
 
-    @property
-    def full_name(self):
-        parts = [self.first_name, self.last_name]
-        full_name = " ".join([p for p in parts if p is not None])
-
-        return full_name
-
     def to_dict(self):
         obj = {
             "account_number": self.account_number,

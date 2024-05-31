@@ -80,7 +80,7 @@ class MeterProcessor(BaseProcessor):
         device = self.get_data(meter_id)
         device_name = self._get_device_info_name(device.meter_id)
 
-        parent_device_id = self._get_device_info_unique_id(self._account_number)
+        parent_device_id = self._get_account_name()
         unique_id = self._get_device_info_unique_id(device.meter_id)
 
         device_info = DeviceInfo(

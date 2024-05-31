@@ -310,7 +310,7 @@ class Coordinator(DataUpdateCoordinator):
                 )
 
             else:
-                if item_id is None:
+                if entity_description.entity_type == EntityType.ACCOUNT:
                     result = handler(entity_description)
 
                 else:
@@ -351,10 +351,10 @@ class Coordinator(DataUpdateCoordinator):
     def get_device_action(
         self,
         entity_description: IntegrationEntityDescription,
-        monitor_id: str | None,
+        item_id: str | None,
         action_key: str,
     ) -> Callable:
-        device_data = self.get_data(entity_description, monitor_id)
+        device_data = self.get_data(entity_description, item_id)
 
         actions = device_data.get(ATTR_ACTIONS)
         async_action = actions.get(action_key)
