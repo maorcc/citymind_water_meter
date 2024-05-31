@@ -3,7 +3,12 @@ import logging
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.util import slugify
 
-from ..common.consts import API_DATA_SECTION_ME, ME_ACCOUNT_NUMBER, ME_LAST_NAME, ME_FIRST_NAME
+from ..common.consts import (
+    API_DATA_SECTION_ME,
+    ME_ACCOUNT_NUMBER,
+    ME_FIRST_NAME,
+    ME_LAST_NAME,
+)
 from ..common.enums import EntityType
 from ..managers.config_manager import ConfigManager
 from ..models.config_data import ConfigData
