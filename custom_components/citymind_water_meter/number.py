@@ -44,7 +44,7 @@ class IntegrationNumberEntity(IntegrationBaseEntity, NumberEntity, ABC):
 
         self._attr_native_min_value = entity_description.native_min_value
         self._attr_native_max_value = entity_description.native_max_value
-        self._attr_native_step = 1
+        self._attr_native_step = entity_description.native_step
 
     async def async_set_native_value(self, value: float) -> None:
         """Change the selected option."""

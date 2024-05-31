@@ -5,6 +5,14 @@
 - Refactor integration
 - Fully translated to Hebrew
 - Isolated API logic, data processing and HA functionality
+- Move cost configuration into meter device (per meter) using number entities
+  - Low Rate Cost - Default 7.955 ILS/m³
+  - High Rate Cost - Default 14.6 ILS/m³
+  - Low Rate Cost - Default 7.955 ILS/m³
+  - Sewage Cost - Default 0 ILS/m³
+  - Low Rate Consumption Threshold - Default 3.5 m³ (Equivalent to 7m³ per 2 months of 1 person in property)
+
+_Default values taken from [gov.il](https://www.gov.il/he/pages/rates_general1) and up to date to January 1st 2024_
 
 ## v2.0.15
 

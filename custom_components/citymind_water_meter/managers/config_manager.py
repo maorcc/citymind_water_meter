@@ -1,3 +1,4 @@
+from copy import copy
 import json
 import logging
 import sys
@@ -14,6 +15,7 @@ from homeassistant.helpers.storage import Store
 
 from ..common.consts import (
     CONFIGURATION_FILE,
+    DEFAULT_METER_CONFIG,
     DEFAULT_NAME,
     DOMAIN,
     INVALID_TOKEN_SECTION,
@@ -309,12 +311,7 @@ class ConfigManager:
 
     async def _set_meter_config(self, meter_id: str, key: str, value: int) -> None:
         if meter_id not in self.meters:
-            self._data[STORAGE_DATA_METERS][meter_id] = {
-                STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD: 0,
-                STORAGE_DATA_METER_LOW_RATE: 0,
-                STORAGE_DATA_METER_HIGH_RATE: 0,
-                STORAGE_DATA_METER_SEWAGE_RATE: 0,
-            }
+            self._data[STORAGE_DATA_METERS][meter_id] = copy(DEFAULT_METER_CONFIG)
 
         self._data[STORAGE_DATA_METERS][meter_id][key] = value
 
