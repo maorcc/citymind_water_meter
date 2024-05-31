@@ -2,17 +2,28 @@
 
 ## v3.0.0
 
+**Breaking Changes:**
+
+- Device & Entity names changed
+  - Meter device name is now constructed by meter's address and serial number
+  - Account device name is now constructed by owner's first & last Name and account number
+- Alert settings dropdown are now being represented as:
+  - Alert leak via Email - binary sensor
+  - Others - switch
+
+**What's Changed:**
+
 - Refactor integration
 - Isolated API logic, data processing and HA functionality
 - Add tool to translate component to additional languages automatically using Google Translate
 - Fully translated to Hebrew
+- Extend diagnostic file to support all data collected from API and internal state data
 - Move cost configuration into meter device (per meter) using number entities
   - Low Rate Cost - Default 7.955 ILS/m³
   - High Rate Cost - Default 14.6 ILS/m³
   - Low Rate Cost - Default 7.955 ILS/m³
   - Sewage Cost - Default 0 ILS/m³
   - Low Rate Consumption Threshold - Default 3.5 m³ (Equivalent to 7m³ per 2 months of 1 person in property)
-- **Breaking Change:** Dropdowns of alert settings are now represented within binary sensor (only leak via email) & switch components
 
 _Default values taken from [gov.il](https://www.gov.il/he/pages/rates_general1) and up to date to January 1st 2024_
 

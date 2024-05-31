@@ -64,9 +64,51 @@ _Configuration -> Integrations -> {Integration} -> Options_ <br />
 | Email       | Textbox | +        | -       | Email registered to City Mind v2                   |
 | Password    | Textbox | +        | -       | Password of the account registered to City Mind v2 |
 
-#### Debugging
+## Components
 
-**Logging**
+### Account
+
+| Entity Name                                                        | Type          | Description                                                                                | Additional information           |
+| ------------------------------------------------------------------ | ------------- | ------------------------------------------------------------------------------------------ | -------------------------------- |
+| {Owner} {Account ID} Alerts                                        | Sensor        | Indicates number of alerts set in the portal                                               | Attributes holds the alerts list |
+| {Owner} {Account ID} Consumption Alert Leak (Email)                | Binary Sensor | Allows to control which communication channel should receive an alert when leak identified |                                  |
+| {Owner} {Account ID} Consumption Alert Leak (SMS)                  | Switch        | Allows to control which communication channel should receive an alert when leak identified |                                  |
+| {Owner} {Account ID} Consumption Alert While Away (Email)          | Switch        | Allows to control which communication channel should receive an alert when leak identified |                                  |
+| {Owner} {Account ID} Consumption Alert While Away (SMS)            | Switch        | Allows to control which communication channel should receive an alert when leak identified |                                  |
+| {Owner} {Account ID} Consumption Alert Exceeded Threshould (Email) | Switch        | Allows to control which communication channel should receive an alert when leak identified |                                  |
+| {Owner} {Account ID} Consumption Alert Exceeded Threshould (SMS)   | Switch        | Allows to control which communication channel should receive an alert when leak identified |                                  |
+
+### Per meter
+
+| Entity Name                                            | Type   | Description                                                                      | Additional information                                 |
+| ------------------------------------------------------ | ------ | -------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| {Address} {Meter Count} Last Read                      | Sensor | Represents the last read in m³                                                   | Statistics: Total Increment                            |
+| {Address} {Meter Count} Monthly Consumption            | Sensor | Represents the monthly consumption in m³                                         | Statistics: Total Increment                            |
+| {Address} {Meter Count} Today's Consumption            | Sensor | Represents the daily consumption in m³                                           | Statistics: Total Increment                            |
+| {Address} {Meter Count} Yesterday's Consumption        | Sensor | Represents the yesterday's consumption in m³                                     | Statistics: Total Increment                            |
+| {Address} {Meter Count} Consumption Forecast           | Sensor | Represents the monthly consumption forecast in m³                                | Statistics: Total, reset at the beginning of the month |
+| {Address} {Meter Count} Low Rate Consumption           | Sensor | Represents the consumption below the threshold in m³                             | Statistics: Measurement                                |
+| {Address} {Meter Count} High Rate Consumption          | Sensor | Represents the consumption above the threshold in m³                             | Statistics: Measurement                                |
+| {Address} {Meter Count} Low Rate Consumption Threshold | Number | Represents the configuration parameter of low rate consumption's threshold in m³ | Statistics: Measurement                                |
+| {Address} {Meter Count} Low Rate Cost                  | Number | Represents the configuration parameter of low rate in ILS/m³                     | Statistics: Measurement                                |
+| {Address} {Meter Count} High Rate Cost                 | Number | Represents the configuration parameter of high rate configuration in ILS/m³      | Statistics: Measurement                                |
+| {Address} {Meter Count} Sewage Cost                    | Number | Represents the configuration parameter of sewage rate configuration in ILS/m³    | Statistics: Measurement                                |
+
+_Last read and daily, monthly, low / high rate consumption's sensors are supporting Water energy_
+
+Cost configuration into meter device (per meter) using number entities
+
+- Low Rate Cost - Default 7.955 ILS/m³
+- High Rate Cost - Default 14.6 ILS/m³
+- Low Rate Cost - Default 7.955 ILS/m³
+- Sewage Cost - Default 0 ILS/m³
+- Low Rate Consumption Threshold - Default 3.5 m³ (Equivalent to 7m³ per 2 months of 1 person in property)
+
+_Default values taken from [gov.il](https://www.gov.il/he/pages/rates_general1) and up to date to January 1st 2024_
+
+## Troubleshooting
+
+### Debug logs
 
 To set the log level of the component to DEBUG, please set it from the options of the component if installed, otherwise, set it within configuration YAML of HA:
 
@@ -77,111 +119,11 @@ logger:
     custom_components.citymind_water_meter: debug
 ```
 
-**Debug files**
+### Diagnostic file
 
-Integration support store debug files which saves the data provided by `Read Your Meter Pro` to:
+In Settings -> Devices & services, look for the device, click on the 3 dots menu and download diagnostic file,
 
-`/config/.storage/citymind_water_meter.{entry_id}.debug.api.json`
-
-## Components
-
-### Account
-
-| Entity Name                                            | Type   | Description                                                                                                         | Additional information                       |
-| ------------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| CityMind {Account ID} Account Alert Exceeded threshold | Select | Allows to control which communication channel should receive an alert when daily consumption exceeded threshold     | Available options are: None, Email, SMS, All |
-| CityMind {Account ID} Account Alert Leak               | Select | Allows to control which communication channel should receive an alert when leak identified                          | Available options are: None, Email, SMS, All |
-| CityMind {Account ID} Account Alert Leak While Away    | Select | Allows to control which communication channel should receive an alert when leak identified when vacation is defined | Available options are: None, Email, SMS, All |
-| CityMind {Account ID} Account Alerts                   | Sensor | Indicates number of alerts set in the portal                                                                        | Attributes holds the alerts list             |
-| CityMind {Account ID} Account Messages                 | Sensor | Indicates number of messages set in the portal                                                                      | Attributes holds the messages list           |
-| CityMind {Account ID} Account Vacations                | Sensor | Indicates number of vacations set in the portal                                                                     | Attributes holds the vacations list          |
-
-### Per meter
-
-| Entity Name                                           | Type   | Description                                                                      | Additional information                                 |
-| ----------------------------------------------------- | ------ | -------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| CityMind {Meter Count} Meter Last Read                | Sensor | Represents the last read in m³                                                   | Statistics: Total Increment                            |
-| CityMind {Meter Count} Meter Monthly Consumption      | Sensor | Represents the monthly consumption in m³                                         | Statistics: Total Increment                            |
-| CityMind {Meter Count} Meter Today's Consumption      | Sensor | Represents the daily consumption in m³                                           | Statistics: Total Increment                            |
-| CityMind {Meter Count} Meter Yesterday's Consumption  | Sensor | Represents the yesterday's consumption in m³                                     | Statistics: Total Increment                            |
-| CityMind {Meter Count} Meter Consumption Forecast     | Sensor | Represents the monthly consumption forecast in m³                                | Statistics: Total, reset at the beginning of the month |
-| CityMind {Meter Count} Low Rate Consumption Threshold | Sensor | Represents the configuration parameter of low rate consumption's threshold in m³ | Statistics: Measurement                                |
-| CityMind {Meter Count} Low Rate                       | Sensor | Represents the configuration parameter of low rate in ILS/m³                     | Statistics: Measurement                                |
-| CityMind {Meter Count} High Rate                      | Sensor | Represents the configuration parameter of high rate configuration in ILS/m³      | Statistics: Measurement                                |
-| CityMind {Meter Count} Sewage Rate                    | Sensor | Represents the configuration parameter of sewage rate configuration in ILS/m³    | Statistics: Measurement                                |
-| CityMind {Meter Count} Low Rate Consumption           | Sensor | Represents the consumption below the threshold in m³                             | Statistics: Measurement                                |
-| CityMind {Meter Count} High Rate Consumption          | Sensor | Represents the consumption above the threshold in m³                             | Statistics: Measurement                                |
-
-_Last read and daily, monthly, low / high rate consumption's sensors are supporting Water energy_
-_Low, High, Sewage rates and threshold sensors category is configuration and will be available only when set by the service_
-
-## Services
-
-### Set Cost Parameters
-
-Set cost's parameters for specific meter:
-
-- Low Rate Consumption Threshold - Time to consider a device without activity as AWAY (any value between 10 and 1800 in seconds)
-- Low Rate - Low rate per cubic meter (m³) for consumption below the threshold
-- High Rate - High rate per cubic meter (m³) for consumption above the threshold
-- Sewage Rate - Sewage rate in ILS per cubic meter (m³)
-
-More details available in `Developer tools` -> `Services` -> `citymind_water_meter.set_cost_parameters`
-
-```yaml
-service: citymind_water_meter.set_cost_parameters
-data:
-  device_id: { Meter device ID }
-  low_rate_consumption_threshold: 7
-  low_rate: 6.5
-  high_rate: 13.5
-  sewage_rate: 3.5
-```
-
-_Will reload the integration_
-
-### Remove Cost Parameters
-
-Remove cost's parameters for specific meter
-
-More details available in `Developer tools` -> `Services` -> `citymind_water_meter.remove_cost_parameters`
-
-```yaml
-service: citymind_water_meter.remove_cost_parameters
-data:
-  device_id: { Meter device ID }
-```
-
-_Will reload the integration_
-
-## Endpoints
-
-| Endpoint Name                            | Method | Description                                                                                         |
-| ---------------------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
-| /api/citymind_water_meter/list           | GET    | List all the endpoints available (supporting multiple integrations), available once for integration |
-| /api/citymind_water_meter/{ENTRY_ID}/api | GET    | JSON of all raw data from the Read Your Meter Pro API, per integration                              |
-
-**Authentication: Requires long-living token from HA**
-
-### Examples
-
-#### List
-
-_Request_
-
-```bash
-curl https://ha_url:8123/api/citymind_water_meter/list
-   -H "Accept: application/json"
-   -H "Authorization: Bearer {token}"
-```
-
-#### API Data
-
-```bash
-curl https://ha_url:8123/api/citymind_water_meter/{ENTRY_ID}/api
-   -H "Accept: application/json"
-   -H "Authorization: Bearer {token}"
-```
+Diagnostic file contains sensitive details, go over it and clean it or send it directly to my [email](elad.bar@hotmail)
 
 ## Example of a History Chart
 

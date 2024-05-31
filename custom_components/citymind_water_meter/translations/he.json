@@ -1,100 +1,100 @@
 {
-    "config": {
-        "error": {
-            "auth_general_error": "\u05db\u05d9\u05e9\u05dc\u05d5\u05df \u05db\u05dc\u05dc\u05d9, \u05d0\u05e0\u05d0 \u05e0\u05e1\u05d4 \u05e9\u05d5\u05d1",
-            "invalid_credentials": "\u05d3\u05d5\u05d0\"\u05dc \u05d5/\u05d0\u05d5 \u05e1\u05d9\u05e1\u05de\u05d0 \u05d0\u05d9\u05e0\u05dd \u05ea\u05e7\u05e4\u05d9\u05dd",
-            "not_found": "\u05db\u05ea\u05d5\u05d1\u05ea \u05d0\u05ea\u05e8 \u05dc\u05d0 \u05e0\u05de\u05e6\u05d0\u05d4"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "email": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc",
-                    "password": "\u05e1\u05d9\u05e1\u05de\u05d4"
-                },
-                "description": "\u05d4\u05d2\u05d3\u05e8 \u05d0\u05ea \u05d0\u05d9\u05e9\u05d5\u05e8\u05d9 \u05d4\u05e2\u05d9\u05e8 \u05e9\u05dc\u05da",
-                "title": "\u05d4\u05d2\u05d3\u05e8\u05ea \u05d7\u05e9\u05d1\u05d5\u05df CityMind"
-            }
-        }
+  "config": {
+    "error": {
+      "auth_general_error": "\u05db\u05d9\u05e9\u05dc\u05d5\u05df \u05db\u05dc\u05dc\u05d9, \u05d0\u05e0\u05d0 \u05e0\u05e1\u05d4 \u05e9\u05d5\u05d1",
+      "invalid_credentials": "\u05d3\u05d5\u05d0\"\u05dc \u05d5/\u05d0\u05d5 \u05e1\u05d9\u05e1\u05de\u05d0 \u05d0\u05d9\u05e0\u05dd \u05ea\u05e7\u05e4\u05d9\u05dd",
+      "not_found": "\u05db\u05ea\u05d5\u05d1\u05ea \u05d0\u05ea\u05e8 \u05dc\u05d0 \u05e0\u05de\u05e6\u05d0\u05d4"
     },
-    "entity": {
-        "binary_sensor": {
-            "alert_leak_email": {
-                "name": "\u05d4\u05ea\u05e8\u05d0\u05ea \u05d3\u05dc\u05d9\u05e4\u05d4 (\u05d3\u05d5\u05d0\u05e8 \u05d0\u05dc\u05e7\u05d8\u05e8\u05d5\u05e0\u05d9)"
-            }
+    "step": {
+      "user": {
+        "data": {
+          "email": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc",
+          "password": "\u05e1\u05d9\u05e1\u05de\u05d4"
         },
-        "number": {
-            "high_rate_cost": {
-                "name": "\u05e2\u05dc\u05d5\u05ea \u05ea\u05e2\u05e8\u05d9\u05e3 \u05d2\u05d1\u05d5\u05d4\u05d4"
-            },
-            "low_rate_consumption_threshold": {
-                "name": "\u05e1\u05e3 \u05e6\u05e8\u05d9\u05db\u05ea \u05e7\u05e6\u05d1 \u05e0\u05de\u05d5\u05da"
-            },
-            "low_rate_cost": {
-                "name": "\u05e2\u05dc\u05d5\u05ea \u05ea\u05e2\u05e8\u05d9\u05e3 \u05e0\u05de\u05d5\u05da"
-            },
-            "sewage_cost": {
-                "name": "\u05e2\u05dc\u05d5\u05ea \u05d1\u05d9\u05d5\u05d1"
-            }
-        },
-        "sensor": {
-            "alerts": {
-                "name": "\u05e2\u05b5\u05e8\u05b8\u05e0\u05b4\u05d9"
-            },
-            "consumption_forecast": {
-                "name": "\u05ea\u05d7\u05d6\u05d9\u05ea \u05e6\u05e8\u05d9\u05db\u05d4"
-            },
-            "high_rate_consumption": {
-                "name": "\u05e6\u05e8\u05d9\u05db\u05ea \u05e7\u05e6\u05d1 \u05d2\u05d1\u05d5\u05d4\u05d4"
-            },
-            "last_read": {
-                "name": "\u05e7\u05e8\u05d0 \u05d0\u05d7\u05e8\u05d5\u05df"
-            },
-            "low_rate_consumption": {
-                "name": "\u05e6\u05e8\u05d9\u05db\u05ea \u05e7\u05e6\u05d1 \u05e0\u05de\u05d5\u05da"
-            },
-            "monthly_consumption": {
-                "name": "\u05e6\u05e8\u05d9\u05db\u05d4 \u05d7\u05d5\u05d3\u05e9\u05d9\u05ea"
-            },
-            "todays_consumption": {
-                "name": "\u05d4\u05e6\u05e8\u05d9\u05db\u05d4 \u05e9\u05dc \u05d4\u05d9\u05d5\u05dd"
-            },
-            "yesterdays_consumption": {
-                "name": "\u05d4\u05e6\u05e8\u05d9\u05db\u05d4 \u05e9\u05dc \u05d0\u05ea\u05de\u05d5\u05dc"
-            }
-        },
-        "switch": {
-            "alert_exceeded_threshold_email": {
-                "name": "\u05d4\u05e1\u05e3 \u05d4\u05d9\u05d5\u05de\u05d9 \u05d7\u05e8\u05d2 (\u05d3\u05d5\u05d0\u05e8 \u05d0\u05dc\u05e7\u05d8\u05e8\u05d5\u05e0\u05d9)"
-            },
-            "alert_exceeded_threshold_sms": {
-                "name": "\u05d4\u05e1\u05e3 \u05d4\u05d9\u05d5\u05de\u05d9 \u05d7\u05e8\u05d2 (SMS)"
-            },
-            "alert_leak_sms": {
-                "name": "\u05d4\u05ea\u05e8\u05d0\u05ea \u05d3\u05dc\u05d9\u05e4\u05d4 (SMS)"
-            },
-            "alert_leak_while_away_email": {
-                "name": "\u05d4\u05ea\u05e8\u05d0\u05ea \u05e6\u05e8\u05d9\u05db\u05d4 \u05d1\u05d6\u05de\u05df (\u05d3\u05d5\u05d0\u05e8 \u05d0\u05dc\u05e7\u05d8\u05e8\u05d5\u05e0\u05d9)"
-            },
-            "alert_leak_while_away_sms": {
-                "name": "\u05d4\u05ea\u05e8\u05d0\u05ea \u05e6\u05e8\u05d9\u05db\u05d4 \u05d1\u05d6\u05de\u05df (SMS)"
-            }
-        }
-    },
-    "options": {
-        "error": {
-            "auth_general_error": "\u05db\u05d9\u05e9\u05dc\u05d5\u05df \u05db\u05dc\u05dc\u05d9, \u05d0\u05e0\u05d0 \u05e0\u05e1\u05d4 \u05e9\u05d5\u05d1",
-            "invalid_credentials": "\u05d3\u05d5\u05d0\"\u05dc \u05d5/\u05d0\u05d5 \u05e1\u05d9\u05e1\u05de\u05d0 \u05d0\u05d9\u05e0\u05dd \u05ea\u05e7\u05e4\u05d9\u05dd",
-            "not_found": "\u05db\u05ea\u05d5\u05d1\u05ea \u05d0\u05ea\u05e8 \u05dc\u05d0 \u05e0\u05de\u05e6\u05d0\u05d4"
-        },
-        "step": {
-            "city_mind_additional_settings": {
-                "data": {
-                    "email": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc",
-                    "password": "\u05e1\u05d9\u05e1\u05de\u05d4"
-                },
-                "description": "\u05d4\u05d2\u05d3\u05e8\u05ea \u05d0\u05e4\u05e9\u05e8\u05d5\u05d9\u05d5\u05ea.",
-                "title": "\u05d0\u05e4\u05e9\u05e8\u05d5\u05d9\u05d5\u05ea \u05dc\u05de\u05d3 \u05de\u05d9\u05dd \u05e2\u05d9\u05e8\u05d5\u05e0\u05d9."
-            }
-        }
+        "description": "\u05d4\u05d2\u05d3\u05e8 \u05d0\u05ea \u05d0\u05d9\u05e9\u05d5\u05e8\u05d9 \u05d4\u05e2\u05d9\u05e8 \u05e9\u05dc\u05da",
+        "title": "\u05d4\u05d2\u05d3\u05e8\u05ea \u05d7\u05e9\u05d1\u05d5\u05df CityMind"
+      }
     }
+  },
+  "entity": {
+    "binary_sensor": {
+      "alert_leak_email": {
+        "name": "\u05d4\u05ea\u05e8\u05d0\u05ea \u05d3\u05dc\u05d9\u05e4\u05d4 (\u05d3\u05d5\u05d0\u05e8 \u05d0\u05dc\u05e7\u05d8\u05e8\u05d5\u05e0\u05d9)"
+      }
+    },
+    "number": {
+      "high_rate_cost": {
+        "name": "\u05e2\u05dc\u05d5\u05ea \u05ea\u05e2\u05e8\u05d9\u05e3 \u05d2\u05d1\u05d5\u05d4\u05d4"
+      },
+      "low_rate_consumption_threshold": {
+        "name": "\u05e1\u05e3 \u05e6\u05e8\u05d9\u05db\u05ea \u05e7\u05e6\u05d1 \u05e0\u05de\u05d5\u05da"
+      },
+      "low_rate_cost": {
+        "name": "\u05e2\u05dc\u05d5\u05ea \u05ea\u05e2\u05e8\u05d9\u05e3 \u05e0\u05de\u05d5\u05da"
+      },
+      "sewage_cost": {
+        "name": "\u05e2\u05dc\u05d5\u05ea \u05d1\u05d9\u05d5\u05d1"
+      }
+    },
+    "sensor": {
+      "alerts": {
+        "name": "\u05e2\u05b5\u05e8\u05b8\u05e0\u05b4\u05d9"
+      },
+      "consumption_forecast": {
+        "name": "\u05ea\u05d7\u05d6\u05d9\u05ea \u05e6\u05e8\u05d9\u05db\u05d4"
+      },
+      "high_rate_consumption": {
+        "name": "\u05e6\u05e8\u05d9\u05db\u05ea \u05e7\u05e6\u05d1 \u05d2\u05d1\u05d5\u05d4\u05d4"
+      },
+      "last_read": {
+        "name": "\u05e7\u05e8\u05d0 \u05d0\u05d7\u05e8\u05d5\u05df"
+      },
+      "low_rate_consumption": {
+        "name": "\u05e6\u05e8\u05d9\u05db\u05ea \u05e7\u05e6\u05d1 \u05e0\u05de\u05d5\u05da"
+      },
+      "monthly_consumption": {
+        "name": "\u05e6\u05e8\u05d9\u05db\u05d4 \u05d7\u05d5\u05d3\u05e9\u05d9\u05ea"
+      },
+      "todays_consumption": {
+        "name": "\u05d4\u05e6\u05e8\u05d9\u05db\u05d4 \u05e9\u05dc \u05d4\u05d9\u05d5\u05dd"
+      },
+      "yesterdays_consumption": {
+        "name": "\u05d4\u05e6\u05e8\u05d9\u05db\u05d4 \u05e9\u05dc \u05d0\u05ea\u05de\u05d5\u05dc"
+      }
+    },
+    "switch": {
+      "alert_exceeded_threshold_email": {
+        "name": "\u05d4\u05e1\u05e3 \u05d4\u05d9\u05d5\u05de\u05d9 \u05d7\u05e8\u05d2 (\u05d3\u05d5\u05d0\u05e8 \u05d0\u05dc\u05e7\u05d8\u05e8\u05d5\u05e0\u05d9)"
+      },
+      "alert_exceeded_threshold_sms": {
+        "name": "\u05d4\u05e1\u05e3 \u05d4\u05d9\u05d5\u05de\u05d9 \u05d7\u05e8\u05d2 (SMS)"
+      },
+      "alert_leak_sms": {
+        "name": "\u05d4\u05ea\u05e8\u05d0\u05ea \u05d3\u05dc\u05d9\u05e4\u05d4 (SMS)"
+      },
+      "alert_leak_while_away_email": {
+        "name": "\u05d4\u05ea\u05e8\u05d0\u05ea \u05e6\u05e8\u05d9\u05db\u05d4 \u05d1\u05d6\u05de\u05df (\u05d3\u05d5\u05d0\u05e8 \u05d0\u05dc\u05e7\u05d8\u05e8\u05d5\u05e0\u05d9)"
+      },
+      "alert_leak_while_away_sms": {
+        "name": "\u05d4\u05ea\u05e8\u05d0\u05ea \u05e6\u05e8\u05d9\u05db\u05d4 \u05d1\u05d6\u05de\u05df (SMS)"
+      }
+    }
+  },
+  "options": {
+    "error": {
+      "auth_general_error": "\u05db\u05d9\u05e9\u05dc\u05d5\u05df \u05db\u05dc\u05dc\u05d9, \u05d0\u05e0\u05d0 \u05e0\u05e1\u05d4 \u05e9\u05d5\u05d1",
+      "invalid_credentials": "\u05d3\u05d5\u05d0\"\u05dc \u05d5/\u05d0\u05d5 \u05e1\u05d9\u05e1\u05de\u05d0 \u05d0\u05d9\u05e0\u05dd \u05ea\u05e7\u05e4\u05d9\u05dd",
+      "not_found": "\u05db\u05ea\u05d5\u05d1\u05ea \u05d0\u05ea\u05e8 \u05dc\u05d0 \u05e0\u05de\u05e6\u05d0\u05d4"
+    },
+    "step": {
+      "city_mind_additional_settings": {
+        "data": {
+          "email": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc",
+          "password": "\u05e1\u05d9\u05e1\u05de\u05d4"
+        },
+        "description": "\u05d4\u05d2\u05d3\u05e8\u05ea \u05d0\u05e4\u05e9\u05e8\u05d5\u05d9\u05d5\u05ea.",
+        "title": "\u05d0\u05e4\u05e9\u05e8\u05d5\u05d9\u05d5\u05ea \u05dc\u05de\u05d3 \u05de\u05d9\u05dd \u05e2\u05d9\u05e8\u05d5\u05e0\u05d9."
+      }
+    }
+  }
 }

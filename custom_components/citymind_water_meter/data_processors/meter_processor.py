@@ -67,8 +67,8 @@ class MeterProcessor(BaseProcessor):
         return meter
 
     def _get_device_info_name(self, meter_id: str | None = None):
-        device = self.get_data(meter_id)
-        parts = [device.address, meter_id]
+        meter = self.get_data(meter_id)
+        parts = [meter.address, meter.meter_serial_number]
 
         relevant_parts = [part for part in parts if part is not None]
 
