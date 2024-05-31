@@ -224,7 +224,7 @@ class MeterProcessor(BaseProcessor):
 
         try:
             if data is not None:
-                consumption_info = data.get(str(meter_id))
+                consumption_info = data.get(meter_id)
                 if isinstance(consumption_info, dict) and consumption_info.get(
                     CONSUMPTION_DATA
                 ):
@@ -237,7 +237,7 @@ class MeterProcessor(BaseProcessor):
                         consumption_date = consumption_item.get(CONSUMPTION_DATE)
                         consumption_value = consumption_item.get(CONSUMPTION_VALUE, 0)
 
-                        is_meter_relevant = consumption_meter_count == meter_id
+                        is_meter_relevant = str(consumption_meter_count) == meter_id
                         is_date_relevant = consumption_date.startswith(date_iso)
 
                         if is_meter_relevant and is_date_relevant:
