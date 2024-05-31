@@ -110,7 +110,7 @@ class MeterProcessor(BaseProcessor):
             )
 
             last_read_details = {
-                last_read_item.get(LAST_READ_METER_COUNT): last_read_item.get(
+                str(last_read_item.get(LAST_READ_METER_COUNT)): last_read_item.get(
                     LAST_READ_VALUE
                 )
                 for last_read_item in last_read_section
