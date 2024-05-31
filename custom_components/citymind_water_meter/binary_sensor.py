@@ -1,12 +1,13 @@
 import logging
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_ICON, ATTR_STATE, Platform
+from homeassistant.const import ATTR_ICON, Platform
 from homeassistant.core import HomeAssistant
 
 from .common.base_entity import IntegrationBaseEntity, async_setup_base_entry
-from .common.entity_descriptions import IntegrationSensorEntityDescription
+from .common.consts import ATTR_IS_ON
+from .common.entity_descriptions import IntegrationBinarySensorEntityDescription
 from .common.enums import EntityType
 from .managers.coordinator import Coordinator
 
@@ -19,19 +20,19 @@ async def async_setup_entry(
     await async_setup_base_entry(
         hass,
         entry,
-        Platform.SENSOR,
-        IntegrationSensorEntity,
+        Platform.BINARY_SENSOR,
+        IntegrationBinarySensorEntity,
         async_add_entities,
     )
 
 
-class IntegrationSensorEntity(IntegrationBaseEntity, SensorEntity):
+class IntegrationBinarySensorEntity(IntegrationBaseEntity, BinarySensorEntity):
     """Representation of a sensor."""
 
     def __init__(
         self,
         hass: HomeAssistant,
-        entity_description: IntegrationSensorEntityDescription,
+        entity_description: IntegrationBinarySensorEntityDescription,
         coordinator: Coordinator,
         entity_type: EntityType,
         item_id: str | None,
@@ -39,20 +40,17 @@ class IntegrationSensorEntity(IntegrationBaseEntity, SensorEntity):
         super().__init__(hass, entity_description, coordinator, entity_type, item_id)
 
         self._attr_device_class = entity_description.device_class
-        self._attr_native_unit_of_measurement = (
-            entity_description.native_unit_of_measurement
-        )
 
     def update_component(self, data):
         """Fetch new state parameters for the sensor."""
         if data is not None:
-            state = data.get(ATTR_STATE)
+            is_on = data.get(ATTR_IS_ON)
             icon = data.get(ATTR_ICON)
 
-            self._attr_native_value = state
+            self._attr_is_on = is_on
 
             if icon is not None:
                 self._attr_icon = icon
 
         else:
-            self._attr_native_value = None
+            self._attr_is_on = None

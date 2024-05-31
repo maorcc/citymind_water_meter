@@ -32,5 +32,69 @@
       "auth_general_error": "General failure, please try again",
       "not_found": "URL not found"
     }
+  },
+  "entity": {
+    "binary_sensor": {
+      "alert_leak_email": {
+        "name": "Leak Alert (E-Mail)"
+      }
+    },
+    "number": {
+      "low_rate_cost": {
+        "name": "Low Rate Cost"
+      },
+      "high_rate_cost": {
+        "name": "High Rate Cost"
+      },
+      "sewage_cost": {
+        "name": "Sewage Cost"
+      },
+      "low_rate_consumption_threshold": {
+        "name": "Low Rate Consumption Threshold"
+      }
+    },
+    "switch": {
+      "alert_exceeded_threshold_sms": {
+        "name": "Daily Threshold Exceeded (SMS)"
+      },
+      "alert_exceeded_threshold_email": {
+        "name": "Daily Threshold Exceeded (E-Mail)"
+      },
+      "alert_leak_sms": {
+        "name": "Leak Alert (SMS)"
+      },
+      "alert_leak_while_away_sms": {
+        "name": "Consumption Alert While Away (SMS)"
+      },
+      "alert_leak_while_away_email": {
+        "name": "Consumption Alert While Away (E-Mail)"
+      }
+    },
+    "sensor": {
+      "consumption_forecast": {
+        "name": "Consumption Forecast"
+      },
+      "last_read": {
+        "name": "Last Read"
+      },
+      "monthly_consumption": {
+        "name": "Monthly Consumption"
+      },
+      "todays_consumption": {
+        "name": "Today's Consumption"
+      },
+      "yesterdays_consumption": {
+        "name": "Yesterday's Consumption"
+      },
+      "high_rate_consumption": {
+        "name": "High Rate Consumption"
+      },
+      "low_rate_consumption": {
+        "name": "Low Rate Consumption"
+      },
+      "alerts": {
+        "name": "Alert"
+      }
+    }
   }
 }
