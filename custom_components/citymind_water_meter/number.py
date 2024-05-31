@@ -49,7 +49,7 @@ class IntegrationNumberEntity(IntegrationBaseEntity, NumberEntity, ABC):
     async def async_set_native_value(self, value: float) -> None:
         """Change the selected option."""
         await self.async_execute_device_action(
-            ACTION_ENTITY_SET_NATIVE_VALUE, int(value)
+            ACTION_ENTITY_SET_NATIVE_VALUE, float(value)
         )
 
     def update_component(self, data):
@@ -57,7 +57,7 @@ class IntegrationNumberEntity(IntegrationBaseEntity, NumberEntity, ABC):
         if data is not None:
             state = data.get(ATTR_STATE)
 
-            self._attr_native_value = int(state)
+            self._attr_native_value = float(state)
 
         else:
             self._attr_native_value = None

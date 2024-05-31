@@ -534,3 +534,5 @@ class RestAPI:
             await action(ENDPOINT_MY_ALERTS_SETTINGS_UPDATE, data)
 
             await self._load_data(ENDPOINT_DATA_RELOAD)
+
+            self._async_dispatcher_send(SIGNAL_DATA_CHANGED)

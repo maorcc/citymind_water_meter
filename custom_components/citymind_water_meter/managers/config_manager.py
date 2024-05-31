@@ -2,6 +2,7 @@ from copy import copy
 import json
 import logging
 import sys
+from typing import Any
 
 from cryptography.fernet import InvalidToken
 
@@ -10,6 +11,7 @@ from homeassistant.const import CONF_NAME, CONF_PASSWORD, CONF_USERNAME, Platfor
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import translation
 from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.dispatcher import dispatcher_send
 from homeassistant.helpers.json import JSONEncoder
 from homeassistant.helpers.storage import Store
 
@@ -19,10 +21,11 @@ from ..common.consts import (
     DEFAULT_NAME,
     DOMAIN,
     INVALID_TOKEN_SECTION,
-    STORAGE_DATA_METER_HIGH_RATE,
-    STORAGE_DATA_METER_LOW_RATE,
+    SIGNAL_DATA_CHANGED,
+    STORAGE_DATA_METER_HIGH_RATE_COST,
     STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD,
-    STORAGE_DATA_METER_SEWAGE_RATE,
+    STORAGE_DATA_METER_LOW_RATE_COST,
+    STORAGE_DATA_METER_SEWAGE_COST,
     STORAGE_DATA_METERS,
 )
 from ..common.entity_descriptions import IntegrationEntityDescription
@@ -49,6 +52,8 @@ class ConfigManager:
         self._entry = entry
         self._entry_id = None if entry is None else entry.entry_id
         self._entry_title = DEFAULT_NAME if entry is None else entry.title
+
+        self._local_async_dispatcher_send = None
 
         self._config_data = ConfigData()
 
@@ -193,17 +198,17 @@ class ConfigManager:
         return result
 
     def get_low_rate_cost(self, meter_id: str) -> int:
-        result = self._get_meter_config(meter_id, STORAGE_DATA_METER_LOW_RATE)
+        result = self._get_meter_config(meter_id, STORAGE_DATA_METER_LOW_RATE_COST)
 
         return result
 
     def get_high_rate_cost(self, meter_id: str) -> int:
-        result = self._get_meter_config(meter_id, STORAGE_DATA_METER_HIGH_RATE)
+        result = self._get_meter_config(meter_id, STORAGE_DATA_METER_HIGH_RATE_COST)
 
         return result
 
     def get_sewage_cost(self, meter_id: str) -> int:
-        result = self._get_meter_config(meter_id, STORAGE_DATA_METER_SEWAGE_RATE)
+        result = self._get_meter_config(meter_id, STORAGE_DATA_METER_SEWAGE_COST)
 
         return result
 
@@ -300,16 +305,7 @@ class ConfigManager:
 
             await self._store.async_save(store_data)
 
-    async def _set_storage_sub_parameter(
-        self, storage_key: str, storage_item_id, value: int | str | bool
-    ):
-        _LOGGER.debug(f"Set {storage_key}, {storage_item_id}: {value}")
-
-        self._data[storage_key][storage_item_id] = value
-
-        await self._save()
-
-    async def _set_meter_config(self, meter_id: str, key: str, value: int) -> None:
+    async def _set_meter_config(self, meter_id: str, key: str, value: float) -> None:
         if meter_id not in self.meters:
             self._data[STORAGE_DATA_METERS][meter_id] = copy(DEFAULT_METER_CONFIG)
 
@@ -317,18 +313,30 @@ class ConfigManager:
 
         await self._save()
 
+        self._async_dispatcher_send(SIGNAL_DATA_CHANGED)
+
     async def set_low_rate_consumption_threshold(
-        self, meter_id: str, value: int
+        self, meter_id: str, value: float
     ) -> None:
         await self._set_meter_config(
             meter_id, STORAGE_DATA_METER_LOW_RATE_CONSUMPTION_THRESHOLD, value
         )
 
-    async def set_low_rate_cost(self, meter_id: str, value: int) -> None:
-        await self._set_meter_config(meter_id, STORAGE_DATA_METER_LOW_RATE, value)
+    async def set_low_rate_cost(self, meter_id: str, value: float) -> None:
+        await self._set_meter_config(meter_id, STORAGE_DATA_METER_LOW_RATE_COST, value)
 
-    async def set_high_rate_cost(self, meter_id: str, value: int) -> None:
-        await self._set_meter_config(meter_id, STORAGE_DATA_METER_HIGH_RATE, value)
+    async def set_high_rate_cost(self, meter_id: str, value: float) -> None:
+        await self._set_meter_config(meter_id, STORAGE_DATA_METER_HIGH_RATE_COST, value)
 
-    async def set_sewage_cost(self, meter_id: str, value: int) -> None:
-        await self._set_meter_config(meter_id, STORAGE_DATA_METER_SEWAGE_RATE, value)
+    async def set_sewage_cost(self, meter_id: str, value: float) -> None:
+        await self._set_meter_config(meter_id, STORAGE_DATA_METER_SEWAGE_COST, value)
+
+    def set_local_async_dispatcher_send(self, callback):
+        self._local_async_dispatcher_send = callback
+
+    def _async_dispatcher_send(self, signal: str, *args: Any) -> None:
+        if self._hass is None:
+            self._local_async_dispatcher_send(signal, None, *args)
+
+        else:
+            dispatcher_send(self._hass, signal, self._entry_id, *args)

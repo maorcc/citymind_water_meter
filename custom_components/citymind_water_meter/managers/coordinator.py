@@ -524,36 +524,54 @@ class Coordinator(DataUpdateCoordinator):
         return result
 
     async def _set_low_rate_consumption_threshold(
-        self, _entity_description, meter_id: str, value: int
+        self, _entity_description, meter_id: str, value: float
     ):
         _LOGGER.debug(
             f"Set low rate consumption threshold, Meter: {meter_id}, Value: {value}"
         )
         await self._config_manager.set_low_rate_consumption_threshold(meter_id, value)
 
-    async def _set_low_rate_cost(self, _entity_description, meter_id: str, value: int):
+        await self.async_request_refresh()
+
+    async def _set_low_rate_cost(
+        self, _entity_description, meter_id: str, value: float
+    ):
         _LOGGER.debug(f"Set low rate cost, Meter: {meter_id}, Value: {value}")
         await self._config_manager.set_low_rate_cost(meter_id, value)
 
-    async def _set_high_rate_cost(self, _entity_description, meter_id: str, value: int):
+        await self.async_request_refresh()
+
+    async def _set_high_rate_cost(
+        self, _entity_description, meter_id: str, value: float
+    ):
         _LOGGER.debug(f"Set high rate cost, Meter: {meter_id}, Value: {value}")
         await self._config_manager.set_high_rate_cost(meter_id, value)
 
-    async def _set_sewage_cost(self, _entity_description, meter_id: str, value: int):
+        await self.async_request_refresh()
+
+    async def _set_sewage_cost(self, _entity_description, meter_id: str, value: float):
         _LOGGER.debug(f"Set sewage cost, Meter: {meter_id}, Value: {value}")
         await self._config_manager.set_sewage_cost(meter_id, value)
+
+        await self.async_request_refresh()
 
     async def _set_alert_exceeded_threshold(self, _entity_description, option: str):
         _LOGGER.debug(f"Set alert exceeded daily threshold, Value: {option}")
         await self._api.set_alert_settings(AlertType.DAILY_THRESHOLD, option)
 
+        await self.async_request_refresh()
+
     async def _set_alert_leak_data(self, _entity_description, option: str):
         _LOGGER.debug(f"Set alert leak, Value: {option}")
         await self._api.set_alert_settings(AlertType.LEAK, option)
 
+        await self.async_request_refresh()
+
     async def _set_alert_leak_while_away(self, _entity_description, option: str):
         _LOGGER.debug(f"Set alert consumption while away, Value: {option}")
         await self._api.set_alert_settings(AlertType.CONSUMPTION_WHILE_AWAY, option)
+
+        await self.async_request_refresh()
 
     async def _reload_integration(self):
         data = {ENTITY_CONFIG_ENTRY_ID: self.config_manager.entry_id}
