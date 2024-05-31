@@ -62,9 +62,9 @@ class MeterProcessor(BaseProcessor):
         return device
 
     def get_data(self, meter_id: str) -> MeterData:
-        interface_data = self._meters.get(meter_id)
+        meter = self._meters.get(meter_id)
 
-        return interface_data
+        return meter
 
     def _get_device_info_name(self, meter_id: str | None = None):
         device = self.get_data(meter_id)
@@ -143,7 +143,7 @@ class MeterProcessor(BaseProcessor):
     ):
         meter_serial_number = meter_details.get(METER_SERIAL_NUMBER)
         meter_address = meter_details.get(METER_FULL_ADDRESS)
-        meter_id = meter_details.get(METER_COUNT)
+        meter_id = str(meter_details.get(METER_COUNT))
 
         last_read_value = last_read_details.get(meter_id, 0)
         last_read = self._format_number(last_read_value, 3)
@@ -186,7 +186,7 @@ class MeterProcessor(BaseProcessor):
         meter.high_rate_cost = self._config_manager.get_high_rate_cost(meter_id)
         meter.sewage_cost = self._config_manager.get_sewage_cost(meter_id)
 
-        self._meters[meter_serial_number] = meter
+        self._meters[meter_id] = meter
 
     def _set_meter(
         self,
