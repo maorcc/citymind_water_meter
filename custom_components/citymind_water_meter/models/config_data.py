@@ -33,7 +33,10 @@ class ConfigData:
         self._email = data.get(CONF_EMAIL)
 
     def to_dict(self):
-        obj = json.loads(json.dumps(self))
+        obj = {
+            "email": self._password,
+            "password": self._email
+        }
 
         return obj
 

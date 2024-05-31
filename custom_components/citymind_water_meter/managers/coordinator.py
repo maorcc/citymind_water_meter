@@ -159,7 +159,7 @@ class Coordinator(DataUpdateCoordinator):
                 "api": self._api.data,
             },
             "processors": {
-                EntityType.ACCOUNT: self._account_processor.get(),
+                EntityType.ACCOUNT: self._account_processor.get().to_dict(),
                 EntityType.METER: self._meter_processor.get_all(),
             },
         }
