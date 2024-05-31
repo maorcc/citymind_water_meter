@@ -1,11 +1,9 @@
 from enum import Enum, StrEnum
 
 
-class AlertChannel(StrEnum):
-    NONE = "0"
-    SMS = "1"
-    EMAIL = "3"
-    ALL = "4"
+class AlertChannel(Enum):
+    EMAIL = 1
+    SMS = 3
 
 
 class AlertType(Enum):
@@ -17,22 +15,6 @@ class AlertType(Enum):
 class EntityType(StrEnum):
     METER = "meter"
     ACCOUNT = "account"
-
-    @staticmethod
-    def from_string(text: str | None):
-        value = EntityType.ACCOUNT
-
-        all_options: list[str] = list(EntityType)
-
-        for option in all_options:
-            item = EntityType(option)
-            is_match = item.value == text
-
-            if is_match:
-                value = item
-                break
-
-        return value
 
 
 class EntityKeys(StrEnum):
@@ -48,6 +30,9 @@ class EntityKeys(StrEnum):
     SEWAGE_COST = "sewage_cost"
     LOW_RATE_CONSUMPTION_THRESHOLD = "low_rate_consumption_threshold"
     ALERTS = "alerts"
-    ALERT_EXCEEDED_THRESHOLD = "alert_exceeded_threshold"
-    ALERT_LEAK = "alert_leak"
-    ALERT_LEAK_WHILE_AWAY = "alert_leak_while_away"
+    ALERT_LEAK_WHILE_AWAY_SMS = "alert_leak_while_away_sms"
+    ALERT_LEAK_WHILE_AWAY_EMAIL = "alert_leak_while_away_email"
+    ALERT_LEAK_SMS = "alert_leak_sms"
+    ALERT_LEAK_EMAIL = "alert_leak_email"
+    ALERT_EXCEEDED_THRESHOLD_SMS = "alert_exceeded_threshold_sms"
+    ALERT_EXCEEDED_THRESHOLD_EMAIL = "alert_exceeded_threshold_email"

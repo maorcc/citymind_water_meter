@@ -4,15 +4,17 @@ constants.
 
 from datetime import timedelta
 
-from custom_components.citymind_water_meter.common.enums import AlertChannel, EntityKeys
-from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
+from custom_components.citymind_water_meter.common.enums import (
+    AlertChannel,
+    AlertType,
+    EntityKeys,
+)
 
-VERSION = "1.0.0"
-
-ATTR_FRIENDLY_NAME = "friendly_name"
 ATTR_ACTIONS = "actions"
+ATTR_IS_ON = "is_on"
 ACTION_ENTITY_SET_NATIVE_VALUE = "set_native_value"
-ACTION_ENTITY_SELECT_OPTION = "select_option"
+ACTION_ENTITY_TURN_ON = "turn_on"
+ACTION_ENTITY_TURN_OFF = "turn_off"
 ENTITY_CONFIG_ENTRY_ID = "entry_id"
 DOMAIN = "citymind_water_meter"
 DEFAULT_NAME = "CityMind"
@@ -30,8 +32,6 @@ SIGNAL_DATA_CHANGED = f"{DOMAIN}_DATA_CHANGED_SIGNAL"
 SIGNAL_API_STATUS = f"{DOMAIN}_API_STATUS_SIGNAL"
 
 ADD_COMPONENT_SIGNALS = [SIGNAL_METER_ADDED, SIGNAL_ACCOUNT_ADDED]
-
-DATA_KEYS = [CONF_EMAIL, CONF_PASSWORD]
 
 RECONNECT_INTERVAL = timedelta(minutes=1)
 WEEKDAY_UPDATE_DATA_INTERVAL = timedelta(minutes=10)
@@ -66,9 +66,7 @@ ENDPOINT_LOGIN = f"{ENDPOINT_CONSUMER}/login"
 
 ENDPOINT_ME = f"{ENDPOINT_CONSUMER}/me"
 ENDPOINT_METERS = f"{ENDPOINT_CONSUMER}/meters"
-ENDPOINT_UNITS = f"{ENDPOINT_MUNICIPALS_OLD}/h1/measurmentunits"
 ENDPOINT_CUSTOMER_SERVICE = f"{ENDPOINT_MUNICIPALS_OLD}/municipalCustomerService"
-ENDPOINT_ALERTS_FOR_SETTINGS = f"{ENDPOINT_CONSUMER}/alertsForSettings"
 
 ENDPOINT_LAST_READ = f"{ENDPOINT_CONSUMPTION}/last-read"
 ENDPOINT_CONSUMPTION_DAILY = (
@@ -79,10 +77,16 @@ ENDPOINT_VACATIONS = f"{ENDPOINT_CONSUMER}/vacations"
 ENDPOINT_MY_ALERTS = f"{ENDPOINT_CONSUMER}/myalerts"
 ENDPOINT_MY_ALERTS_SETTINGS = f"{ENDPOINT_CONSUMER}/myalerts/settings"
 ENDPOINT_MY_MESSAGES = f"{ENDPOINT_MUNICIPALS_NEW}/{{municipality_id}}/messages"
-ENDPOINT_MY_MESSAGE_SUBJECTS = f"{ENDPOINT_MY_MESSAGES}/message-subjects"
-ENDPOINT_CONSUMPTION_LOW_RATE_LIMIT = f"{ENDPOINT_CONSUMPTION}/Low-Rate-Limit"
 ENDPOINT_CONSUMPTION_FORECAST = f"{ENDPOINT_CONSUMPTION}/forecast/{{meter_id}}"
 ENDPOINT_MY_ALERTS_SETTINGS_UPDATE = f"{ENDPOINT_MY_ALERTS}/settings/{{alert_type}}"
+
+############
+ENDPOINT_MY_MESSAGE_SUBJECTS = f"{ENDPOINT_MY_MESSAGES}/message-subjects"
+ENDPOINT_CONSUMPTION_LOW_RATE_LIMIT = f"{ENDPOINT_CONSUMPTION}/Low-Rate-Limit"
+ENDPOINT_ALERTS_FOR_SETTINGS = f"{ENDPOINT_CONSUMER}/alertsForSettings"
+ENDPOINT_UNITS = f"{ENDPOINT_MUNICIPALS_OLD}/h1/measurmentunits"
+
+##############
 
 API_DATA_SECTION_ME = "me"
 API_DATA_SECTION_METERS = "meters"
@@ -106,7 +110,6 @@ METER_SERIAL_NUMBER = "meterSn"
 METER_FULL_ADDRESS = "fullAddress"
 
 LAST_READ_METER_COUNT = METER_COUNT
-LAST_READ_METER_ID = "meterId"
 LAST_READ_VALUE = "read"
 
 ME_FIRST_NAME = "firstName"
@@ -122,9 +125,6 @@ CONSUMPTION_METER_COUNT = METER_COUNT
 CONSUMPTION_VALUE = "cons"
 CONSUMPTION_DATA = "consumptionData"
 CONSUMPTION_DATE = "consDate"
-
-CONSUMPTION_ESTIMATION_TYPE = "estimationType"
-CONSUMPTION_METER_STATUS_DESC = "meterStatusDesc"
 
 CONSUMPTION_FORECAST_ESTIMATED_CONSUMPTION = "estimatedConsumption"
 
@@ -189,8 +189,8 @@ FORMAT_DATE_YEAR_MONTH = "%Y-%m"
 
 WEEKEND_DAYS = ["Friday", "Saturday"]
 
-ATTR_MEDIA_TYPES = "media_type"
-ATTR_ALERT_TYPES = "alert_type"
+ATTR_MEDIA_TYPE = "media_type"
+ATTR_ALERT_TYPE = "alert_type"
 ATTR_MONTHLY_CONSUMPTION = "Monthly Consumption"
 ATTR_LOW_RATE_CONSUMPTION = "Low Rate Consumption"
 ATTR_HIGH_RATE_CONSUMPTION = "High Rate Consumption"
@@ -219,11 +219,29 @@ DEFAULT_METER_CONFIG = {
 
 UNIT_COST = "ILS/m³"
 
-ALL_OPTIONS = [str(channel) for channel in list(AlertChannel)]
-LEAK_OPTIONS = [AlertChannel.EMAIL, AlertChannel.ALL]
-
-ALERT_OPTIONS = {
-    EntityKeys.ALERT_EXCEEDED_THRESHOLD: ALL_OPTIONS,
-    EntityKeys.ALERT_LEAK: LEAK_OPTIONS,
-    EntityKeys.ALERT_LEAK_WHILE_AWAY: ALL_OPTIONS,
+ALERT_MAPPING = {
+    EntityKeys.ALERT_LEAK_SMS: {
+        ATTR_ALERT_TYPE: AlertType.LEAK,
+        ATTR_MEDIA_TYPE: AlertChannel.SMS,
+    },
+    EntityKeys.ALERT_LEAK_EMAIL: {
+        ATTR_ALERT_TYPE: AlertType.LEAK,
+        ATTR_MEDIA_TYPE: AlertChannel.EMAIL,
+    },
+    EntityKeys.ALERT_EXCEEDED_THRESHOLD_SMS: {
+        ATTR_ALERT_TYPE: AlertType.DAILY_THRESHOLD,
+        ATTR_MEDIA_TYPE: AlertChannel.SMS,
+    },
+    EntityKeys.ALERT_EXCEEDED_THRESHOLD_EMAIL: {
+        ATTR_ALERT_TYPE: AlertType.DAILY_THRESHOLD,
+        ATTR_MEDIA_TYPE: AlertChannel.EMAIL,
+    },
+    EntityKeys.ALERT_LEAK_WHILE_AWAY_SMS: {
+        ATTR_ALERT_TYPE: AlertType.CONSUMPTION_WHILE_AWAY,
+        ATTR_MEDIA_TYPE: AlertChannel.SMS,
+    },
+    EntityKeys.ALERT_LEAK_WHILE_AWAY_EMAIL: {
+        ATTR_ALERT_TYPE: AlertType.CONSUMPTION_WHILE_AWAY,
+        ATTR_MEDIA_TYPE: AlertChannel.EMAIL,
+    },
 }

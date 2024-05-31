@@ -34,6 +34,11 @@
     }
   },
   "entity": {
+    "binary_sensor": {
+      "alert_leak_email": {
+        "name": "Leak Alert (E-Mail)"
+      }
+    },
     "number": {
       "low_rate_cost": {
         "name": "Low Rate Cost"
@@ -48,33 +53,21 @@
         "name": "Low Rate Consumption Threshold"
       }
     },
-    "select": {
-      "alert_exceeded_threshold": {
-        "name": "Daily Threshold Exceeded",
-        "state": {
-          "0": "None",
-          "1": "SMS",
-          "3": "EMail",
-          "4": "All"
-        }
+    "switch": {
+      "alert_exceeded_threshold_sms": {
+        "name": "Daily Threshold Exceeded (SMS)"
       },
-      "alert_leak": {
-        "name": "Leak Alert",
-        "state": {
-          "0": "None",
-          "1": "SMS",
-          "3": "EMail",
-          "4": "All"
-        }
+      "alert_exceeded_threshold_email": {
+        "name": "Daily Threshold Exceeded (E-Mail)"
       },
-      "alert_leak_while_away": {
-        "name": "Consumption Alert While Away",
-        "state": {
-          "0": "None",
-          "1": "SMS",
-          "3": "EMail",
-          "4": "All"
-        }
+      "alert_leak_sms": {
+        "name": "Leak Alert (SMS)"
+      },
+      "alert_leak_while_away_sms": {
+        "name": "Consumption Alert While Away (SMS)"
+      },
+      "alert_leak_while_away_email": {
+        "name": "Consumption Alert While Away (E-Mail)"
       }
     },
     "sensor": {

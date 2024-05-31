@@ -17,9 +17,14 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from ..common.connectivity_status import ConnectivityStatus
 from ..common.consts import (
-    ACTION_ENTITY_SELECT_OPTION,
     ACTION_ENTITY_SET_NATIVE_VALUE,
+    ACTION_ENTITY_TURN_OFF,
+    ACTION_ENTITY_TURN_ON,
+    ALERT_MAPPING,
     ATTR_ACTIONS,
+    ATTR_ALERT_TYPE,
+    ATTR_IS_ON,
+    ATTR_MEDIA_TYPE,
     DOMAIN,
     ENTITY_CONFIG_ENTRY_ID,
     HA_NAME,
@@ -32,7 +37,7 @@ from ..common.consts import (
     WEEKEND_DAYS,
 )
 from ..common.entity_descriptions import PLATFORMS, IntegrationEntityDescription
-from ..common.enums import AlertType, EntityKeys, EntityType
+from ..common.enums import EntityKeys, EntityType
 from ..data_processors.account_processor import AccountProcessor
 from ..data_processors.base_processor import BaseProcessor
 from ..data_processors.meter_processor import MeterProcessor
@@ -276,9 +281,12 @@ class Coordinator(DataUpdateCoordinator):
             EntityKeys.SEWAGE_COST: self._get_sewage_cost_data,
             EntityKeys.LOW_RATE_CONSUMPTION_THRESHOLD: self._get_low_rate_consumption_threshold_data,
             EntityKeys.ALERTS: self._get_alerts_data,
-            EntityKeys.ALERT_EXCEEDED_THRESHOLD: self._get_alert_exceeded_threshold_data,
-            EntityKeys.ALERT_LEAK: self._get_alert_leak_data,
-            EntityKeys.ALERT_LEAK_WHILE_AWAY: self._get_alert_leak_while_away_data,
+            EntityKeys.ALERT_EXCEEDED_THRESHOLD_SMS: self._get_alert_setting_data,
+            EntityKeys.ALERT_EXCEEDED_THRESHOLD_EMAIL: self._get_alert_setting_data,
+            EntityKeys.ALERT_LEAK_SMS: self._get_alert_setting_data,
+            EntityKeys.ALERT_LEAK_EMAIL: self._get_alert_setting_data,
+            EntityKeys.ALERT_LEAK_WHILE_AWAY_SMS: self._get_alert_setting_data,
+            EntityKeys.ALERT_LEAK_WHILE_AWAY_EMAIL: self._get_alert_setting_data,
         }
 
         self._data_mapping = data_mapping
@@ -487,38 +495,18 @@ class Coordinator(DataUpdateCoordinator):
 
         return result
 
-    def _get_alert_exceeded_threshold_data(self, _entity_description) -> dict | None:
-        data = self._account_processor.get()
+    def _get_alert_setting_data(self, entity_description) -> dict | None:
+        account = self._account_processor.get()
+        is_on = account.alert_settings.get(entity_description.key, False)
 
         result = {
-            ATTR_STATE: data.alert_exceeded_threshold,
+            ATTR_IS_ON: is_on,
             ATTR_ACTIONS: {
-                ACTION_ENTITY_SELECT_OPTION: self._set_alert_exceeded_threshold,
-            },
-        }
-
-        return result
-
-    def _get_alert_leak_data(self, _entity_description) -> dict | None:
-        data = self._account_processor.get()
-
-        result = {
-            ATTR_STATE: data.alert_leak,
-            ATTR_ACTIONS: {
-                ACTION_ENTITY_SELECT_OPTION: self._set_alert_leak_data,
-            },
-        }
-
-        return result
-
-    def _get_alert_leak_while_away_data(self, _entity_description) -> dict | None:
-        data = self._account_processor.get()
-
-        result = {
-            ATTR_STATE: data.alert_leak_while_away,
-            ATTR_ACTIONS: {
-                ACTION_ENTITY_SELECT_OPTION: self._set_alert_leak_while_away,
-            },
+                ACTION_ENTITY_TURN_ON: self._set_alert_setting_enabled,
+                ACTION_ENTITY_TURN_OFF: self._set_alert_setting_disabled,
+            }
+            if entity_description.key != EntityKeys.ALERT_LEAK_EMAIL
+            else None,
         }
 
         return result
@@ -555,21 +543,22 @@ class Coordinator(DataUpdateCoordinator):
 
         await self.async_request_refresh()
 
-    async def _set_alert_exceeded_threshold(self, _entity_description, option: str):
-        _LOGGER.debug(f"Set alert exceeded daily threshold, Value: {option}")
-        await self._api.set_alert_settings(AlertType.DAILY_THRESHOLD, option)
+    async def _set_alert_setting_enabled(self, entity_description):
+        await self._set_alert_setting_state(entity_description, True)
 
-        await self.async_request_refresh()
+    async def _set_alert_setting_disabled(self, entity_description):
+        await self._set_alert_setting_state(entity_description, False)
 
-    async def _set_alert_leak_data(self, _entity_description, option: str):
-        _LOGGER.debug(f"Set alert leak, Value: {option}")
-        await self._api.set_alert_settings(AlertType.LEAK, option)
+    async def _set_alert_setting_state(self, entity_description, enabled: bool):
+        _LOGGER.debug(
+            f"Set setting state of {entity_description.key}, Value: {enabled}"
+        )
 
-        await self.async_request_refresh()
+        alert_mapping = ALERT_MAPPING.get(entity_description.key)
+        alert_type = alert_mapping.get(ATTR_ALERT_TYPE)
+        media_type = alert_mapping.get(ATTR_MEDIA_TYPE)
 
-    async def _set_alert_leak_while_away(self, _entity_description, option: str):
-        _LOGGER.debug(f"Set alert consumption while away, Value: {option}")
-        await self._api.set_alert_settings(AlertType.CONSUMPTION_WHILE_AWAY, option)
+        await self._api.set_alert_settings(alert_type, media_type, enabled)
 
         await self.async_request_refresh()
 

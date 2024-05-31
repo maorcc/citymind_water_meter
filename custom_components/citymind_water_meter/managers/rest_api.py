@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable
 from datetime import datetime, timedelta
 import logging
@@ -19,7 +20,6 @@ from ..common.consts import (
     API_DATA_LAST_UPDATE,
     API_DATA_SECTION_ME,
     API_DATA_SECTION_METERS,
-    API_DATA_SECTION_SETTINGS,
     API_DATA_TOKEN,
     API_HEADER_TOKEN,
     DEFAULT_NAME,
@@ -45,8 +45,6 @@ from ..common.consts import (
     LOGIN_PASSWORD,
     ME_MUNICIPAL_ID,
     METER_COUNT,
-    SETTINGS_ALERT_TYPE_ID,
-    SETTINGS_MEDIA_TYPE_ID,
     SIGNAL_API_STATUS,
     SIGNAL_DATA_CHANGED,
 )
@@ -303,7 +301,7 @@ class RestAPI:
         )
 
     def _build_endpoint(
-        self, endpoint, meter_count: str | None = None, alert_type: int | None = None
+        self, endpoint, meter_count: str | None = None, alert_type: str | None = None
     ):
         data = {
             ENDPOINT_PARAMETER_METER_ID: meter_count,
@@ -388,13 +386,11 @@ class RestAPI:
 
         return result
 
-    async def _async_put(self, endpoint: str, data: list[int]):
+    async def _async_put(self, url: str, data: list[int]):
         result = None
 
         try:
             headers = {API_HEADER_TOKEN: self.token}
-
-            url = self._build_endpoint(endpoint, alert_type=data[0])
 
             async with self._session.put(
                 url, headers=headers, json=data, ssl=False
@@ -409,7 +405,7 @@ class RestAPI:
 
         except ClientResponseError as crex:
             _LOGGER.error(
-                f"Failed to get data from {endpoint}, Data: {data}, HTTP Status: {crex.message} ({crex.status})"
+                f"Failed to get data from {url}, Data: {data}, HTTP Status: {crex.message} ({crex.status})"
             )
 
             if response.status == 401:
@@ -420,7 +416,7 @@ class RestAPI:
             line_number = tb.tb_lineno
 
             _LOGGER.error(
-                f"Failed to get data from {endpoint}, Data: {data}, Error: {ex}, Line: {line_number}"
+                f"Failed to get data from {url}, Data: {data}, Error: {ex}, Line: {line_number}"
             )
 
         return result
@@ -434,7 +430,7 @@ class RestAPI:
             async with self._session.delete(
                 url, headers=headers, json=data, ssl=False
             ) as response:
-                _LOGGER.debug(f"Status of {url}: {response.status}")
+                _LOGGER.debug(f"Status of {url}: {response.status}, Data: {data}")
 
                 response.raise_for_status()
 
@@ -444,7 +440,7 @@ class RestAPI:
 
         except ClientResponseError as crex:
             _LOGGER.error(
-                f"Failed to get data from {url}, HTTP Status: {crex.message} ({crex.status})"
+                f"Failed to get data from {url}, Data: {data}, HTTP Status: {crex.message} ({crex.status})"
             )
 
             if response.status == 401:
@@ -455,7 +451,7 @@ class RestAPI:
             line_number = tb.tb_lineno
 
             _LOGGER.error(
-                f"Failed to get data from {url}, Error: {ex}, Line: {line_number}"
+                f"Failed to get data from {url}, Data: {data}, Error: {ex}, Line: {line_number}"
             )
 
         return result
@@ -489,49 +485,25 @@ class RestAPI:
                         else:
                             self.data[endpoint_key] = metered_data
 
-    async def set_alert_settings(self, alert_type: AlertType, option: str) -> None:
+    async def set_alert_settings(
+        self, alert_type: AlertType, media_type: AlertChannel, enabled: bool
+    ) -> None:
         """Handles ACTION_CORE_ENTITY_SELECT_OPTION."""
-        settings = self.data.get(API_DATA_SECTION_SETTINGS)
-
-        current_sms_state = False
-        current_email_state = False
-
-        for item in settings:
-            current_alert_type_id = item.get(SETTINGS_ALERT_TYPE_ID)
-            current_media_type_id = item.get(SETTINGS_MEDIA_TYPE_ID)
-
-            current_alert_type = AlertType(current_alert_type_id)
-            current_media_type = AlertChannel(current_media_type_id)
-
-            if current_alert_type == alert_type:
-                if current_media_type == AlertChannel.SMS:
-                    current_sms_state = True
-                elif current_media_type == AlertChannel.EMAIL:
-                    current_email_state = True
-
-        expected_sms_state = option in [AlertChannel.SMS, AlertChannel.ALL]
-        expected_email_state = option in [AlertChannel.EMAIL, AlertChannel.ALL]
-
-        media_type: AlertChannel | None = None
-        enabled: bool | None = None
-
-        if current_sms_state != expected_sms_state:
-            media_type = AlertChannel.SMS
-            enabled = expected_sms_state
-
-        if current_email_state != expected_email_state:
-            media_type = AlertChannel.EMAIL
-            enabled = expected_email_state
-
         if media_type is not None:
             _LOGGER.info(
                 f"Updating alert {alert_type} on media {media_type} to {enabled}"
             )
 
             action = self._alert_settings_actions[enabled]
-            data = [int(media_type)]
 
-            await action(ENDPOINT_MY_ALERTS_SETTINGS_UPDATE, data)
+            url = self._build_endpoint(
+                ENDPOINT_MY_ALERTS_SETTINGS_UPDATE, alert_type=alert_type.value
+            )
+            data = [media_type.value]
+
+            await action(url, data)
+
+            await asyncio.sleep(1)
 
             await self._load_data(ENDPOINT_DATA_RELOAD)
 

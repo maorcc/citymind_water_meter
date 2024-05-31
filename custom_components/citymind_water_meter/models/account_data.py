@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+from custom_components.citymind_water_meter.common.enums import EntityType
+
 
 class AccountData:
     account_number: int | None
@@ -14,9 +16,7 @@ class AccountData:
     vacations: int | None
     alerts: int | None
     messages: int | None
-    alert_leak_data: str | None
-    alert_exceeded_threshold: str | None
-    alert_leak_while_away: str | None
+    alert_settings: dict[EntityType, bool] | None
 
     def __init__(self):
         self.account_number = None
@@ -29,9 +29,7 @@ class AccountData:
         self.vacations = None
         self.alerts = None
         self.messages = None
-        self.alert_leak = None
-        self.alert_exceeded_threshold = None
-        self.alert_leak_while_away = None
+        self.alert_settings = None
 
     def to_dict(self):
         obj = {
@@ -45,9 +43,7 @@ class AccountData:
             "vacations": self.vacations,
             "alerts": self.alerts,
             "messages": self.messages,
-            "alert_leak": self.alert_leak,
-            "alert_exceeded_threshold": self.alert_exceeded_threshold,
-            "alert_leak_while_away": self.alert_leak_while_away,
+            "alert_settings": self.alert_settings,
         }
 
         return obj

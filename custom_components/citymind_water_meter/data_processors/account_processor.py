@@ -4,10 +4,13 @@ import sys
 from homeassistant.helpers.device_registry import DeviceInfo
 
 from ..common.consts import (
+    ALERT_MAPPING,
     API_DATA_SECTION_CUSTOMER_SERVICE,
     API_DATA_SECTION_MY_ALERTS,
     API_DATA_SECTION_MY_MESSAGES,
     API_DATA_SECTION_SETTINGS,
+    ATTR_ALERT_TYPE,
+    ATTR_MEDIA_TYPE,
     CITY_MIND_WEBSITE,
     CUSTOMER_SERVICE_DESCRIPTION,
     CUSTOMER_SERVICE_EMAIL,
@@ -73,7 +76,7 @@ class AccountProcessor(BaseProcessor):
             vacations_data = self._api_data.get(API_DATA_SECTION_MY_MESSAGES)
             alerts_data = self._api_data.get(API_DATA_SECTION_MY_ALERTS)
             messages_data = self._api_data.get(API_DATA_SECTION_MY_MESSAGES)
-            settings = self._api_data.get(API_DATA_SECTION_SETTINGS)
+            settings_section = self._api_data.get(API_DATA_SECTION_SETTINGS)
 
             account.account_number = self._account_number
             account.first_name = self._first_name
@@ -94,13 +97,8 @@ class AccountProcessor(BaseProcessor):
             account.vacations = self._get_items_count(vacations_data)
             account.alerts = self._get_items_count(alerts_data)
             account.messages = self._get_items_count(messages_data)
-            account.alert_leak = self._get_alert_state(settings, AlertType.LEAK)
-            account.alert_exceeded_threshold = self._get_alert_state(
-                settings, AlertType.DAILY_THRESHOLD
-            )
-            account.alert_leak_while_away = self._get_alert_state(
-                settings, AlertType.CONSUMPTION_WHILE_AWAY
-            )
+
+            account.alert_settings = self._get_alert_settings(settings_section)
 
             self._account = account
 
@@ -113,26 +111,36 @@ class AccountProcessor(BaseProcessor):
             )
 
     @staticmethod
+    def _get_alert_settings(settings_section: dict) -> dict[EntityType, bool]:
+        alert_settings: dict[EntityType, bool] = {}
+        for entity_type in ALERT_MAPPING:
+            alert_mapping = ALERT_MAPPING[entity_type]
+
+            alert_type: AlertType = alert_mapping.get(ATTR_ALERT_TYPE)
+            media_type: AlertChannel = alert_mapping.get(ATTR_MEDIA_TYPE)
+
+            alert_type_id = alert_type.value
+            media_type_id = media_type.value
+
+            relevant_config = [
+                item
+                for item in settings_section
+                if item.get(SETTINGS_ALERT_TYPE_ID) == alert_type_id
+                and item.get(SETTINGS_MEDIA_TYPE_ID) == media_type_id
+            ]
+
+            enabled = len(relevant_config) > 0
+
+            _LOGGER.debug(
+                f"Checking Alert: {alert_type}, Channel: {media_type}, Status: {enabled}"
+            )
+
+            alert_settings[entity_type] = enabled
+
+        return alert_settings
+
+    @staticmethod
     def _get_items_count(data: list | dict | None) -> int:
         count = 0 if data is None else len(data)
 
         return count
-
-    @staticmethod
-    def _get_alert_state(settings: dict, alert_type: AlertType):
-        is_leak_alert = alert_type == AlertType.LEAK
-
-        value = int(AlertChannel.EMAIL) if is_leak_alert else 0
-
-        for item in settings:
-            alert_type_id = item.get(SETTINGS_ALERT_TYPE_ID)
-            current_media_type_id = item.get(SETTINGS_MEDIA_TYPE_ID, 0)
-
-            skip = is_leak_alert and current_media_type_id == int(AlertChannel.EMAIL)
-
-            if alert_type_id == alert_type and not skip:
-                value += current_media_type_id
-
-        state = str(value)
-
-        return state

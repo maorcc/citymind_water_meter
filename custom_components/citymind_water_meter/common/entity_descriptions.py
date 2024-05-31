@@ -8,10 +8,11 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
+from homeassistant.components.switch import SwitchEntityDescription
 from homeassistant.const import EntityCategory, Platform, UnitOfVolume
 from homeassistant.helpers.entity import EntityDescription
 
-from .consts import ALERT_OPTIONS, UNIT_COST
+from .consts import UNIT_COST
 from .enums import EntityKeys, EntityType
 
 
@@ -26,8 +27,6 @@ class IntegrationBinarySensorEntityDescription(
     BinarySensorEntityDescription, IntegrationEntityDescription
 ):
     platform: Platform | None = Platform.BINARY_SENSOR
-    on_value: str | bool | None = None
-    attributes: list[str] | None = None
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -42,6 +41,13 @@ class IntegrationSelectEntityDescription(
     SelectEntityDescription, IntegrationEntityDescription
 ):
     platform: Platform | None = Platform.SELECT
+
+
+@dataclass(frozen=True, kw_only=True)
+class IntegrationSwitchEntityDescription(
+    SwitchEntityDescription, IntegrationEntityDescription
+):
+    platform: Platform | None = Platform.SWITCH
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -150,21 +156,33 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         entity_type=EntityType.ACCOUNT,
         state_class=SensorStateClass.MEASUREMENT,
     ),
-    IntegrationSelectEntityDescription(
-        key=EntityKeys.ALERT_EXCEEDED_THRESHOLD,
-        options=ALERT_OPTIONS.get(EntityKeys.ALERT_EXCEEDED_THRESHOLD),
+    IntegrationSwitchEntityDescription(
+        key=EntityKeys.ALERT_EXCEEDED_THRESHOLD_SMS,
         entity_category=EntityCategory.CONFIG,
         entity_type=EntityType.ACCOUNT,
     ),
-    IntegrationSelectEntityDescription(
-        key=EntityKeys.ALERT_LEAK,
-        options=ALERT_OPTIONS.get(EntityKeys.ALERT_LEAK),
+    IntegrationSwitchEntityDescription(
+        key=EntityKeys.ALERT_EXCEEDED_THRESHOLD_EMAIL,
         entity_category=EntityCategory.CONFIG,
         entity_type=EntityType.ACCOUNT,
     ),
-    IntegrationSelectEntityDescription(
-        key=EntityKeys.ALERT_LEAK_WHILE_AWAY,
-        options=ALERT_OPTIONS.get(EntityKeys.ALERT_LEAK_WHILE_AWAY),
+    IntegrationSwitchEntityDescription(
+        key=EntityKeys.ALERT_LEAK_SMS,
+        entity_category=EntityCategory.CONFIG,
+        entity_type=EntityType.ACCOUNT,
+    ),
+    IntegrationBinarySensorEntityDescription(
+        key=EntityKeys.ALERT_LEAK_EMAIL,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        entity_type=EntityType.ACCOUNT,
+    ),
+    IntegrationSwitchEntityDescription(
+        key=EntityKeys.ALERT_LEAK_WHILE_AWAY_SMS,
+        entity_category=EntityCategory.CONFIG,
+        entity_type=EntityType.ACCOUNT,
+    ),
+    IntegrationSwitchEntityDescription(
+        key=EntityKeys.ALERT_LEAK_WHILE_AWAY_EMAIL,
         entity_category=EntityCategory.CONFIG,
         entity_type=EntityType.ACCOUNT,
     ),
