@@ -46,14 +46,23 @@
       "high_rate_consumption": {
         "name": "High Rate Consumption"
       },
+      "high_rate_total_cost": {
+        "name": "High Rate Cost"
+      },
       "last_read": {
         "name": "Last Read"
       },
       "low_rate_consumption": {
         "name": "Low Rate Consumption"
       },
+      "low_rate_total_cost": {
+        "name": "Low Rate Cost"
+      },
       "monthly_consumption": {
         "name": "Monthly Consumption"
+      },
+      "sewage_total_cost": {
+        "name": "Sewage Cost"
       },
       "todays_consumption": {
         "name": "Today's Consumption"

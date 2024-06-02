@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.1
+
+- Add total cost per low & rate and sewage consumption
+
 ## v3.0.0
 
 **Breaking Changes:**

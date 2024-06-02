@@ -94,6 +94,15 @@
       },
       "alerts": {
         "name": "Alert"
+      },
+      "low_rate_total_cost": {
+        "name": "Low Rate Cost"
+      },
+      "high_rate_total_cost": {
+        "name": "High Rate Cost"
+      },
+      "sewage_total_cost": {
+        "name": "Sewage Cost"
       }
     }
   }
