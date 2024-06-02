@@ -44,6 +44,7 @@ class IntegrationSensorEntity(IntegrationBaseEntity, SensorEntity):
             entity_description.native_unit_of_measurement
         )
 
+        self._attr_state_class = entity_description.state_class
         self._attr_last_reset = self._get_last_reset()
 
     def _get_last_reset(self) -> datetime | None:
