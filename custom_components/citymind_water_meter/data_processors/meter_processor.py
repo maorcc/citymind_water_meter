@@ -148,10 +148,6 @@ class MeterProcessor(BaseProcessor):
         last_read_value = last_read_details.get(meter_id, 0)
         last_read = self._format_number(last_read_value, 3)
 
-        date_parts = self._today_iso.split("-")
-        month_parts = date_parts[:2]
-        current_month = "-".join(month_parts)
-
         yesterday_consumption = self._get_consumption(
             daily_consumption_section, meter_id, self._yesterday_iso
         )
@@ -159,7 +155,7 @@ class MeterProcessor(BaseProcessor):
             daily_consumption_section, meter_id, self._today_iso
         )
         monthly_consumption = self._get_consumption(
-            monthly_consumption_section, meter_id, current_month
+            monthly_consumption_section, meter_id, self._current_month_iso
         )
 
         consumption_forecast_data = consumption_forecast_section.get(str(meter_id))

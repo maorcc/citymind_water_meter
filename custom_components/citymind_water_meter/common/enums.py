@@ -17,6 +17,12 @@ class EntityType(StrEnum):
     ACCOUNT = "account"
 
 
+class ResetPolicy(Enum):
+    NONE = 0
+    DAILY = 1
+    MONTHLY = 2
+
+
 class EntityKeys(StrEnum):
     CONSUMPTION_FORECAST = "consumption_forecast"
     LAST_READ = "last_read"

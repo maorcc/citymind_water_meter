@@ -91,9 +91,10 @@ class Coordinator(DataUpdateCoordinator):
             entry.async_on_unload(async_dispatcher_connect(hass, signal, handler))
 
         config_data = config_manager.config_data
+        analytic_periods = config_manager.analytic_periods
         entry_id = config_manager.entry_id
 
-        self._api = RestAPI(self.hass, config_data, entry_id)
+        self._api = RestAPI(self.hass, config_data, analytic_periods, entry_id)
 
         self._config_manager = config_manager
 
@@ -176,6 +177,8 @@ class Coordinator(DataUpdateCoordinator):
             return
 
         if status == ConnectivityStatus.Connected:
+            self.config_manager.analytic_periods.update()
+
             await self._api.update()
 
         elif status in [ConnectivityStatus.Failed]:
@@ -222,7 +225,7 @@ class Coordinator(DataUpdateCoordinator):
         if api_connected:
             for processor_type in self._processors:
                 processor = self._processors[processor_type]
-                processor.update(self._api.data, self._api.today, self._api.yesterday)
+                processor.update(self._api.data)
 
             account = self._account_processor.get()
 
@@ -252,6 +255,8 @@ class Coordinator(DataUpdateCoordinator):
                 now = datetime.now().timestamp()
 
                 if now - self._last_update >= self.update_interval.total_seconds():
+                    self.config_manager.analytic_periods.update()
+
                     await self._api.update()
 
                     self._last_update = now
@@ -277,8 +282,11 @@ class Coordinator(DataUpdateCoordinator):
             EntityKeys.HIGH_RATE_CONSUMPTION: self._get_high_rate_consumption_data,
             EntityKeys.LOW_RATE_CONSUMPTION: self._get_low_rate_consumption_data,
             EntityKeys.LOW_RATE_COST: self._get_low_rate_cost_data,
+            EntityKeys.LOW_RATE_TOTAL_COST: self._get_low_rate_total_cost_data,
             EntityKeys.HIGH_RATE_COST: self._get_high_rate_cost_data,
+            EntityKeys.HIGH_RATE_TOTAL_COST: self._get_high_rate_total_cost_data,
             EntityKeys.SEWAGE_COST: self._get_sewage_cost_data,
+            EntityKeys.SEWAGE_TOTAL_COST: self._get_sewage_total_cost_data,
             EntityKeys.LOW_RATE_CONSUMPTION_THRESHOLD: self._get_low_rate_consumption_threshold_data,
             EntityKeys.ALERTS: self._get_alerts_data,
             EntityKeys.ALERT_EXCEEDED_THRESHOLD_SMS: self._get_alert_setting_data,
@@ -448,6 +456,15 @@ class Coordinator(DataUpdateCoordinator):
 
         return result
 
+    def _get_low_rate_total_cost_data(
+        self, _entity_description, meter_id: str
+    ) -> dict | None:
+        data = self._meter_processor.get_data(meter_id)
+
+        result = {ATTR_STATE: data.low_rate_cost * data.low_rate_monthly_consumption}
+
+        return result
+
     def _get_high_rate_cost_data(
         self, _entity_description, meter_id: str
     ) -> dict | None:
@@ -462,6 +479,15 @@ class Coordinator(DataUpdateCoordinator):
 
         return result
 
+    def _get_high_rate_total_cost_data(
+        self, _entity_description, meter_id: str
+    ) -> dict | None:
+        data = self._meter_processor.get_data(meter_id)
+
+        result = {ATTR_STATE: data.high_rate_cost * data.high_rate_monthly_consumption}
+
+        return result
+
     def _get_sewage_cost_data(self, _entity_description, meter_id: str) -> dict | None:
         data = self._meter_processor.get_data(meter_id)
 
@@ -471,6 +497,15 @@ class Coordinator(DataUpdateCoordinator):
                 ACTION_ENTITY_SET_NATIVE_VALUE: self._set_sewage_cost,
             },
         }
+
+        return result
+
+    def _get_sewage_total_cost_data(
+        self, _entity_description, meter_id: str
+    ) -> dict | None:
+        data = self._meter_processor.get_data(meter_id)
+
+        result = {ATTR_STATE: data.sewage_cost * data.monthly_consumption}
 
         return result
 

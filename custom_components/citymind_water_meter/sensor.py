@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 
 from homeassistant.components.sensor import SensorEntity
@@ -7,7 +8,7 @@ from homeassistant.core import HomeAssistant
 
 from .common.base_entity import IntegrationBaseEntity, async_setup_base_entry
 from .common.entity_descriptions import IntegrationSensorEntityDescription
-from .common.enums import EntityType
+from .common.enums import EntityType, ResetPolicy
 from .managers.coordinator import Coordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -42,6 +43,23 @@ class IntegrationSensorEntity(IntegrationBaseEntity, SensorEntity):
         self._attr_native_unit_of_measurement = (
             entity_description.native_unit_of_measurement
         )
+
+        self._attr_last_reset = self._get_last_reset()
+
+    def _get_last_reset(self) -> datetime | None:
+        last_reset: datetime | None = None
+        reset_policy = self._entity_description.reset_policy
+
+        if reset_policy != ResetPolicy.NONE:
+            analytic_periods = self.coordinator.config_manager.analytic_periods
+
+            if reset_policy == ResetPolicy.DAILY:
+                last_reset = analytic_periods.today
+
+            elif reset_policy == ResetPolicy.MONTHLY:
+                last_reset = analytic_periods.first_date_of_month
+
+        return last_reset
 
     def update_component(self, data):
         """Fetch new state parameters for the sensor."""
