@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.3
+
+- Fix state class to total
+
 ## v3.0.2
 
 - Fix unload integration process
