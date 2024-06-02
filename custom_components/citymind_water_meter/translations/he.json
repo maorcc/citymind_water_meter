@@ -46,14 +46,23 @@
       "high_rate_consumption": {
         "name": "\u05e6\u05e8\u05d9\u05db\u05ea \u05e7\u05e6\u05d1 \u05d2\u05d1\u05d5\u05d4\u05d4"
       },
+      "high_rate_total_cost": {
+        "name": "\u05e2\u05dc\u05d5\u05ea \u05ea\u05e2\u05e8\u05d9\u05e3 \u05d2\u05d1\u05d5\u05d4\u05d4"
+      },
       "last_read": {
         "name": "\u05e7\u05e8\u05d0 \u05d0\u05d7\u05e8\u05d5\u05df"
       },
       "low_rate_consumption": {
         "name": "\u05e6\u05e8\u05d9\u05db\u05ea \u05e7\u05e6\u05d1 \u05e0\u05de\u05d5\u05da"
       },
+      "low_rate_total_cost": {
+        "name": "\u05e2\u05dc\u05d5\u05ea \u05ea\u05e2\u05e8\u05d9\u05e3 \u05e0\u05de\u05d5\u05da"
+      },
       "monthly_consumption": {
         "name": "\u05e6\u05e8\u05d9\u05db\u05d4 \u05d7\u05d5\u05d3\u05e9\u05d9\u05ea"
+      },
+      "sewage_total_cost": {
+        "name": "\u05e2\u05dc\u05d5\u05ea \u05d1\u05d9\u05d5\u05d1"
       },
       "todays_consumption": {
         "name": "\u05d4\u05e6\u05e8\u05d9\u05db\u05d4 \u05e9\u05dc \u05d4\u05d9\u05d5\u05dd"
