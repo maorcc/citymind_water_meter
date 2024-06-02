@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.2
+
+- Fix unload integration process
+- Add last reset date for sensors (none, daily, monthly)
+- Correct state_class of sensors
+- Correct data of total cost per low & rate and sewage consumption
+- Fix convert to string function of data models
+
 ## v3.0.1
 
 - Add total cost per low & rate and sewage consumption

@@ -13,13 +13,14 @@ from homeassistant.const import EntityCategory, Platform, UnitOfVolume
 from homeassistant.helpers.entity import EntityDescription
 
 from .consts import UNIT_COST
-from .enums import EntityKeys, EntityType
+from .enums import EntityKeys, EntityType, ResetPolicy
 
 
 @dataclass(frozen=True, kw_only=True)
 class IntegrationEntityDescription(EntityDescription):
     platform: Platform | None = None
     entity_type: EntityType | None
+    reset_policy: ResetPolicy = ResetPolicy.NONE
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -64,6 +65,7 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         icon="mdi:meter-gas",
         state_class=SensorStateClass.TOTAL,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
+        reset_policy=ResetPolicy.MONTHLY,
     ),
     IntegrationSensorEntityDescription(
         key=EntityKeys.LAST_READ,
@@ -71,6 +73,7 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         device_class=SensorDeviceClass.WATER,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
+        reset_policy=ResetPolicy.MONTHLY,
     ),
     IntegrationSensorEntityDescription(
         key=EntityKeys.MONTHLY_CONSUMPTION,
@@ -78,6 +81,7 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         device_class=SensorDeviceClass.WATER,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
+        reset_policy=ResetPolicy.MONTHLY,
     ),
     IntegrationSensorEntityDescription(
         key=EntityKeys.TODAYS_CONSUMPTION,
@@ -85,6 +89,7 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         device_class=SensorDeviceClass.WATER,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
+        reset_policy=ResetPolicy.DAILY,
     ),
     IntegrationSensorEntityDescription(
         key=EntityKeys.YESTERDAYS_CONSUMPTION,
@@ -92,6 +97,7 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         device_class=SensorDeviceClass.WATER,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
+        reset_policy=ResetPolicy.DAILY,
     ),
     IntegrationSensorEntityDescription(
         key=EntityKeys.HIGH_RATE_CONSUMPTION,
@@ -99,6 +105,7 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         device_class=SensorDeviceClass.WATER,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
+        reset_policy=ResetPolicy.MONTHLY,
     ),
     IntegrationSensorEntityDescription(
         key=EntityKeys.LOW_RATE_CONSUMPTION,
@@ -106,14 +113,16 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         device_class=SensorDeviceClass.WATER,
         state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UnitOfVolume.CUBIC_METERS,
+        reset_policy=ResetPolicy.MONTHLY,
     ),
     IntegrationSensorEntityDescription(
         key=EntityKeys.LOW_RATE_TOTAL_COST,
         entity_type=EntityType.METER,
         entity_category=EntityCategory.DIAGNOSTIC,
-        state_class=SensorStateClass.MEASUREMENT,
+        state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UNIT_COST,
         icon="mdi:currency-ils",
+        reset_policy=ResetPolicy.MONTHLY,
     ),
     IntegrationNumberEntityDescription(
         key=EntityKeys.LOW_RATE_COST,
@@ -130,9 +139,10 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         key=EntityKeys.HIGH_RATE_TOTAL_COST,
         entity_type=EntityType.METER,
         entity_category=EntityCategory.DIAGNOSTIC,
-        state_class=SensorStateClass.MEASUREMENT,
+        state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UNIT_COST,
         icon="mdi:currency-ils",
+        reset_policy=ResetPolicy.MONTHLY,
     ),
     IntegrationNumberEntityDescription(
         key=EntityKeys.HIGH_RATE_COST,
@@ -149,9 +159,10 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         key=EntityKeys.SEWAGE_TOTAL_COST,
         entity_type=EntityType.METER,
         entity_category=EntityCategory.DIAGNOSTIC,
-        state_class=SensorStateClass.MEASUREMENT,
+        state_class=SensorStateClass.TOTAL_INCREASING,
         native_unit_of_measurement=UNIT_COST,
         icon="mdi:currency-ils",
+        reset_policy=ResetPolicy.MONTHLY,
     ),
     IntegrationNumberEntityDescription(
         key=EntityKeys.SEWAGE_COST,

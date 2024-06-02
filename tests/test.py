@@ -88,7 +88,12 @@ class Test:
 
         self._config_data = self._config_manager.config_data
 
-        self._api = RestAPI(None, self._config_data)
+        self._api = RestAPI(
+            None,
+            self._config_data,
+            self._config_manager.analytic_periods
+        )
+
         self._api.set_local_async_dispatcher_send(self.local_async_dispatcher_send)
 
         await self._api.initialize()
@@ -120,15 +125,16 @@ class Test:
 
         for processor_type in self._processors:
             processor = self._processors[processor_type]
-            processor.update(self._api.data, self._api.today, self._api.yesterday)
+            processor.update(self._api.data)
 
-        account = self._account_processor.get().to_dict()
-        meters = self._meter_processor.get_all()
+        account = self._account_processor.get()
+        meters = self._meter_processor.get_meters()
 
         _LOGGER.info(json.dumps(self._api.data, indent=4, default=str))
         _LOGGER.info(f"account: {account}")
 
-        for meter in meters:
+        for meter_id in meters:
+            meter = self._meter_processor.get_data(meter_id)
             _LOGGER.info(f"{meter}")
 
     def _get_api_data(self) -> str:
@@ -150,7 +156,6 @@ class Test:
         result = json.dumps(clean_data, indent=4)
 
         return result
-
 
 
 loop = asyncio.new_event_loop()

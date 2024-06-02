@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Awaitable
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 import sys
 from typing import Any, Callable
@@ -38,8 +38,6 @@ from ..common.consts import (
     ENDPOINT_PARAMETER_TODAY,
     ENDPOINT_PARAMETER_YESTERDAY,
     ERROR_REASON_INVALID_CREDENTIALS,
-    FORMAT_DATE_ISO,
-    FORMAT_DATE_YEAR_MONTH,
     LOGIN_DEVICE_ID,
     LOGIN_EMAIL,
     LOGIN_PASSWORD,
@@ -49,6 +47,7 @@ from ..common.consts import (
     SIGNAL_DATA_CHANGED,
 )
 from ..common.enums import AlertChannel, AlertType
+from ..models.analytics_periods import AnalyticPeriodsData
 from ..models.config_data import ConfigData
 
 _LOGGER = logging.getLogger(__name__)
@@ -56,6 +55,9 @@ _LOGGER = logging.getLogger(__name__)
 
 class RestAPI:
     _hass: HomeAssistant | None
+    _config_data: ConfigData
+    _analytic_periods: AnalyticPeriodsData
+
     data: dict
 
     _status: ConnectivityStatus | None
@@ -66,18 +68,13 @@ class RestAPI:
 
     _last_valid: datetime | None
 
-    today: str | None
-    yesterday: str | None
-    first_day_of_month: str | None
-    _last_day_of_current_month: str | None
-    current_month: str | None
-
     _alert_settings_actions: dict[bool, Callable[[str, list[int]], Awaitable[dict]]]
 
     def __init__(
         self,
         hass: HomeAssistant | None,
         config_data: ConfigData,
+        analytic_periods: AnalyticPeriodsData,
         entry_id: str | None = None,
     ):
         try:
@@ -87,6 +84,7 @@ class RestAPI:
             self.data = {}
 
             self._config_data = config_data
+            self._analytic_periods = analytic_periods
 
             self._local_async_dispatcher_send = None
 
@@ -97,12 +95,6 @@ class RestAPI:
             self._dispatched_devices = []
             self._dispatched_server = False
             self._last_valid = None
-
-            self.today = None
-            self.yesterday = None
-            self.first_day_of_month = None
-            self._last_day_of_current_month = None
-            self.current_month = None
 
             self._alert_settings_actions = {
                 True: self._async_put,
@@ -174,8 +166,6 @@ class RestAPI:
             await self.initialize(self._config_data)
 
         if self.status == ConnectivityStatus.Connected:
-            self._set_date()
-
             if self.municipal_id is None:
                 await self._load_data(ENDPOINT_DATA_INITIALIZE)
 
@@ -278,39 +268,17 @@ class RestAPI:
         else:
             dispatcher_send(self._hass, signal, self._entry_id, *args)
 
-    def _set_date(self):
-        today = datetime.now()
-        yesterday = today - timedelta(days=1)
-
-        year = today.year if today.month <= 11 else today.year + 1
-        month = today.month + 1 if today.month <= 11 else 1
-
-        next_month_date = datetime(year=year, month=month, day=1)
-        last_day_of_current_month = next_month_date - timedelta(days=1)
-
-        first_day_of_month = today.replace(
-            day=1, hour=0, minute=0, second=0, microsecond=0
-        )
-
-        self.today = today.strftime(FORMAT_DATE_ISO)
-        self.yesterday = yesterday.strftime(FORMAT_DATE_ISO)
-        self.current_month = today.strftime(FORMAT_DATE_YEAR_MONTH)
-        self.first_day_of_month = first_day_of_month.strftime(FORMAT_DATE_ISO)
-        self._last_day_of_current_month = last_day_of_current_month.strftime(
-            FORMAT_DATE_ISO
-        )
-
     def _build_endpoint(
         self, endpoint, meter_count: str | None = None, alert_type: str | None = None
     ):
         data = {
             ENDPOINT_PARAMETER_METER_ID: meter_count,
-            ENDPOINT_PARAMETER_YESTERDAY: self.yesterday,
-            ENDPOINT_PARAMETER_TODAY: self.today,
-            ENDPOINT_PARAMETER_LAST_DAY_MONTH: self._last_day_of_current_month,
-            ENDPOINT_PARAMETER_MUNICIPALITY_ID: self.municipal_id,
-            ENDPOINT_PARAMETER_CURRENT_MONTH: self.current_month,
             ENDPOINT_PARAMETER_ALERT_TYPE: alert_type,
+            ENDPOINT_PARAMETER_MUNICIPALITY_ID: self.municipal_id,
+            ENDPOINT_PARAMETER_YESTERDAY: self._analytic_periods.yesterday_iso,
+            ENDPOINT_PARAMETER_TODAY: self._analytic_periods.today_iso,
+            ENDPOINT_PARAMETER_LAST_DAY_MONTH: self._analytic_periods.last_date_of_month_iso,
+            ENDPOINT_PARAMETER_CURRENT_MONTH: self._analytic_periods.current_month_iso,
         }
 
         url = endpoint.format(**data)

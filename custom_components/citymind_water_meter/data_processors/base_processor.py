@@ -23,6 +23,7 @@ class BaseProcessor:
     _last_name: str | None = None
     _today_iso: str | None = None
     _yesterday_iso: str | None = None
+    _current_month_iso: str | None = None
     _config_manager: ConfigManager | None = None
     _config_data: ConfigData | None = None
     _unique_messages: list[str] | None = None
@@ -35,16 +36,18 @@ class BaseProcessor:
         self._account_number = None
         self._first_name = None
         self._last_name = None
-        self._today_iso = None
-        self._yesterday_iso = None
         self.processor_type = None
 
         self._unique_messages = []
 
-    def update(self, api_data: dict, today_iso: str, yesterday_iso: str):
+    def update(self, api_data: dict):
         self._api_data = api_data
-        self._today_iso = today_iso
-        self._yesterday_iso = yesterday_iso
+
+        analytic_periods = self._config_manager.analytic_periods
+
+        self._today_iso = analytic_periods.today_iso
+        self._yesterday_iso = analytic_periods.yesterday_iso
+        self._current_month_iso = analytic_periods.current_month_iso
 
         self._process_api_data()
 

@@ -29,6 +29,7 @@ from ..common.consts import (
     STORAGE_DATA_METERS,
 )
 from ..common.entity_descriptions import IntegrationEntityDescription
+from ..models.analytics_periods import AnalyticPeriodsData
 from ..models.config_data import ConfigData
 
 _LOGGER = logging.getLogger(__name__)
@@ -47,6 +48,8 @@ class ConfigManager:
     _is_set_up_mode: bool
     _is_initialized: bool
 
+    analytic_periods: AnalyticPeriodsData
+
     def __init__(self, hass: HomeAssistant | None, entry: ConfigEntry | None = None):
         self._hass = hass
         self._entry = entry
@@ -64,6 +67,8 @@ class ConfigManager:
 
         self._is_set_up_mode = entry is None
         self._is_initialized = False
+
+        self.analytic_periods = AnalyticPeriodsData()
 
         if hass is not None:
             self._store = Store(

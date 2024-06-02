@@ -81,10 +81,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
     """Unload a config entry."""
     _LOGGER.info(f"Unloading {DOMAIN} integration, Entry ID: {entry.entry_id}")
 
-    coordinator: Coordinator = hass.data[DOMAIN][entry.entry_id]
-
-    await coordinator.terminate()
-
     for platform in PLATFORMS:
         await hass.config_entries.async_forward_entry_unload(entry, platform)
 

@@ -49,6 +49,6 @@ class AccountData:
         return obj
 
     def __repr__(self):
-        to_string = json.dumps(self, default=str)
+        to_string = json.dumps(self.to_dict(), default=str)
 
         return to_string
