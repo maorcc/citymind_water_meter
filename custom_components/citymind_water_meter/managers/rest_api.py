@@ -74,10 +74,13 @@ class RestAPI:
         self,
         hass: HomeAssistant | None,
         config_data: ConfigData,
-        analytic_periods: AnalyticPeriodsData,
+        analytic_periods: AnalyticPeriodsData | None = None,
         entry_id: str | None = None,
     ):
         try:
+            if analytic_periods is None:
+                analytic_periods = AnalyticPeriodsData()
+
             self._hass = hass
             self._support_video_browser_api = False
 

@@ -13,7 +13,6 @@ from homeassistant.data_entry_flow import FlowHandler
 
 from ..common.connectivity_status import ConnectivityStatus
 from ..common.consts import DEFAULT_NAME
-from ..models.analytics_periods import AnalyticPeriodsData
 from ..models.config_data import DATA_KEYS, ConfigData
 from ..models.exceptions import LoginError
 from .config_manager import ConfigManager
@@ -67,8 +66,7 @@ class IntegrationFlowManager:
                 config_data = ConfigData()
                 config_data.update(user_input)
 
-                analytic_periods = AnalyticPeriodsData()
-                api = RestAPI(self._hass, config_data, analytic_periods)
+                api = RestAPI(self._hass, config_data)
 
                 await api.validate()
 
