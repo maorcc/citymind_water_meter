@@ -1,5 +1,13 @@
 # Changelog
 
+## v3.0.5
+
+- Remove startup blocking call
+
+## v3.0.4
+
+- Fix login issue while set up integration
+
 ## v3.0.3
 
 - Fix state class to total

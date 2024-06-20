@@ -7,7 +7,7 @@ from typing import Callable
 
 from homeassistant.components.homeassistant import SERVICE_RELOAD_CONFIG_ENTRY
 from homeassistant.const import ATTR_STATE
-from homeassistant.core import Event
+from homeassistant.core import Event, callback
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
@@ -76,20 +76,6 @@ class Coordinator(DataUpdateCoordinator):
 
         _LOGGER.debug("Initializing")
 
-        entry = config_manager.entry
-
-        signal_handlers = {
-            SIGNAL_API_STATUS: self._on_api_status_changed,
-            SIGNAL_DATA_CHANGED: self._on_data_changed,
-        }
-
-        _LOGGER.debug(f"Registering signals for {signal_handlers.keys()}")
-
-        for signal in signal_handlers:
-            handler = signal_handlers[signal]
-
-            entry.async_on_unload(async_dispatcher_connect(hass, signal, handler))
-
         config_data = config_manager.config_data
         analytic_periods = config_manager.analytic_periods
         entry_id = config_manager.entry_id
@@ -114,6 +100,8 @@ class Coordinator(DataUpdateCoordinator):
             EntityType.ACCOUNT: self._account_processor,
             EntityType.METER: self._meter_processor,
         }
+
+        self._load_signal_handlers()
 
         _LOGGER.debug("Initializing done")
 
@@ -155,6 +143,31 @@ class Coordinator(DataUpdateCoordinator):
         await self.async_config_entry_first_refresh()
 
         await self._api.initialize()
+
+    def _load_signal_handlers(self):
+        loop = self.hass.loop
+
+        @callback
+        def on_api_status_changed(entry_id: str, status: ConnectivityStatus):
+            loop.create_task(self._on_api_status_changed(entry_id, status)).__await__()
+
+        @callback
+        def on_data_changed(entry_id: str):
+            loop.create_task(self._on_data_changed(entry_id)).__await__()
+
+        signal_handlers = {
+            SIGNAL_API_STATUS: self._on_api_status_changed,
+            SIGNAL_DATA_CHANGED: self._on_data_changed,
+        }
+
+        _LOGGER.debug(f"Registering signals for {signal_handlers.keys()}")
+
+        for signal in signal_handlers:
+            handler = signal_handlers[signal]
+
+            self._config_manager.entry.async_on_unload(
+                async_dispatcher_connect(self.hass, signal, handler)
+            )
 
     def get_debug_data(self) -> dict:
         config_data = self._config_manager.get_debug_data()
