@@ -45,3 +45,4 @@ class EntityKeys(StrEnum):
     ALERT_LEAK_EMAIL = "alert_leak_email"
     ALERT_EXCEEDED_THRESHOLD_SMS = "alert_exceeded_threshold_sms"
     ALERT_EXCEEDED_THRESHOLD_EMAIL = "alert_exceeded_threshold_email"
+    USE_UNIQUE_DEVICE_NAMES = "use_unique_device_name"

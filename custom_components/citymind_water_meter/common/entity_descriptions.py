@@ -221,6 +221,11 @@ ENTITY_DESCRIPTIONS: list[IntegrationEntityDescription] = [
         entity_category=EntityCategory.CONFIG,
         entity_type=EntityType.ACCOUNT,
     ),
+    IntegrationSwitchEntityDescription(
+        key=EntityKeys.USE_UNIQUE_DEVICE_NAMES,
+        entity_category=EntityCategory.CONFIG,
+        entity_type=EntityType.ACCOUNT,
+    ),
 ]
 
 

@@ -31,7 +31,7 @@ class ConnectivityStatus(StrEnum):
     @staticmethod
     def get_ha_error(status: str) -> str | None:
         errors = {
-            str(ConnectivityStatus.InvalidCredentials): "invalid_admin_credentials",
+            str(ConnectivityStatus.InvalidCredentials): "invalid_credentials",
             str(ConnectivityStatus.TemporaryConnected): "missing_permanent_api_key",
             str(ConnectivityStatus.MissingAPIKey): "missing_permanent_api_key",
             str(ConnectivityStatus.Failed): "invalid_server_details",

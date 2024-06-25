@@ -19,6 +19,7 @@ from ..common.consts import (
     CONFIGURATION_FILE,
     DEFAULT_METER_CONFIG,
     DEFAULT_NAME,
+    DEFAULT_USE_UNIQUE_DEVICE_NAMES,
     DOMAIN,
     INVALID_TOKEN_SECTION,
     SIGNAL_DATA_CHANGED,
@@ -27,6 +28,7 @@ from ..common.consts import (
     STORAGE_DATA_METER_LOW_RATE_COST,
     STORAGE_DATA_METER_SEWAGE_COST,
     STORAGE_DATA_METERS,
+    STORAGE_DATA_USE_UNIQUE_DEVICE_NAMES,
 )
 from ..common.entity_descriptions import IntegrationEntityDescription
 from ..models.analytics_periods import AnalyticPeriodsData
@@ -102,6 +104,14 @@ class ConfigManager:
     @property
     def meters(self):
         result = self._data.get(STORAGE_DATA_METERS, {})
+
+        return result
+
+    @property
+    def use_unique_device_names(self) -> bool:
+        result = self._data.get(
+            STORAGE_DATA_USE_UNIQUE_DEVICE_NAMES, DEFAULT_USE_UNIQUE_DEVICE_NAMES
+        )
 
         return result
 
@@ -230,23 +240,24 @@ class ConfigManager:
             self._data = {}
 
         default_configuration = self._get_defaults()
-        _LOGGER.info(f"default_configuration: {default_configuration}")
+        _LOGGER.debug(f"Default configuration: {default_configuration}")
 
         for key in default_configuration:
             value = default_configuration[key]
 
             if key not in self._data:
-                _LOGGER.info(f"adding {key}")
+                _LOGGER.debug(f"Adding {key}")
                 should_save = True
                 self._data[key] = value
 
         if should_save:
-            _LOGGER.info("updated")
+            _LOGGER.debug("Updating configuration")
             await self._save()
 
     @staticmethod
     def _get_defaults() -> dict:
         data = {
+            STORAGE_DATA_USE_UNIQUE_DEVICE_NAMES: DEFAULT_USE_UNIQUE_DEVICE_NAMES,
             STORAGE_DATA_METERS: {},
         }
 
@@ -309,6 +320,13 @@ class ConfigManager:
             store_data[self._entry_id] = entry_data
 
             await self._store.async_save(store_data)
+
+    async def set_use_unique_device_names(self, value: bool) -> None:
+        self._data[STORAGE_DATA_USE_UNIQUE_DEVICE_NAMES] = value
+
+        await self._save()
+
+        self._async_dispatcher_send(SIGNAL_DATA_CHANGED)
 
     async def _set_meter_config(self, meter_id: str, key: str, value: float) -> None:
         if meter_id not in self.meters:

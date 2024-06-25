@@ -68,6 +68,9 @@
       },
       "alert_leak_while_away_email": {
         "name": "Consumption Alert While Away (E-Mail)"
+      },
+      "use_unique_device_name": {
+        "name": "Use unique device name"
       }
     },
     "sensor": {

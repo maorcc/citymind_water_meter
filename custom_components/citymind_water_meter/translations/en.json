@@ -86,6 +86,9 @@
       },
       "alert_leak_while_away_sms": {
         "name": "Consumption Alert While Away (SMS)"
+      },
+      "use_unique_device_name": {
+        "name": "Use unique device name"
       }
     }
   },

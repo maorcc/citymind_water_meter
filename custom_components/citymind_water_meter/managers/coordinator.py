@@ -8,10 +8,18 @@ from typing import Callable
 from homeassistant.components.homeassistant import SERVICE_RELOAD_CONFIG_ENTRY
 from homeassistant.const import ATTR_STATE
 from homeassistant.core import Event, callback
-from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.device_registry import (
+    DeviceInfo,
+    async_entries_for_config_entry as devices_by_config_entry,
+    async_get as async_get_device_registry,
+)
 from homeassistant.helpers.dispatcher import (
     async_dispatcher_connect,
     async_dispatcher_send,
+)
+from homeassistant.helpers.entity_registry import (
+    async_entries_for_config_entry as entities_by_config_entry,
+    async_get as async_get_entity_registry,
 )
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -295,6 +303,7 @@ class Coordinator(DataUpdateCoordinator):
             EntityKeys.ALERT_LEAK_EMAIL: self._get_alert_setting_data,
             EntityKeys.ALERT_LEAK_WHILE_AWAY_SMS: self._get_alert_setting_data,
             EntityKeys.ALERT_LEAK_WHILE_AWAY_EMAIL: self._get_alert_setting_data,
+            EntityKeys.USE_UNIQUE_DEVICE_NAMES: self._get_use_unique_device_names_data,
         }
 
         self._data_mapping = data_mapping
@@ -530,6 +539,19 @@ class Coordinator(DataUpdateCoordinator):
 
         return result
 
+    def _get_use_unique_device_names_data(self, _entity_description) -> dict | None:
+        is_on = self._config_manager.use_unique_device_names
+
+        result = {
+            ATTR_IS_ON: is_on,
+            ATTR_ACTIONS: {
+                ACTION_ENTITY_TURN_ON: self._set_use_unique_device_names_enabled,
+                ACTION_ENTITY_TURN_OFF: self._set_use_unique_device_names_disabled,
+            },
+        }
+
+        return result
+
     def _get_alert_setting_data(self, entity_description) -> dict | None:
         account = self._account_processor.get()
         is_on = account.alert_settings.get(entity_description.key, False)
@@ -578,6 +600,19 @@ class Coordinator(DataUpdateCoordinator):
 
         await self.async_request_refresh()
 
+    async def _set_use_unique_device_names_enabled(self, _entity_description):
+        await self._set_use_unique_device_names_state(True)
+
+    async def _set_use_unique_device_names_disabled(self, _entity_description):
+        await self._set_use_unique_device_names_state(False)
+
+    async def _set_use_unique_device_names_state(self, enabled: bool):
+        _LOGGER.debug(f"Set unique device name state, Value: {enabled}")
+
+        await self._config_manager.set_use_unique_device_names(enabled)
+
+        await self._remove_and_refresh()
+
     async def _set_alert_setting_enabled(self, entity_description):
         await self._set_alert_setting_state(entity_description, True)
 
@@ -614,3 +649,18 @@ class Coordinator(DataUpdateCoordinator):
             self._is_weekend = is_weekend
 
             self.update_interval = self.current_update_interval
+
+    async def _remove_and_refresh(self):
+        entity_registry = async_get_entity_registry(self.hass)
+        device_registry = async_get_device_registry(self.hass)
+
+        entities = entities_by_config_entry(entity_registry, self.config_entry.entry_id)
+        devices = devices_by_config_entry(device_registry, self.config_entry.entry_id)
+
+        for entity_entry in entities:
+            entity_registry.async_remove(entity_entry.entity_id)
+
+        for device_entry in devices:
+            device_registry.async_remove_device(device_entry.id)
+
+        await self._reload_integration()

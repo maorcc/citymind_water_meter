@@ -35,29 +35,30 @@ class AccountProcessor(BaseProcessor):
     def __init__(self, config_manager: ConfigManager):
         super().__init__(config_manager)
 
-        self.processor_type = EntityType.ACCOUNT
-
         self._account = None
+
+    @property
+    def processor_type(self) -> EntityType | None:
+        return EntityType.ACCOUNT
 
     def get(self) -> AccountData | None:
         return self._account
 
-    def _get_device_info_name(self, meter_id: str | None = None):
-        name = self._get_account_name()
+    def get_device_info(self, identifier: str | None = None) -> DeviceInfo:
+        if self._config_manager.use_unique_device_names:
+            device_name = self._account.unique_name
 
-        return name
-
-    def get_device_info(self, meter_id: str | None = None) -> DeviceInfo:
-        name = self._get_device_info_name()
+        else:
+            device_name = self._get_account_name()
 
         municipal_name = self._account.municipal_name
         if municipal_name is None:
             municipal_name = PROVIDER
 
         device_info = DeviceInfo(
-            identifiers={(DEFAULT_NAME, name)},
-            name=name,
-            model=self.processor_type,
+            identifiers={(DEFAULT_NAME, device_name)},
+            name=device_name,
+            model=str(self.processor_type).capitalize(),
             manufacturer=municipal_name,
             configuration_url=CITY_MIND_WEBSITE,
         )

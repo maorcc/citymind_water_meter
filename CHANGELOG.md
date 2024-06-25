@@ -6,6 +6,12 @@
 - Handle timeouts as managed failure instead of general failure
 - Ignore update request when the connection is not established
 - Improved log messages of status changes
+- Add support to control how entity names will look like, under account device:
+
+  | Approach         | Meter                           | Account                                   | Reason                                                                                                                |
+  | ---------------- | ------------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+  | Unique (Default) | {address} {meter serial number} | {first name} {last name} {account number} | [can't rename meter device to a meaningful name #39](https://github.com/maorcc/citymind_water_meter/issues/39)        |
+  | Non unique       | Meter {meter serial number}     | Account {account number}                  | [Bad Entity Names - seems to be translated from Hebrew #71](https://github.com/maorcc/citymind_water_meter/issues/71) |
 
 ## v3.0.5
 

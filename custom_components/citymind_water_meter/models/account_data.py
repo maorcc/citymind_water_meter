@@ -31,6 +31,16 @@ class AccountData:
         self.messages = None
         self.alert_settings = None
 
+    @property
+    def unique_name(self) -> str | None:
+        parts = [self.first_name, self.last_name, self.account_number]
+
+        relevant_parts = [str(part) for part in parts if part is not None]
+
+        name = " ".join(relevant_parts)
+
+        return name
+
     def to_dict(self):
         obj = {
             "account_number": self.account_number,
