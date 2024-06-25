@@ -36,6 +36,16 @@ class MeterData:
         return self.meter_id
 
     @property
+    def unique_name(self) -> str | None:
+        parts = [self.address, self.meter_serial_number]
+
+        relevant_parts = [str(part) for part in parts if part is not None]
+
+        name = " ".join(relevant_parts)
+
+        return name
+
+    @property
     def high_rate_monthly_consumption(self) -> float:
         value = 0
 

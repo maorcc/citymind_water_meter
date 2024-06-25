@@ -89,7 +89,7 @@ class IntegrationFlowManager:
                     error_key = ConnectivityStatus.get_ha_error(api.status)
 
             except LoginError:
-                error_key = "invalid_admin_credentials"
+                error_key = "invalid_credentials"
 
             except InvalidToken:
                 error_key = "corrupted_encryption_key"

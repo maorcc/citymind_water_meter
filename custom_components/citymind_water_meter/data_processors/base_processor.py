@@ -27,7 +27,6 @@ class BaseProcessor:
     _config_manager: ConfigManager | None = None
     _config_data: ConfigData | None = None
     _unique_messages: list[str] | None = None
-    processor_type: EntityType | None = None
 
     def __init__(self, config_manager: ConfigManager):
         self._config_manager = config_manager
@@ -36,9 +35,12 @@ class BaseProcessor:
         self._account_number = None
         self._first_name = None
         self._last_name = None
-        self.processor_type = None
 
         self._unique_messages = []
+
+    @property
+    def processor_type(self) -> EntityType | None:
+        return None
 
     def update(self, api_data: dict):
         self._api_data = api_data
@@ -68,28 +70,27 @@ class BaseProcessor:
             _LOGGER.log(log_level, message)
 
     def _get_account_name(self):
-        parts = [self._first_name, self._last_name, str(self._account_number)]
-
-        relevant_parts = [part for part in parts if part is not None]
-
-        name = " ".join(relevant_parts)
+        name = self._get_default_device_info_name(self._account_number)
 
         return name
 
-    def get_device_info(self, item_id: str | None = None) -> DeviceInfo:
+    def get_device_info(self, identifier: str | None = None) -> DeviceInfo:
         pass
 
-    def _get_device_info_name(self, meter_id: str | None = None):
-        parts = [self.processor_type, meter_id]
+    def _get_default_device_info_name(self, identifier: str | None = None) -> str:
+        parts = [self.processor_type, identifier]
 
-        relevant_parts = [part for part in parts if part is not None]
+        relevant_parts = [str(part).capitalize() for part in parts if part is not None]
 
         name = " ".join(relevant_parts)
 
+        _LOGGER.debug(f"Processor type: {str(self.processor_type)}")
+        _LOGGER.debug(f"Default device name: {name}")
+
         return name
 
-    def _get_device_info_unique_id(self, item_id: str | None = None):
-        identifier = self._get_device_info_name(item_id)
+    def _get_device_info_unique_id(self, item_id: str | None = None) -> str:
+        identifier = self._get_default_device_info_name(item_id)
 
         unique_id = slugify(identifier)
 

@@ -159,8 +159,6 @@ class RestAPI:
     async def validate(self):
         await self.initialize()
 
-        await self.login()
-
     async def update(self):
         _LOGGER.debug(
             f"Updating data for user {self._config_data.email}, "
@@ -442,7 +440,7 @@ class RestAPI:
         if crex.status == 401:
             self._set_status(ConnectivityStatus.NotConnected)
 
-        else:
+        elif crex.status > 401:
             self._set_status(ConnectivityStatus.Failed, message)
 
     def _handle_server_timeout(self, endpoint: str, method: str):

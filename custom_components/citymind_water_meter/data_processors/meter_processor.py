@@ -36,10 +36,12 @@ class MeterProcessor(BaseProcessor):
     def __init__(self, config_manager: ConfigManager):
         super().__init__(config_manager)
 
-        self.processor_type = EntityType.METER
-
         self._meters = {}
         self._account_number = None
+
+    @property
+    def processor_type(self) -> EntityType | None:
+        return EntityType.METER
 
     def get_meters(self) -> list[str]:
         return list(self._meters.keys())
@@ -66,19 +68,14 @@ class MeterProcessor(BaseProcessor):
 
         return meter
 
-    def _get_device_info_name(self, meter_id: str | None = None):
-        meter = self.get_data(meter_id)
-        parts = [meter.address, meter.meter_serial_number]
+    def get_device_info(self, identifier: str | None = None) -> DeviceInfo:
+        device = self.get_data(identifier)
 
-        relevant_parts = [part for part in parts if part is not None]
+        if self._config_manager.use_unique_device_names:
+            device_name = device.unique_name
 
-        name = " ".join(relevant_parts)
-
-        return name
-
-    def get_device_info(self, meter_id: str | None = None) -> DeviceInfo:
-        device = self.get_data(meter_id)
-        device_name = self._get_device_info_name(device.meter_id)
+        else:
+            device_name = self._get_default_device_info_name(device.meter_serial_number)
 
         parent_device_id = self._get_account_name()
         unique_id = self._get_device_info_unique_id(device.meter_id)
@@ -86,7 +83,7 @@ class MeterProcessor(BaseProcessor):
         device_info = DeviceInfo(
             identifiers={(DEFAULT_NAME, unique_id)},
             name=device_name,
-            model=self.processor_type,
+            model=str(self.processor_type).capitalize(),
             manufacturer=device.address,
             via_device=(DEFAULT_NAME, parent_device_id),
         )
