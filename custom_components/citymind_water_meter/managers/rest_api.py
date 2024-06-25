@@ -8,6 +8,7 @@ import sys
 from typing import Any, Callable
 
 from aiohttp import ClientResponseError, ClientSession
+from aiohttp.hdrs import METH_DELETE, METH_GET, METH_POST, METH_PUT
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
@@ -144,9 +145,7 @@ class RestAPI:
         pass
 
     async def initialize(self):
-        _LOGGER.info("Initializing EdgeOS API")
-
-        self._set_status(ConnectivityStatus.Connecting)
+        self._set_status(ConnectivityStatus.Connecting, "Initializing API")
 
         await self._initialize_session()
 
@@ -163,10 +162,10 @@ class RestAPI:
         await self.login()
 
     async def update(self):
-        _LOGGER.debug(f"Updating data for user {self._config_data.email}")
-
-        if self.status == ConnectivityStatus.Failed:
-            await self.initialize(self._config_data)
+        _LOGGER.debug(
+            f"Updating data for user {self._config_data.email}, "
+            f"Connection: {self.status}"
+        )
 
         if self.status == ConnectivityStatus.Connected:
             if self.municipal_id is None:
@@ -184,10 +183,6 @@ class RestAPI:
             self._async_dispatcher_send(SIGNAL_DATA_CHANGED)
 
     async def login(self):
-        exception_data = None
-
-        status = ConnectivityStatus.Failed
-
         try:
             self.data[API_DATA_TOKEN] = None
 
@@ -207,28 +202,22 @@ class RestAPI:
                 error_reason = payload.get(API_DATA_ERROR_REASON)
 
                 if error_code == ERROR_REASON_INVALID_CREDENTIALS:
-                    status = ConnectivityStatus.InvalidCredentials
+                    message = f"Failed to login, Error #{error_code}: {error_reason}"
 
-                    exception_data = f"Error #{error_code}: {error_reason}"
+                    self._set_status(ConnectivityStatus.InvalidCredentials, message)
 
                 if token is not None:
                     self.data[API_DATA_TOKEN] = token
 
-                    status = ConnectivityStatus.Connected
+                    self._set_status(ConnectivityStatus.Connected)
 
         except Exception as ex:
             exc_type, exc_obj, tb = sys.exc_info()
             line_number = tb.tb_lineno
 
-            exception_data = f"Error: {ex}, Line: {line_number}"
+            message = f"Failed to login, Error: {ex}, Line: {line_number}"
 
-        self._set_status(status)
-
-        log_level = ConnectivityStatus.get_log_level(status)
-
-        message = status if exception_data is None else f"{status}, {exception_data}"
-
-        _LOGGER.log(log_level, message)
+            self._set_status(ConnectivityStatus.Failed, message)
 
     async def _initialize_session(self):
         try:
@@ -242,24 +231,34 @@ class RestAPI:
             exc_type, exc_obj, tb = sys.exc_info()
             line_number = tb.tb_lineno
 
-            _LOGGER.warning(
+            message = (
                 f"Failed to initialize session, Error: {str(ex)}, Line: {line_number}"
             )
 
-            self._set_status(ConnectivityStatus.Failed)
+            self._set_status(ConnectivityStatus.Failed, message)
 
-    def _set_status(self, status: ConnectivityStatus):
+    def _set_status(self, status: ConnectivityStatus, message: str | None = None):
+        log_level = ConnectivityStatus.get_log_level(status)
+
         if status != self._status:
-            log_level = ConnectivityStatus.get_log_level(status)
+            log_message = f"Status update {self._status} --> {status}"
 
-            _LOGGER.log(
-                log_level,
-                f"Status changed from '{self._status}' to '{status}'",
-            )
+            if message is not None:
+                log_message = f"{log_message}, {message}"
+
+            _LOGGER.log(log_level, log_message)
 
             self._status = status
 
             self._async_dispatcher_send(SIGNAL_API_STATUS, status)
+
+        else:
+            log_message = f"Status is {status}"
+
+            if message is None:
+                log_message = f"{log_message}, {message}"
+
+            _LOGGER.log(log_level, log_message)
 
     def set_local_async_dispatcher_send(self, callback):
         self._local_async_dispatcher_send = callback
@@ -294,8 +293,6 @@ class RestAPI:
         try:
             url = self._build_endpoint(endpoint)
 
-            _LOGGER.debug(f"POST {url}")
-
             async with self._session.post(
                 url, json=request_data, ssl=False
             ) as response:
@@ -306,17 +303,13 @@ class RestAPI:
                 response.raise_for_status()
 
         except ClientResponseError as crex:
-            _LOGGER.error(
-                f"Failed to post JSON to {endpoint}, HTTP Status: {crex.message} ({crex.status}), Data: {result}"
-            )
+            self._handle_client_error(endpoint, METH_POST, crex)
+
+        except TimeoutError:
+            self._handle_server_timeout(endpoint, METH_POST)
 
         except Exception as ex:
-            exc_type, exc_obj, tb = sys.exc_info()
-            line_number = tb.tb_lineno
-
-            _LOGGER.error(
-                f"Failed to post JSON to {endpoint}, Error: {ex}, Line: {line_number}"
-            )
+            self._handle_general_request_failure(endpoint, METH_POST, ex)
 
         return result
 
@@ -328,8 +321,6 @@ class RestAPI:
 
             headers = {API_HEADER_TOKEN: self.token}
 
-            _LOGGER.debug(f"GET {url}")
-
             async with self._session.get(url, headers=headers, ssl=False) as response:
                 _LOGGER.debug(f"Status of {url}: {response.status}")
 
@@ -340,20 +331,13 @@ class RestAPI:
                 self.data[API_DATA_LAST_UPDATE] = datetime.now()
 
         except ClientResponseError as crex:
-            _LOGGER.error(
-                f"Failed to get data from {endpoint}, HTTP Status: {crex.message} ({crex.status})"
-            )
+            self._handle_client_error(endpoint, METH_GET, crex)
 
-            if response.status == 401:
-                self._set_status(ConnectivityStatus.NotConnected)
+        except TimeoutError:
+            self._handle_server_timeout(endpoint, METH_GET)
 
         except Exception as ex:
-            exc_type, exc_obj, tb = sys.exc_info()
-            line_number = tb.tb_lineno
-
-            _LOGGER.error(
-                f"Failed to get data from {endpoint}, Error: {ex}, Line: {line_number}"
-            )
+            self._handle_general_request_failure(endpoint, METH_GET, ex)
 
         return result
 
@@ -375,20 +359,13 @@ class RestAPI:
                 self.data[API_DATA_LAST_UPDATE] = datetime.now()
 
         except ClientResponseError as crex:
-            _LOGGER.error(
-                f"Failed to get data from {url}, Data: {data}, HTTP Status: {crex.message} ({crex.status})"
-            )
+            self._handle_client_error(url, METH_PUT, crex)
 
-            if response.status == 401:
-                self._set_status(ConnectivityStatus.NotConnected)
+        except TimeoutError:
+            self._handle_server_timeout(url, METH_PUT)
 
         except Exception as ex:
-            exc_type, exc_obj, tb = sys.exc_info()
-            line_number = tb.tb_lineno
-
-            _LOGGER.error(
-                f"Failed to get data from {url}, Data: {data}, Error: {ex}, Line: {line_number}"
-            )
+            self._handle_general_request_failure(url, METH_PUT, ex)
 
         return result
 
@@ -410,20 +387,13 @@ class RestAPI:
                 self.data[API_DATA_LAST_UPDATE] = datetime.now()
 
         except ClientResponseError as crex:
-            _LOGGER.error(
-                f"Failed to get data from {url}, Data: {data}, HTTP Status: {crex.message} ({crex.status})"
-            )
+            self._handle_client_error(url, METH_DELETE, crex)
 
-            if response.status == 401:
-                self._set_status(ConnectivityStatus.NotConnected)
+        except TimeoutError:
+            self._handle_server_timeout(url, METH_DELETE)
 
         except Exception as ex:
-            exc_type, exc_obj, tb = sys.exc_info()
-            line_number = tb.tb_lineno
-
-            _LOGGER.error(
-                f"Failed to get data from {url}, Data: {data}, Error: {ex}, Line: {line_number}"
-            )
+            self._handle_general_request_failure(url, METH_DELETE, ex)
 
         return result
 
@@ -434,6 +404,9 @@ class RestAPI:
                     endpoint = endpoints.get(endpoint_key)
 
                     data = await self._async_get(endpoint, meter_count)
+
+                    if data is None:
+                        continue
 
                     if meter_count is None:
                         if data is None:
@@ -455,6 +428,47 @@ class RestAPI:
 
                         else:
                             self.data[endpoint_key] = metered_data
+
+    def _handle_client_error(
+        self, endpoint: str, method: str, crex: ClientResponseError
+    ):
+        message = (
+            "Failed to send HTTP request, "
+            f"Endpoint: {endpoint}, "
+            f"Method: {method}, "
+            f"HTTP Status: {crex.message} ({crex.status})"
+        )
+
+        if crex.status == 401:
+            self._set_status(ConnectivityStatus.NotConnected)
+
+        else:
+            self._set_status(ConnectivityStatus.Failed, message)
+
+    def _handle_server_timeout(self, endpoint: str, method: str):
+        message = (
+            "Failed to send HTTP request due to timeout, "
+            f"Endpoint: {endpoint}, "
+            f"Method: {method}"
+        )
+
+        self._set_status(ConnectivityStatus.Failed, message)
+
+    def _handle_general_request_failure(
+        self, endpoint: str, method: str, ex: Exception
+    ):
+        exc_type, exc_obj, tb = sys.exc_info()
+        line_number = tb.tb_lineno
+
+        message = (
+            "Failed to send HTTP request, "
+            f"Endpoint: {endpoint}, "
+            f"Method: {method}, "
+            f"Error: {ex}, "
+            f"Line: {line_number}"
+        )
+
+        self._set_status(ConnectivityStatus.Failed, message)
 
     async def set_alert_settings(
         self, alert_type: AlertType, media_type: AlertChannel, enabled: bool
