@@ -199,9 +199,6 @@ class Coordinator(DataUpdateCoordinator):
 
             await self._api.initialize()
 
-        elif status == ConnectivityStatus.InvalidCredentials:
-            self.update_interval = UPDATE_DATA_INTERVALS[None]
-
     def _on_account_discovered(self) -> None:
         key = EntityType.ACCOUNT
 
@@ -262,21 +259,11 @@ class Coordinator(DataUpdateCoordinator):
         try:
             _LOGGER.debug("Updating data")
 
-            api_connected = self._api.status == ConnectivityStatus.Connected
+            self.config_manager.analytic_periods.update()
 
-            if api_connected:
-                now = datetime.now().timestamp()
+            await self._api.update()
 
-                if now - self._last_update >= self.update_interval.total_seconds():
-                    self.config_manager.analytic_periods.update()
-
-                    await self._api.update()
-
-                    self._last_update = now
-
-                    await self._on_data_changed(self.config_manager.entry_id)
-
-                    self._validate_weekday()
+            self._validate_weekday()
 
             return {}
 
