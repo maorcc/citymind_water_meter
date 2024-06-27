@@ -13,8 +13,8 @@ class AlertType(Enum):
 
 
 class EntityType(StrEnum):
-    METER = "meter"
-    ACCOUNT = "account"
+    METER = "Water Meter"
+    ACCOUNT = "Account"
 
 
 class ResetPolicy(Enum):

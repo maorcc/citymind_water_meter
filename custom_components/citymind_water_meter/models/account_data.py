@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from custom_components.citymind_water_meter.common.enums import EntityType
+from custom_components.citymind_water_meter.common.enums import EntityKeys
 
 
 class AccountData:
@@ -16,7 +16,7 @@ class AccountData:
     vacations: int | None
     alerts: int | None
     messages: int | None
-    alert_settings: dict[EntityType, bool] | None
+    alert_settings: dict[EntityKeys, bool] | None
 
     def __init__(self):
         self.account_number = None
