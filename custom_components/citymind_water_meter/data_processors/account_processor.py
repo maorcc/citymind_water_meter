@@ -21,7 +21,7 @@ from ..common.consts import (
     SETTINGS_ALERT_TYPE_ID,
     SETTINGS_MEDIA_TYPE_ID,
 )
-from ..common.enums import AlertChannel, AlertType, EntityType
+from ..common.enums import AlertChannel, AlertType, EntityKeys, EntityType
 from ..managers.config_manager import ConfigManager
 from ..models.account_data import AccountData
 from .base_processor import BaseProcessor
@@ -112,8 +112,8 @@ class AccountProcessor(BaseProcessor):
             )
 
     @staticmethod
-    def _get_alert_settings(settings_section: dict) -> dict[EntityType, bool]:
-        alert_settings: dict[EntityType, bool] = {}
+    def _get_alert_settings(settings_section: dict) -> dict[EntityKeys, bool]:
+        alert_settings: dict[EntityKeys, bool] = {}
         for entity_type in ALERT_MAPPING:
             alert_mapping = ALERT_MAPPING[entity_type]
 
