@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.8
+
+- HACS Support
+
 ## v3.0.7
 
 - Adjust non unique device names:
