@@ -1,4 +1,5 @@
 """Config flow to configure."""
+
 from __future__ import annotations
 
 from copy import copy

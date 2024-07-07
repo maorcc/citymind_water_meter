@@ -63,11 +63,14 @@ class Coordinator(DataUpdateCoordinator):
     _processors: dict[EntityType, BaseProcessor] | None = None
     _is_weekend: bool = False
 
-    _data_mapping: dict[
-        str,
-        Callable[[IntegrationEntityDescription], dict | None]
-        | Callable[[IntegrationEntityDescription, str], dict | None],
-    ] | None
+    _data_mapping: (
+        dict[
+            str,
+            Callable[[IntegrationEntityDescription], dict | None]
+            | Callable[[IntegrationEntityDescription, str], dict | None],
+        ]
+        | None
+    )
     _system_status_details: dict | None
 
     _last_update: float
@@ -558,12 +561,14 @@ class Coordinator(DataUpdateCoordinator):
 
         result = {
             ATTR_IS_ON: is_on,
-            ATTR_ACTIONS: {
-                ACTION_ENTITY_TURN_ON: self._set_alert_setting_enabled,
-                ACTION_ENTITY_TURN_OFF: self._set_alert_setting_disabled,
-            }
-            if entity_description.key != EntityKeys.ALERT_LEAK_EMAIL
-            else None,
+            ATTR_ACTIONS: (
+                {
+                    ACTION_ENTITY_TURN_ON: self._set_alert_setting_enabled,
+                    ACTION_ENTITY_TURN_OFF: self._set_alert_setting_disabled,
+                }
+                if entity_description.key != EntityKeys.ALERT_LEAK_EMAIL
+                else None
+            ),
         }
 
         return result

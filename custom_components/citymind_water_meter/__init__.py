@@ -3,6 +3,7 @@ This component provides support for EdgeOS based devices.
 For more details about this component, please refer to the documentation at
 https://github.com/maorcc/citymind_water_meter
 """
+
 import logging
 import sys
 
