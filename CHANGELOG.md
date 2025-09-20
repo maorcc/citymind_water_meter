@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.10
+
+- Resolve device registry warnings about referencing non-existing devices
+
 ## 3.0.9
 
 - Initialize data using `async_request_refresh` instead of `async_config_entry_first_refresh` to remove warning message

@@ -52,6 +52,7 @@ class AccountProcessor(BaseProcessor):
             device_name = self._get_account_name()
 
         municipal_name = self._account.municipal_name
+
         if municipal_name is None:
             municipal_name = PROVIDER
 

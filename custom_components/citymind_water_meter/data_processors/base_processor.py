@@ -70,7 +70,7 @@ class BaseProcessor:
             _LOGGER.log(log_level, message)
 
     def _get_account_name(self):
-        name = self._get_default_device_info_name(self._account_number)
+        name = self._get_device_info_name(EntityType.ACCOUNT, self._account_number)
 
         return name
 
@@ -78,13 +78,20 @@ class BaseProcessor:
         pass
 
     def _get_default_device_info_name(self, identifier: str | None = None) -> str:
-        parts = [self.processor_type, identifier]
+        name = self._get_device_info_name(self.processor_type, identifier)
+
+        return name
+
+    def _get_device_info_name(
+        self, process_type: EntityType, identifier: str | None = None
+    ) -> str:
+        parts = [process_type, identifier]
 
         relevant_parts = [str(part).capitalize() for part in parts if part is not None]
 
         name = " ".join(relevant_parts)
 
-        _LOGGER.debug(f"Processor type: {str(self.processor_type)}")
+        _LOGGER.debug(f"Processor type: {str(process_type)}")
         _LOGGER.debug(f"Default device name: {name}")
 
         return name
