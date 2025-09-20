@@ -31,13 +31,13 @@ _LOGGER = logging.getLogger(__name__)
 
 class MeterProcessor(BaseProcessor):
     _meters: dict[str, MeterData]
-    _account_number: str | None = None
+    _account_device_id: str | None = None
 
     def __init__(self, config_manager: ConfigManager):
         super().__init__(config_manager)
 
         self._meters = {}
-        self._account_number = None
+        self._account_device_id = None
 
     @property
     def processor_type(self) -> EntityType | None:
@@ -50,6 +50,9 @@ class MeterProcessor(BaseProcessor):
         items = [self._meters[item_key].to_dict() for item_key in self._meters]
 
         return items
+
+    def set_account_device_id(self, account_device_id: str):
+        self._account_device_id = account_device_id
 
     def get_meter(self, identifiers: set[tuple[str, str]]) -> dict | None:
         device: dict | None = None
@@ -77,7 +80,6 @@ class MeterProcessor(BaseProcessor):
         else:
             device_name = self._get_default_device_info_name(device.meter_serial_number)
 
-        parent_device_id = self._get_account_name()
         unique_id = self._get_device_info_unique_id(device.meter_id)
 
         device_info = DeviceInfo(
@@ -85,7 +87,11 @@ class MeterProcessor(BaseProcessor):
             name=device_name,
             model=str(self.processor_type).capitalize(),
             manufacturer=device.address,
-            via_device=(DEFAULT_NAME, parent_device_id),
+            via_device=(
+                (DEFAULT_NAME, self._account_device_id)
+                if self._account_device_id
+                else None
+            ),
         )
 
         return device_info

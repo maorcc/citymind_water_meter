@@ -47,7 +47,6 @@ from ..common.consts import (
 from ..common.entity_descriptions import PLATFORMS, IntegrationEntityDescription
 from ..common.enums import EntityKeys, EntityType
 from ..data_processors.account_processor import AccountProcessor
-from ..data_processors.base_processor import BaseProcessor
 from ..data_processors.meter_processor import MeterProcessor
 from ..models.account_data import AccountData
 from .config_manager import ConfigManager
@@ -60,7 +59,7 @@ class Coordinator(DataUpdateCoordinator):
     """My custom coordinator."""
 
     _api: RestAPI
-    _processors: dict[EntityType, BaseProcessor] | None = None
+    _processors: dict[EntityType, MeterProcessor | AccountProcessor] | None = None
     _is_weekend: bool = False
 
     _data_mapping: (
@@ -167,8 +166,8 @@ class Coordinator(DataUpdateCoordinator):
             loop.create_task(self._on_data_changed(entry_id)).__await__()
 
         signal_handlers = {
-            SIGNAL_API_STATUS: self._on_api_status_changed,
-            SIGNAL_DATA_CHANGED: self._on_data_changed,
+            SIGNAL_API_STATUS: on_api_status_changed,
+            SIGNAL_DATA_CHANGED: on_data_changed,
         }
 
         _LOGGER.debug(f"Registering signals for {signal_handlers.keys()}")
@@ -244,16 +243,30 @@ class Coordinator(DataUpdateCoordinator):
         api_connected = self._api.status == ConnectivityStatus.Connected
 
         if api_connected:
-            for processor_type in self._processors:
-                processor = self._processors[processor_type]
-                processor.update(self._api.data)
+            self._account_processor.update(self._api.data)
 
             account = self._account_processor.get()
+            account_device = self._account_processor.get_device_info()
+            account_identifiers = account_device.get("identifiers")
+            # Extract the device identifier from the identifiers set
+            account_device_id = (
+                list(account_identifiers)[0][1] if account_identifiers else None
+            )
+
+            self._on_account_discovered()
+
+            meter_processors: list[MeterProcessor] = [
+                self._processors[processor_type]
+                for processor_type in self._processors
+                if processor_type == EntityType.METER
+            ]
+
+            for meter_processor in meter_processors:
+                meter_processor.set_account_device_id(account_device_id)
+                meter_processor.update(self._api.data)
 
             if account is None:
                 return
-
-            self._on_account_discovered()
 
             meters = self._meter_processor.get_meters()
 
